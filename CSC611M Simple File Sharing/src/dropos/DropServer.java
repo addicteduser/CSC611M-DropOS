@@ -5,8 +5,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class DropServer extends Thread {
+	
+	private static Path serverDirectory;
 	
 	private static ServerSocket serversocket;
 	private static Socket server;
@@ -16,6 +20,8 @@ public class DropServer extends Thread {
 	public DropServer(int port) throws IOException {
 		serversocket = new ServerSocket(port);
 		System.out.println("[SYSTEM] Starting File Sync Server...");
+		
+		serverDirectory = Paths.get(System.getProperty("user.dir")).resolve("My DropOS Folder");
 	}
 	
 	public void run() {
