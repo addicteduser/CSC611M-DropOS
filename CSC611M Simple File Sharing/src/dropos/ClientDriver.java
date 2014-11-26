@@ -4,7 +4,8 @@ import java.io.IOException;
 
 public class ClientDriver {
 	public static void main(String[] args) throws IOException {
-		DropClient c = new DropClient(HOSTNAME, PORT_NUMBER);
+		Config.initialize();
+		DropClient c = new DropClient(Config.getIpAddress(), Config.getPort());
 		c.start();
 	}
 }
