@@ -6,7 +6,9 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +19,10 @@ import java.nio.file.WatchEvent.Kind;
 
 public class DirectoryWatcher {
 		
-	public static void watchDirectoryPath(Path path) {
+	private static DataOutputStream out;
+
+	public static void watchDirectoryPath(Path path, DataOutputStream out) {
+		DirectoryWatcher.out = out;
 		// Sanity check - Check if path is a folder
 		try {
 			Boolean isFolder = (Boolean) Files.getAttribute(path,
@@ -30,7 +35,7 @@ public class DirectoryWatcher {
 			ioe.printStackTrace();
 		}
 		
-		System.out.println("Watching path: " + path);
+		System.out.println("[CLIENT] Watching path: " + path);
 		
 		// We obtain the file system of the Path
 		FileSystem fs = path.getFileSystem ();
@@ -52,19 +57,18 @@ public class DirectoryWatcher {
 				for(WatchEvent<?> watchEvent : key.pollEvents()) {
 					// Get the type of the event
 					kind = watchEvent.kind();
+					Path newPath = ((WatchEvent<Path>) watchEvent).context();
 					if (OVERFLOW == kind) {
 						continue; //loop
 					} else if (ENTRY_CREATE == kind) {
-						// A new Path was created 
-						Path newPath = ((WatchEvent<Path>) watchEvent).context();
-						// Output
-						System.out.println("New path created: " + newPath);
+						out.writeUTF("ADD "+newPath);
+						System.out.println("[CLIENT] ADD "+newPath);
 					} else if (ENTRY_DELETE == kind) {
-						Path newPath = ((WatchEvent<Path>) watchEvent).context();
-						System.out.println("DELETE: "+newPath);
+						out.writeUTF("DELETE "+newPath);
+						System.out.println("[CLIENT] DELETE "+newPath);
 					} else if (ENTRY_MODIFY == kind) {
-						Path newPath = ((WatchEvent<Path>) watchEvent).context();
-						System.out.println("MODIFY: "+newPath);
+						out.writeUTF("MODIFY "+newPath);
+						System.out.println("[CLIENT] MODIFY "+newPath);
 					}
 				}
 				
