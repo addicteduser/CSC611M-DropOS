@@ -18,12 +18,9 @@ public class ClientConnection extends Thread {
 		this.connectionSocket = connectionSocket;
 		this.ipAddress = connectionSocket.getInetAddress().toString()
 				.substring(1);
-
-		// TODO Auto-generated constructor stub
-
-		System.out.println("[SYSTEM] SERVER just connected to CLIENT with IP:"
-				+ connectionSocket.getInetAddress().toString());
-
+		
+		System.out.println("Server is accepted connection from client [" + ipAddress + "]");
+		
 		try {
 			DataInputStream din = new DataInputStream(
 					connectionSocket.getInputStream());
@@ -45,6 +42,7 @@ public class ClientConnection extends Thread {
 			String input = null;
 			// As long as you are sending me messages, handle them correctly
 			while ((input = in.nextLine()).equals(null) == false) {
+				System.err.println("Client: " + ipAddress);
 				handleInput(input);
 			}
 		} while (true);
