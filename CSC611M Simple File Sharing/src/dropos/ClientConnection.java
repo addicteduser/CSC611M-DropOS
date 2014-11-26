@@ -41,7 +41,8 @@ public class ClientConnection extends Thread {
 		do {
 			String input = null;
 			// As long as you are sending me messages, handle them correctly
-			while ((input = in.nextLine()).equals(null) == false) {
+			while (in.hasNextLine()) {
+				input = in.nextLine();
 				System.err.println("Client: " + ipAddress);
 				handleInput(input);
 			}
