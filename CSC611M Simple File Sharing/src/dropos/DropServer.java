@@ -11,8 +11,6 @@ public class DropServer extends Thread {
 	private ArrayList<ClientConnection> clients;
 	
 	public DropServer(int port) throws IOException {
-		System.out.println("[SYSTEM] Starting File Sync Server...");
-		
 		serversocket = new ServerSocket(port);
 		clients = new ArrayList<ClientConnection>();
 	}
@@ -24,8 +22,9 @@ public class DropServer extends Thread {
 				Socket connectionSocket = serversocket.accept();
 				
 				ClientConnection clientConnection = new ClientConnection(connectionSocket);
-				clients.add(clientConnection);
 				clientConnection.start();
+				clients.add(clientConnection);
+				
 				
 			} catch (IOException e) {
 				e.printStackTrace();

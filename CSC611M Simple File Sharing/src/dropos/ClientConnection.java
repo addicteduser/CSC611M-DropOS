@@ -1,35 +1,27 @@
 package dropos;
 
-import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class ClientConnection extends Thread {
-
-	private Socket connectionSocket;
-	private Scanner in;
+	private DataInputStream in;
 	public PrintWriter out;
 	private String ipAddress;
 
 	public ClientConnection(Socket connectionSocket) {
-		this.connectionSocket = connectionSocket;
 		this.ipAddress = connectionSocket.getInetAddress().toString()
 				.substring(1);
 		
-		System.out.println("Server is accepted connection from client [" + ipAddress + "]");
+		System.out.println("Server has accepted connection from client [" + ipAddress + "]");
 		
 		try {
-			DataInputStream din = new DataInputStream(
-					connectionSocket.getInputStream());
-			BufferedInputStream bin = new BufferedInputStream(din);
-			in = new Scanner(bin);
+			in = new DataInputStream(connectionSocket.getInputStream());
+			// InputStreamReader bin = new InputStreamReader(ins);
+			// in = new BufferedReader(bin);
 
-			DataOutputStream dout = new DataOutputStream(
-					connectionSocket.getOutputStream());
-			out = new PrintWriter(dout);
+			out = new PrintWriter(connectionSocket.getOutputStream(), true);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -38,15 +30,16 @@ public class ClientConnection extends Thread {
 
 	@Override
 	public void run() {
-		do {
-			String input = null;
-			// As long as you are sending me messages, handle them correctly
-			while (in.hasNextLine()) {
-				input = in.nextLine();
+		String input;
+		// As long as you are sending me messages, handle them correctly
+		try {
+			while((input = in.readUTF()) != null){
 				System.err.println("Client: " + ipAddress);
 				handleInput(input);
 			}
-		} while (true);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 
