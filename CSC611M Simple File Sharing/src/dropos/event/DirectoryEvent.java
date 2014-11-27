@@ -39,7 +39,7 @@ public class DirectoryEvent {
 		byte[] rawBytes = null;
 		
 		try {
-			String message = getMessage();	
+			String message = this.toString();	
 			rawBytes = message.getBytes("UTF-8");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -47,7 +47,7 @@ public class DirectoryEvent {
 		return rawBytes;
 	}
 	
-	public String getMessage() throws Exception{
+	public String toString(){
 		switch(type){
 		case ADD: 
 			return "ADD " + file;
@@ -55,8 +55,7 @@ public class DirectoryEvent {
 			return "DELETE " + file;
 		case MODIFY: 
 			return "MODIFY " + file;
-			default:
-			throw new Exception("Unknown directory event type!");
 		}
+		return "Unknown directory event type!";
 	}
 }
