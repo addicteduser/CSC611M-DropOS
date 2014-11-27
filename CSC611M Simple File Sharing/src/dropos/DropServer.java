@@ -4,14 +4,12 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
 
 public class DropServer extends Thread {
 	
 	private static ServerSocket serversocket;
 	private ThreadPool pool;
 	private ArrayList<ClientConnection> clients;
-	
 	public DropServer(int port) throws IOException {
 		serversocket = new ServerSocket(port);
 		//clients = new ArrayList<ClientConnection>();
