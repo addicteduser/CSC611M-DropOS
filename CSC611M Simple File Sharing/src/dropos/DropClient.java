@@ -5,12 +5,8 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -20,37 +16,28 @@ import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
+import message.DropOSProtocol;
 import dropos.event.DirectoryEvent;
 
 public class DropClient extends Thread {
-	private static int port;
-	private static String hostname;
-	private static Socket client;
-	private static DataInputStream in;
-	private static OutputStream serverOut;
-
-	private static Path clientPath;
+	private int port;
+	private String hostname;
+	private Socket clientSocket;
+	private DropOSProtocol protocol;
 
 	public DropClient() {
 		hostname = Config.getIpAddress();
 		port = Config.getPort();
-		clientPath = Config.getPath();
 
 		System.out.println("[SYSTEM] Created new CLIENT instance");
 
 		try {
 			// create connection
-			System.out.println("[CLIENT] CLIENT trying to connect to SERVER at IP:" + hostname + " on port " + port);
 			
-			client = new Socket(hostname, port);
+			clientSocket = new Socket(hostname, port);
+			System.out.println("[CLIENT] I am now connected to [" + hostname + "] on port [" + port + "]");
 			
-			System.out.println("[CLIENT] CLIENT just connected to SERVER. CLIENT has IP:" + client.getInetAddress().toString());
-
-			// instantiate connections to get input from CLIENT
-			in = new DataInputStream(client.getInputStream());
-			
-			// instantiate connections to get input from CLIENT
-			serverOut = client.getOutputStream();
+			protocol = new DropOSProtocol(clientSocket);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,43 +49,45 @@ public class DropClient extends Thread {
 	 */
 	private void eventPerformed(DirectoryEvent e) {
 		
-		// From the type of event, get the bytes to be sent
-		try {
-			byte[] raw = e.getBytes();
-			serverOut.write(raw);
-		} catch (IOException ioException) {
-			ioException.printStackTrace();
+		switch(e.getType()){
+		case ADD:
+			
+			addFile(e);
+			break;
+		case DELETE:
+			 
+			break;
+			 
+		case MODIFY:
+			
+			break;
 		}
 	}
 
-	/**
-	 * This method can send files to the server.
-	 * @param file
-	 */
-	private void sendFile(File file) {
-		// File myFile = clientPath.resolve("test.txt").toFile();
-		// sendFile(myFile);
-		// while(true);
+	private void addFile(DirectoryEvent event) {
 		try {
-			FileInputStream fis = new FileInputStream(file);
-			byte[] mybytearray = new byte[(int) file.length()];
-
-			BufferedInputStream bin = new BufferedInputStream(fis);
-			bin.read(mybytearray, 0, mybytearray.length);
-			serverOut.write(mybytearray, 0, mybytearray.length);
-			serverOut.flush();
-
-			fis.close();
-			client.close();
-			System.out.println("Done.");
+			File f = new File(Config.getPath() + "\\" + event.getFile().toString());
+			long size = Files.size(event.getFile());
+			protocol.sendMessage("ADD " + size + " " + event.getFile());
+			
+			String message = protocol.receiveMessage();
+			
+			if (message.equalsIgnoreCase("GO")){
+				protocol.sendFile(f);
+			}
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		
 	}
 
 	@SuppressWarnings("unchecked")
 	public void run() {
 		// Sanity check - Check if path is a folder
+
+		Path clientPath = Config.getPath();
 		try {
 			Boolean isFolder = (Boolean) Files.getAttribute(clientPath, "basic:isDirectory", NOFOLLOW_LINKS);
 			

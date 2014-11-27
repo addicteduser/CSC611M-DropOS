@@ -46,7 +46,10 @@ public class ClientConnection extends Thread {
 		System.out.println("Params: " + params);
 		switch (command) {
 		case "ADD":
-			protocol.receiveFile(params);
+			String fileSize = params.split(" ")[0];
+			String fileName = params.substring(fileSize.length() + 1).trim();
+			long size = Long.valueOf(fileSize);
+			protocol.receiveFile(fileName, size);
 			break;
 		case "MODIFY":
 			break;
