@@ -2,19 +2,18 @@ package message;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.file.Files;
 
 import dropos.Config;
+import dropos.event.DirectoryEvent;
 
 public class DropOSProtocol {
 	private String ipAddress;
@@ -27,7 +26,7 @@ public class DropOSProtocol {
 	/**
 	 * The packet header has a length of fifty (50) bytes.
 	 */
-	private static final int PACKET_HEADER_LENGTH = 50;
+	private static final int PACKET_MAX_LENGTH = 1500;
 
 	public DropOSProtocol(Socket s) {
 		this.socket = s;
@@ -48,7 +47,7 @@ public class DropOSProtocol {
 
 	public void sendHeader(String message) {
 		try {
-			byte[] buf = new byte[PACKET_HEADER_LENGTH];
+			byte[] buf = new byte[PACKET_MAX_LENGTH];
 			byte[] mes = message.getBytes("UTF-8");
 			buf[0] = (byte)mes.length;
 			System.arraycopy(mes, 0, buf, 1, mes.length);
@@ -74,6 +73,40 @@ public class DropOSProtocol {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+
+	
+	public void sendHeaderAndFile(DirectoryEvent event, File f){
+		long size;
+		try {
+			size = Files.size(f.toPath());
+			String message = ("ADD " + size + " " + event.getFile());
+
+				// header
+				byte[] buf = new byte[PACKET_MAX_LENGTH];
+				byte[] mes = message.getBytes("UTF-8");
+				buf[0] = (byte)mes.length;
+				System.arraycopy(mes, 0, buf, 1, mes.length);
+				
+				// file	
+				FileInputStream fileInputStream = new FileInputStream(f);
+				byte[] fbuf = new byte[(int) f.length()];
+
+				BufferedInputStream bin = new BufferedInputStream(fileInputStream);
+				bin.read(fbuf, 0, fbuf.length);
+				
+				System.arraycopy(fbuf, 0, buf, mes.length + 1, fbuf.length);
+				bufferedOutputStream.write(buf, 0, buf.length);
+				bufferedOutputStream.flush();
+				fileInputStream.close();
+
+				
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	public File receiveFile(String filePath, long filesize) {
@@ -106,7 +139,6 @@ public class DropOSProtocol {
 			// Close it
 			fileOutputStream.close();
 			bufferedOutputStream.flush();
-			socket.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

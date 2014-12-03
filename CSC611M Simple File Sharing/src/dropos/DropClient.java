@@ -67,11 +67,10 @@ public class DropClient extends Thread {
 	private void addFile(DirectoryEvent event) {
 		try {
 			File f = new File(Config.getPath() + "\\" + event.getFile().toString());
-			long size = Files.size(f.toPath());
-			protocol.sendHeader("ADD " + size + " " + event.getFile());
-			protocol.sendFile(f);
+			protocol.sendHeaderAndFile(event, f);
+			// protocol.sendFile(f);
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
