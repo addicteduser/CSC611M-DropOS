@@ -137,8 +137,8 @@ public class DropOSProtocol {
 			bufferedOutputStream.write(mybytearray, 0, currentTot);
 
 			// Close it
-			fileOutputStream.close();
 			bufferedOutputStream.flush();
+			bufferedOutputStream.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
