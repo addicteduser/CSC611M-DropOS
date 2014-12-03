@@ -70,7 +70,7 @@ public class DropClient extends Thread {
 			long size = Files.size(event.getFile());
 			protocol.sendMessage("ADD " + size + " " + event.getFile());
 			
-			String message = protocol.receiveMessage();
+			String message = protocol.receiveHeader();
 			
 			if (message.equalsIgnoreCase("GO")){
 				protocol.sendFile(f);

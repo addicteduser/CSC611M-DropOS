@@ -17,26 +17,26 @@ import java.net.Socket;
 import dropos.Config;
 
 public class DropOSProtocol {
-	// Reading
-	private BufferedReader bufferedReader;
-	private InputStream inputStream;
-	
-	// Writing
-	private OutputStream outputStream;
-	private PrintWriter printWriter;
-	
 	private String ipAddress;
 	private Socket socket;
+
+	private BufferedInputStream bufferedInputStream;
+	private BufferedOutputStream bufferedOutputStream;
+	
+	/**
+	 * The packet header has a length of fifty (50) bytes.
+	 */
+	private static final int PACKET_HEADER_LENGTH = 50;
 
 	public DropOSProtocol(Socket s) {
 		this.socket = s;
 		try {
-			inputStream = s.getInputStream();
-			InputStreamReader isr = new InputStreamReader(inputStream);
-			
-			bufferedReader = new BufferedReader(isr);
-			outputStream = s.getOutputStream();
-			printWriter = new PrintWriter(outputStream, true);
+			InputStream inputStream = s.getInputStream();
+			bufferedInputStream = new BufferedInputStream(inputStream);
+
+			OutputStream outputStream = s.getOutputStream();
+			bufferedOutputStream = new BufferedOutputStream(outputStream);
+
 			ipAddress = s.getInetAddress().toString().substring(1);
 
 		} catch (IOException e) {
@@ -46,21 +46,29 @@ public class DropOSProtocol {
 	}
 
 	public void sendMessage(String message) {
-		printWriter.println(message);
+		try {
+			byte[] buf = message.getBytes("UTF-8");
+			bufferedOutputStream.write(buf, 0, buf.length);
+			bufferedOutputStream.flush();
+			socket.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void sendFile(File file) {
 		try {
 			FileInputStream fileInputStream = new FileInputStream(file);
-			byte[] mybytearray = new byte[(int) file.length()];
+			byte[] buf = new byte[(int) file.length()];
 
 			BufferedInputStream bin = new BufferedInputStream(fileInputStream);
-			bin.read(mybytearray, 0, mybytearray.length);
-			outputStream.write(mybytearray, 0, mybytearray.length);
-			outputStream.flush();
+			bin.read(buf, 0, buf.length);
+			bufferedOutputStream.write(buf, 0, buf.length);
+			bufferedOutputStream.flush();
 			fileInputStream.close();
 			socket.close();
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -70,44 +78,66 @@ public class DropOSProtocol {
 		FileOutputStream fileOutputStream = null;
 		BufferedOutputStream bufferedOutputStream = null;
 		File file = null;
-		
+
 		try {
-		file = new File(Config.getPath() + "\\" + filePath);
-		
-		// Stream to handle file writing
-		fileOutputStream = new FileOutputStream(file);
-		
-		// Buffered output stream for file writing
-		bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
-		
-		byte[] mybytearray = new byte[(int) filesize];
-		int bytesRead = 0;
-		int currentTot = 0;
-		
-		do {
-			bytesRead = inputStream.read(mybytearray, currentTot, mybytearray.length - currentTot);
-			if (bytesRead >= 0)
-				currentTot += bytesRead;
-		} while (currentTot < filesize);
-		
-		// Write everything to file
-		bufferedOutputStream.write(mybytearray, 0, currentTot);
-		
-		// Close it
-		bufferedReader.close();
-		fileOutputStream.close();
-		bufferedOutputStream.flush();
-		
-		}catch(FileNotFoundException e){
+			file = new File(Config.getPath() + "\\" + filePath);
+
+			// Stream to handle file writing
+			fileOutputStream = new FileOutputStream(file);
+
+			// Buffered output stream for file writing
+			bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+
+			byte[] mybytearray = new byte[(int) filesize];
+			int bytesRead = 0;
+			int currentTot = 0;
+
+			do {
+				bytesRead = bufferedInputStream.read(mybytearray, currentTot,
+						mybytearray.length - currentTot);
+				if (bytesRead >= 0)
+					currentTot += bytesRead;
+			} while (currentTot < filesize);
+
+			// Write everything to file
+			bufferedOutputStream.write(mybytearray, 0, currentTot);
+
+			// Close it
+			bufferedInputStream.close();
+			fileOutputStream.close();
+			bufferedOutputStream.flush();
+
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();	
+			e.printStackTrace();
 		}
 		return file;
 	}
 
-	public String receiveMessage() throws IOException {
-		return bufferedReader.readLine();
+	public String receiveHeader() throws IOException {
+		String message = null;
+		try {
+
+			byte[] buf = new byte[(int) PACKET_HEADER_LENGTH];
+			int bytesRead = 0;
+			int currentTotalBytesRead = 0;
+
+			do {
+				bytesRead = bufferedInputStream.read(buf, currentTotalBytesRead, PACKET_HEADER_LENGTH - currentTotalBytesRead);
+				if (bytesRead >= 0)
+					currentTotalBytesRead += bytesRead;
+			} while (currentTotalBytesRead < PACKET_HEADER_LENGTH);
+
+			message = new String(buf);
+			
+			bufferedInputStream.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return message;
 	}
 
 	public String getIPAddress() {

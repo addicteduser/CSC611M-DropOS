@@ -27,7 +27,7 @@ public class ClientConnection extends Thread {
 						.println("Server has accepted connection from client ["
 								+ protocol.getIPAddress() + "]");
 
-				String headers = protocol.receiveMessage();
+				String headers = protocol.receiveHeader();
 				protocol.sendMessage("GO");
 				handleInput(headers);
 
