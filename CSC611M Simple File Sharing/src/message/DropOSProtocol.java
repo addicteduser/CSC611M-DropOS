@@ -69,7 +69,6 @@ public class DropOSProtocol {
 			bufferedOutputStream.write(buf, 0, buf.length);
 			bufferedOutputStream.flush();
 			fileInputStream.close();
-			socket.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -105,7 +104,7 @@ public class DropOSProtocol {
 			bufferedOutputStream.write(mybytearray, 0, currentTot);
 
 			// Close it
-			bufferedInputStream.close();
+			socket.close();
 			fileOutputStream.close();
 			bufferedOutputStream.flush();
 
@@ -139,8 +138,6 @@ public class DropOSProtocol {
 			} while (currentTotalBytesRead < length);
 
 			message = new String(buf);
-			
-			bufferedInputStream.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
