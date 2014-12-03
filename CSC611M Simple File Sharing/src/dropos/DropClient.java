@@ -32,8 +32,6 @@ public class DropClient extends Thread {
 		System.out.println("[SYSTEM] Created new CLIENT instance");
 
 		try {
-			// create connection
-			
 			clientSocket = new Socket(hostname, port);
 			System.out.println("[CLIENT] I am now connected to [" + hostname + "] on port [" + port + "]");
 			
@@ -68,7 +66,6 @@ public class DropClient extends Thread {
 		try {
 			File f = new File(Config.getPath() + "\\" + event.getFile().toString());
 			protocol.sendHeaderAndFile(event, f);
-			// protocol.sendFile(f);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

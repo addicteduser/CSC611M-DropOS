@@ -7,7 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class ThreadPool {
 	private final BlockingQueue<Socket> socketQueue;
-	private ArrayList<ClientConnection> threadList = new ArrayList<ClientConnection>();
+	private ArrayList<DropServer> threadList = new ArrayList<DropServer>();
 	
 	public ThreadPool(int numThread){
 		//Queue for storing "work" (In this case sockets)
@@ -15,7 +15,7 @@ public class ThreadPool {
 			
 		//Create threads for pool
 		for(int i = 0; i<numThread;i++){
-			threadList.add(new ClientConnection(socketQueue));
+			threadList.add(new DropServer(socketQueue));
 		}
 
 	}

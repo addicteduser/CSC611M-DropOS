@@ -1,37 +1,59 @@
 package dropos;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
+
+import message.DropOSProtocol;
 
 public class DropServer extends Thread {
-	
-	private static ServerSocket serversocket;
-	private ThreadPool pool;
-	private ArrayList<ClientConnection> clients;
-	public DropServer(int port) throws IOException {
-		serversocket = new ServerSocket(port);
-		//clients = new ArrayList<ClientConnection>();
-		pool = new ThreadPool(16);
+	private BlockingQueue<Socket> queue;
+	private Socket connectionSocket;
+	private DropOSProtocol protocol;
+
+	public DropServer(BlockingQueue<Socket> queue) {
+		this.queue = queue;
+		this.start();
 	}
-	
+
+	@Override
 	public void run() {
 		while (true) {
 			try {
-				System.out.println("[SERVER] Waiting for client connections on port " + serversocket.getLocalPort() + "...");
-				Socket connectionSocket = serversocket.accept();
-				
-				pool.addTask(connectionSocket);
-				/*
-				ClientConnection clientConnection = new ClientConnection();
-				clientConnection.start();
-				clients.add(clientConnection);
-				*/
-				
-			} catch (IOException e) {
+
+				this.connectionSocket = queue.take();
+				protocol = new DropOSProtocol(connectionSocket);
+
+				System.out
+						.println("Server has accepted connection from client ["
+								+ protocol.getIPAddress() + "]");
+
+				String headers = protocol.receiveHeader();
+				handleInput(headers);
+
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
+
+	private void handleInput(String input) {
+		String command = input.split(" ")[0];
+		String params = input.substring(command.length() + 1).trim();
+
+		switch (command) {
+		case "ADD":
+			String fileSize = params.split(" ")[0];
+			String fileName = params.substring(fileSize.length() + 1).trim();
+			long size = Long.valueOf(fileSize);
+			
+			protocol.receiveFile(fileName, size);
+			break;
+		case "MODIFY":
+			break;
+		case "DELETE":
+			break;
+		}
+
+	}
+
 }
