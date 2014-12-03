@@ -125,7 +125,7 @@ public class DropOSProtocol {
 
 			byte[] mybytearray = new byte[(int) filesize];
 			int bytesRead = 0;
-			int currentTot = headerBytesRead;
+			int currentTot = 0;
 
 			do {
 				bytesRead = bufferedInputStream.read(mybytearray, currentTot, mybytearray.length - currentTot);
