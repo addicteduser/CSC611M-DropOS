@@ -45,13 +45,15 @@ public class DropOSProtocol {
 		}
 	}
 
-	public void sendMessage(String message) {
+	public void sendHeader(String message) {
 		try {
-			byte[] buf = message.getBytes("UTF-8");
+			byte[] buf = new byte[PACKET_HEADER_LENGTH];
+			byte[] mes = message.getBytes("UTF-8");
+			buf[0] = (byte)mes.length;
+			System.arraycopy(mes, 0, buf, 1, mes.length);
+			
 			bufferedOutputStream.write(buf, 0, buf.length);
 			bufferedOutputStream.flush();
-			socket.close();
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -119,15 +121,22 @@ public class DropOSProtocol {
 		String message = null;
 		try {
 
-			byte[] buf = new byte[(int) PACKET_HEADER_LENGTH];
+			byte[] size = new byte[1];
+			bufferedInputStream.read(size, 0, 1);
+			
+			int length = size[0];
+			
+			byte[] buf = new byte[(int) length];
 			int bytesRead = 0;
 			int currentTotalBytesRead = 0;
+			
+			
 
 			do {
-				bytesRead = bufferedInputStream.read(buf, currentTotalBytesRead, PACKET_HEADER_LENGTH - currentTotalBytesRead);
+				bytesRead = bufferedInputStream.read(buf, currentTotalBytesRead, length - currentTotalBytesRead);
 				if (bytesRead >= 0)
 					currentTotalBytesRead += bytesRead;
-			} while (currentTotalBytesRead < PACKET_HEADER_LENGTH);
+			} while (currentTotalBytesRead < length);
 
 			message = new String(buf);
 			

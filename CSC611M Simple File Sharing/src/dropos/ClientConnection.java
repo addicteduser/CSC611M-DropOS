@@ -28,7 +28,7 @@ public class ClientConnection extends Thread {
 								+ protocol.getIPAddress() + "]");
 
 				String headers = protocol.receiveHeader();
-				protocol.sendMessage("GO");
+				protocol.sendHeader("GO");
 				handleInput(headers);
 
 			} catch (Exception e) {

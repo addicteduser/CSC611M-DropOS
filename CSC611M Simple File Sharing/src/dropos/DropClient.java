@@ -67,8 +67,8 @@ public class DropClient extends Thread {
 	private void addFile(DirectoryEvent event) {
 		try {
 			File f = new File(Config.getPath() + "\\" + event.getFile().toString());
-			long size = Files.size(event.getFile());
-			protocol.sendMessage("ADD " + size + " " + event.getFile());
+			long size = Files.size(f.toPath());
+			protocol.sendHeader("ADD " + size + " " + event.getFile());
 			
 			String message = protocol.receiveHeader();
 			
