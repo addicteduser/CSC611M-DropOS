@@ -22,6 +22,7 @@ public class DropOSProtocol {
 
 	private BufferedInputStream bufferedInputStream;
 	private BufferedOutputStream bufferedOutputStream;
+	private int headerBytesRead;
 	
 	/**
 	 * The packet header has a length of fifty (50) bytes.
@@ -91,11 +92,10 @@ public class DropOSProtocol {
 
 			byte[] mybytearray = new byte[(int) filesize];
 			int bytesRead = 0;
-			int currentTot = 0;
+			int currentTot = headerBytesRead;
 
 			do {
-				bytesRead = bufferedInputStream.read(mybytearray, currentTot,
-						mybytearray.length - currentTot);
+				bytesRead = bufferedInputStream.read(mybytearray, currentTot, mybytearray.length - currentTot);
 				if (bytesRead >= 0)
 					currentTot += bytesRead;
 			} while (currentTot < filesize);
@@ -104,10 +104,9 @@ public class DropOSProtocol {
 			bufferedOutputStream.write(mybytearray, 0, currentTot);
 
 			// Close it
-			socket.close();
 			fileOutputStream.close();
 			bufferedOutputStream.flush();
-
+			socket.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -127,15 +126,15 @@ public class DropOSProtocol {
 			
 			byte[] buf = new byte[(int) length];
 			int bytesRead = 0;
-			int currentTotalBytesRead = 0;
+			headerBytesRead = 0;
 			
 			
 
 			do {
-				bytesRead = bufferedInputStream.read(buf, currentTotalBytesRead, length - currentTotalBytesRead);
+				bytesRead = bufferedInputStream.read(buf, headerBytesRead, length - headerBytesRead);
 				if (bytesRead >= 0)
-					currentTotalBytesRead += bytesRead;
-			} while (currentTotalBytesRead < length);
+					headerBytesRead += bytesRead;
+			} while (headerBytesRead < length);
 
 			message = new String(buf);
 		} catch (FileNotFoundException e) {
