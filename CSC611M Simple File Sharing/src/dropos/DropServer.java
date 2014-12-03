@@ -1,5 +1,6 @@
 package dropos;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
@@ -23,9 +24,7 @@ public class DropServer extends Thread {
 				this.connectionSocket = queue.take();
 				protocol = new DropOSProtocol(connectionSocket);
 
-				System.out
-						.println("Server has accepted connection from client ["
-								+ protocol.getIPAddress() + "]");
+				System.out.println("Server has accepted connection from client [" + protocol.getIPAddress() + "]");
 
 				String headers = protocol.receiveHeader();
 				handleInput(headers);
@@ -36,24 +35,37 @@ public class DropServer extends Thread {
 		}
 	}
 
-	private void handleInput(String input) {
+	private void handleInput(String input) throws IOException {
 		String command = input.split(" ")[0];
 		String params = input.substring(command.length() + 1).trim();
 
 		switch (command) {
 		case "ADD":
-			String fileSize = params.split(" ")[0];
-			String fileName = params.substring(fileSize.length() + 1).trim();
-			long size = Long.valueOf(fileSize);
-			
-			protocol.receiveFile(fileName, size);
+			addFile(params);
 			break;
+
 		case "MODIFY":
+			modifyFile(params);
 			break;
+
 		case "DELETE":
+			deleteFile(params);
 			break;
 		}
+	}
+
+	private void modifyFile(String params) {
 
 	}
 
+	private void deleteFile(String params) {
+
+	}
+
+	private void addFile(String params) throws IOException {
+		String fileSize = params.split(" ")[0];
+		String fileName = params.substring(fileSize.length() + 1).trim();
+		long size = Long.valueOf(fileSize);
+		protocol.receiveFile(fileName, size);
+	}
 }
