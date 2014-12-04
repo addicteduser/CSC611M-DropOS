@@ -41,7 +41,7 @@ public class DropClient extends Thread {
 	private void eventPerformed(DirectoryEvent e) {
 
 		try {
-			if (clientSocket.isClosed() == false)
+			if (clientSocket != null && clientSocket.isClosed() == false)
 				throw new IOException(
 						"Wait! The client socket isn't closed yet!");
 
