@@ -10,9 +10,11 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
