@@ -73,8 +73,8 @@ public class DropOSDirectoryIndexer {
 	}
 	
 	// EXTRACTS THE FILENAMES AND TIMESTAMPS(LONG) FROM THE GIVEN INPUT DIRECTORY FILE
-	public HashMap<String,Long> extractInfoFromIndexListFile(File indexFile) {
-		HashMap<String,Long> info = new HashMap<String,Long>();
+	public FileAndLastModified extractInfoFromIndexListFile(File indexFile) {
+		FileAndLastModified info = new FileAndLastModified();
 		String indexLine = null;
 		
 		try {
@@ -95,27 +95,21 @@ public class DropOSDirectoryIndexer {
 		return info;
 	}
 	
-	public HashMap<String,String> compareIndexLists(HashMap<String,Long> server, HashMap<String,Long> client) {
-		HashMap<String,String> actions = new HashMap<String,String>();
+	
+	
+	public FileAndAction compare(FileAndLastModified server, FileAndLastModified client) {
+		FileAndAction actions = new FileAndAction();
 		
-		Set<Entry<String,Long>> set = client.entrySet();
-	    Iterator<Entry<String,Long>> iterator = set.iterator();
-	    
-	    while(iterator.hasNext()) {
-	    	Map.Entry<String,Long> me = (Map.Entry<String,Long>)iterator.next();
-	    	
-	    	String key = me.getKey();
-	    	long value = me.getValue();
+		Set<String> files = client.keySet();
+		for(String file : files){
+			long clientLastModified = client.get(file);
+			long serverLastModified = server.get(file);
 	   
-	    	if(server.containsKey(key)) {
-	    		if(server.get(key) < value)
-	    			actions.put(key, "REQUEST");
-	    		else if(server.get(key) > value)
-	    			actions.put(key, "ADD");
+	    	if(server.containsKey(file) && serverLastModified > clientLastModified){
+    			actions.put(file, "ADD");
 	    	} else {
-	    		actions.put(key, "REQUEST");
+	    		actions.put(file, "REQUEST");
 	    	}
-	    			
 	    }
 		
 		return actions;
