@@ -59,7 +59,7 @@ public class DropServer extends Thread {
 	}
 
 	private void deleteFile(String params) {
-
+		// deleteIfExists(Path of the file)
 	}
 
 	private void addFile(String params) throws IOException {

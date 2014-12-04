@@ -63,7 +63,7 @@ public class DropOSProtocol {
 		bufferedOutputStream.flush();
 		fileInputStream.close();
 
-	}
+	} 
 
 	public void sendHeaderAndFile(SynchronizationEvent event, File f) throws IOException {
 		long size;
