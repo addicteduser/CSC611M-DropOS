@@ -8,22 +8,22 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent.Kind;
 
-public class DirectoryEvent {
+public class SynchronizationEvent {
 	private Path file;
 	private EventType type;
 
 	public enum EventType {
-		ADD, MODIFY, DELETE
+		ADD, REQUEST, DELETE
 	}
 	
-	public DirectoryEvent(Path file, Kind<?> kind) {
+	public SynchronizationEvent(Path file, Kind<?> kind) {
 		this.file = file;
 		if (ENTRY_CREATE == kind) {
 			type = EventType.ADD;
 		} else if (ENTRY_DELETE == kind) {
 			type = EventType.DELETE;
 		} else if (ENTRY_MODIFY == kind) {
-			type = EventType.MODIFY;
+			type = EventType.REQUEST;
 		}
 	}
 
@@ -53,7 +53,7 @@ public class DirectoryEvent {
 			return "ADD " + file;
 		case DELETE:
 			return "DELETE " + file;
-		case MODIFY: 
+		case REQUEST: 
 			return "MODIFY " + file;
 		}
 		return "Unknown directory event type!";

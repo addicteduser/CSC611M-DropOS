@@ -14,7 +14,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 
 import dropos.Config;
-import dropos.event.DirectoryEvent;
+import dropos.event.SynchronizationEvent;
 
 public class DropOSProtocol {
 	private String ipAddress;
@@ -67,7 +67,7 @@ public class DropOSProtocol {
 
 	}
 
-	public void sendHeaderAndFile(DirectoryEvent event, File f) throws IOException {
+	public void sendHeaderAndFile(SynchronizationEvent event, File f) throws IOException {
 		long size;
 		size = Files.size(f.toPath());
 		String message = ("ADD " + size + " " + event.getFile());

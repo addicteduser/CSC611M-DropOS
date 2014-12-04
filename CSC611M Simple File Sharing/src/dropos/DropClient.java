@@ -17,7 +17,7 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
 import message.DropOSProtocol;
-import dropos.event.DirectoryEvent;
+import dropos.event.SynchronizationEvent;
 
 public class DropClient extends Thread {
 	private int port;
@@ -38,7 +38,7 @@ public class DropClient extends Thread {
 	 * 
 	 * @param e
 	 */
-	private void eventPerformed(DirectoryEvent e) {
+	private void eventPerformed(SynchronizationEvent e) {
 
 		try {
 			if (clientSocket != null && clientSocket.isClosed() == false)
@@ -56,11 +56,11 @@ public class DropClient extends Thread {
 				addFile(e);
 				break;
 			case DELETE:
-
+				deleteFile(e);
 				break;
 
-			case MODIFY:
-
+			case REQUEST:
+				requestFile(e);
 				break;
 			}
 		} catch (IOException err) {
@@ -68,9 +68,39 @@ public class DropClient extends Thread {
 		}
 	}
 
-	private void addFile(DirectoryEvent event) throws IOException {
-		File f = new File(Config.getPath() + "\\" + event.getFile().toString());
-		protocol.sendHeaderAndFile(event, f);
+	/**
+	 * <p>This method is called when the index list was able to identify files that were outdated. 
+	 * It sends a packet header requesting for a file.</p>
+	 * @param e this contains details of the file to be requested
+	 */
+	private void requestFile(SynchronizationEvent e) {
+		
+	}
+
+	/**
+	 * <p>This method recognizes that a file was now missing. The server must now be informed that the file is removed.
+	 * It sends a packet header containing the command to delete the file.</p>
+	 * 
+	 * @param e this contains details of the file to be deleted
+	 * @throws IOException
+	 */
+	private void deleteFile(SynchronizationEvent e) {
+		
+	}
+
+	/**
+	 * <p>This method recognizes that a file was newly added / needs to be updated.
+	 * It sends a packet header and the payload.</p>
+	 * 
+	 * <p>
+	 * <b>Note:</b> The recipient automatically closes the connection once the payload was successfully received.
+	 * </p>
+	 * @param e this contains details of the newly added file 
+	 * @throws IOException
+	 */
+	private void addFile(SynchronizationEvent e) throws IOException {
+		File f = new File(Config.getPath() + "\\" + e.getFile().toString());
+		protocol.sendHeaderAndFile(e, f);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -117,7 +147,7 @@ public class DropClient extends Thread {
 					Path newPath = ((WatchEvent<Path>) watchEvent).context();
 
 					// Create a directory event from what happened
-					DirectoryEvent directoryEvent = new DirectoryEvent(newPath,
+					SynchronizationEvent directoryEvent = new SynchronizationEvent(newPath,
 							kind);
 
 					// Fire the event
