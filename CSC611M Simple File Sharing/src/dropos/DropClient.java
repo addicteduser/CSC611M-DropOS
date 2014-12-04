@@ -41,12 +41,8 @@ public class DropClient extends Thread {
 	 * @param e
 	 */
 	private void eventPerformed(SynchronizationEvent e) {
-
+		System.out.println(e);
 		try {
-			if (clientSocket != null && clientSocket.isClosed() == false)
-				throw new IOException(
-						"Wait! The client socket isn't closed yet!");
-
 			clientSocket = new Socket(hostname, port);
 			System.out.println("[CLIENT] New event. I am now connecting to ["
 					+ hostname + "] on port [" + port + "]");
@@ -152,6 +148,8 @@ public class DropClient extends Thread {
 					SynchronizationEvent directoryEvent = new SynchronizationEvent(newPath,
 							kind);
 
+					if (kind.toString().equalsIgnoreCase("modify")) continue;
+					
 					// Fire the event
 					eventPerformed(directoryEvent);
 
