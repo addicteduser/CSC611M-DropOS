@@ -31,47 +31,46 @@ public class DropClient extends Thread {
 
 		System.out.println("[SYSTEM] Created new CLIENT instance");
 
-		try {
-			clientSocket = new Socket(hostname, port);
-			System.out.println("[CLIENT] I am now connected to [" + hostname + "] on port [" + port + "]");
-			
-			protocol = new DropOSProtocol(clientSocket);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**
 	 * This method handles different kinds of events.
+	 * 
 	 * @param e
 	 */
 	private void eventPerformed(DirectoryEvent e) {
-		
-		switch(e.getType()){
-		case ADD:
-			
-			addFile(e);
-			break;
-		case DELETE:
-			 
-			break;
-			 
-		case MODIFY:
-			
-			break;
+
+		try {
+			if (clientSocket.isClosed() == false)
+				throw new IOException(
+						"Wait! The client socket isn't closed yet!");
+
+			clientSocket = new Socket(hostname, port);
+			System.out.println("[CLIENT] New event. I am now connecting to ["
+					+ hostname + "] on port [" + port + "]");
+
+			protocol = new DropOSProtocol(clientSocket);
+
+			switch (e.getType()) {
+			case ADD:
+				addFile(e);
+				break;
+			case DELETE:
+
+				break;
+
+			case MODIFY:
+
+				break;
+			}
+		} catch (IOException err) {
+			err.printStackTrace();
 		}
 	}
 
-	private void addFile(DirectoryEvent event) {
-		try {
-			File f = new File(Config.getPath() + "\\" + event.getFile().toString());
-			protocol.sendHeaderAndFile(event, f);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		
+	private void addFile(DirectoryEvent event) throws IOException {
+		File f = new File(Config.getPath() + "\\" + event.getFile().toString());
+		protocol.sendHeaderAndFile(event, f);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -80,11 +79,13 @@ public class DropClient extends Thread {
 
 		Path clientPath = Config.getPath();
 		try {
-			Boolean isFolder = (Boolean) Files.getAttribute(clientPath, "basic:isDirectory", NOFOLLOW_LINKS);
-			
-			if (!isFolder) 
-				throw new IllegalArgumentException("Path: " + clientPath + " is not a folder");
-			
+			Boolean isFolder = (Boolean) Files.getAttribute(clientPath,
+					"basic:isDirectory", NOFOLLOW_LINKS);
+
+			if (!isFolder)
+				throw new IllegalArgumentException("Path: " + clientPath
+						+ " is not a folder");
+
 		} catch (IOException ioe) {
 			// Folder does not exists
 			ioe.printStackTrace();
@@ -100,7 +101,8 @@ public class DropClient extends Thread {
 
 			// We register the path to the service
 			// We watch for creation events
-			clientPath.register(service, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+			clientPath.register(service, ENTRY_CREATE, ENTRY_DELETE,
+					ENTRY_MODIFY);
 
 			// Start the infinite polling loop
 			WatchKey key = null;
@@ -115,8 +117,9 @@ public class DropClient extends Thread {
 					Path newPath = ((WatchEvent<Path>) watchEvent).context();
 
 					// Create a directory event from what happened
-					DirectoryEvent directoryEvent = new DirectoryEvent(newPath, kind);
-					
+					DirectoryEvent directoryEvent = new DirectoryEvent(newPath,
+							kind);
+
 					// Fire the event
 					eventPerformed(directoryEvent);
 
