@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Files;
 
 import dropos.Config;
@@ -23,9 +25,9 @@ public class DropOSProtocol {
 	private int headerBytesRead;
 
 	/**
-	 * The packet header has a length of fifty (50) bytes.
+	 * The packet header has a length of 5mb.
 	 */
-	private static final int PACKET_MAX_LENGTH = 1500;
+	private static final int PACKET_MAX_LENGTH = 5 * 1024 * 1024;
 
 	public DropOSProtocol(Socket s) {
 		this.socket = s;
@@ -73,8 +75,13 @@ public class DropOSProtocol {
 		// header
 		byte[] buf = new byte[PACKET_MAX_LENGTH];
 		byte[] mes = message.getBytes("UTF-8");
-		buf[0] = (byte) mes.length;
-		System.arraycopy(mes, 0, buf, 1, mes.length);
+		byte[] packetHeaderLength = intToByteArray(mes.length);
+		
+		// First 4 bytes contain an integer value, which is the length of the packet header
+		System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
+		
+		// The next bytes would be the packet header
+		System.arraycopy(mes, 0, buf, 4, mes.length);
 
 		// file
 		FileInputStream fileInputStream = new FileInputStream(f);
@@ -83,7 +90,7 @@ public class DropOSProtocol {
 		BufferedInputStream bin = new BufferedInputStream(fileInputStream);
 		bin.read(fbuf, 0, fbuf.length);
 
-		System.arraycopy(fbuf, 0, buf, mes.length + 1, fbuf.length);
+		System.arraycopy(fbuf, 0, buf, mes.length + 4, fbuf.length);
 		bufferedOutputStream.write(buf, 0, buf.length);
 		bufferedOutputStream.flush();
 		fileInputStream.close();
@@ -123,15 +130,28 @@ public class DropOSProtocol {
 		return file;
 	}
 
+	private static int byteArrayToInt(byte[] b) {
+	    final ByteBuffer bb = ByteBuffer.wrap(b);
+	    bb.order(ByteOrder.LITTLE_ENDIAN);
+	    return bb.getInt();
+	}
+
+	private static byte[] intToByteArray(int i) {
+	    final ByteBuffer bb = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
+	    bb.order(ByteOrder.LITTLE_ENDIAN);
+	    bb.putInt(i);
+	    return bb.array();
+	}
+	
 	public String receiveHeader() throws IOException {
 		String message = null;
 
-		byte[] size = new byte[1];
-		bufferedInputStream.read(size, 0, 1);
+		byte[] size = new byte[4];
+		bufferedInputStream.read(size, 0, 4);
+		
+		int length = byteArrayToInt(size);
 
-		int length = size[0];
-
-		byte[] buf = new byte[(int) length];
+		byte[] buf = new byte[length];
 		int bytesRead = 0;
 		headerBytesRead = 0;
 
