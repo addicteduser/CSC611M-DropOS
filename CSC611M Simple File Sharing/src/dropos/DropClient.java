@@ -41,7 +41,7 @@ public class DropClient extends Thread {
 	 * @param e
 	 */
 	private void eventPerformed(SynchronizationEvent e) {
-
+		System.out.println(e);
 		try {
 			clientSocket = new Socket(hostname, port);
 			System.out.println("[CLIENT] New event. I am now connecting to ["
@@ -148,6 +148,8 @@ public class DropClient extends Thread {
 					SynchronizationEvent directoryEvent = new SynchronizationEvent(newPath,
 							kind);
 
+					if (kind.toString().equalsIgnoreCase("modify")) continue;
+					
 					// Fire the event
 					eventPerformed(directoryEvent);
 
