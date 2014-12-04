@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Files;
 
 import dropos.Config;
@@ -73,7 +75,12 @@ public class DropOSProtocol {
 		// header
 		byte[] buf = new byte[PACKET_MAX_LENGTH];
 		byte[] mes = message.getBytes("UTF-8");
-		buf[0] = (byte) mes.length;
+		byte[] packetHeaderLength = intToByteArray(mes.length);
+		
+		// First 4 bytes contain an integer value, which is the length of the packet header
+		System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
+		
+		// The next bytes would be the packet header
 		System.arraycopy(mes, 0, buf, 1, mes.length);
 
 		// file
@@ -123,15 +130,28 @@ public class DropOSProtocol {
 		return file;
 	}
 
+	private static int byteArrayToInt(byte[] b) {
+	    final ByteBuffer bb = ByteBuffer.wrap(b);
+	    bb.order(ByteOrder.LITTLE_ENDIAN);
+	    return bb.getInt();
+	}
+
+	private static byte[] intToByteArray(int i) {
+	    final ByteBuffer bb = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
+	    bb.order(ByteOrder.LITTLE_ENDIAN);
+	    bb.putInt(i);
+	    return bb.array();
+	}
+	
 	public String receiveHeader() throws IOException {
 		String message = null;
 
-		byte[] size = new byte[1];
-		bufferedInputStream.read(size, 0, 1);
+		byte[] size = new byte[4];
+		bufferedInputStream.read(size, 0, 4);
+		
+		int length = byteArrayToInt(size);
 
-		int length = size[0];
-
-		byte[] buf = new byte[(int) length];
+		byte[] buf = new byte[length];
 		int bytesRead = 0;
 		headerBytesRead = 0;
 

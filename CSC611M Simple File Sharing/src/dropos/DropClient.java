@@ -43,10 +43,6 @@ public class DropClient extends Thread {
 	private void eventPerformed(SynchronizationEvent e) {
 
 		try {
-			if (clientSocket != null && clientSocket.isClosed() == false)
-				throw new IOException(
-						"Wait! The client socket isn't closed yet!");
-
 			clientSocket = new Socket(hostname, port);
 			System.out.println("[CLIENT] New event. I am now connecting to ["
 					+ hostname + "] on port [" + port + "]");
