@@ -11,10 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 public class DropOSDirectoryIndexer {
