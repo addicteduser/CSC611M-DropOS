@@ -68,8 +68,7 @@ public class DropOSProtocol {
 	} 
 
 	public void sendHeaderAndFile(SynchronizationEvent event, File f) throws IOException {
-		long size;
-		size = Files.size(f.toPath());
+		long size = Files.size(f.toPath());
 		String message = ("ADD " + size + " " + event.getFile());
 
 		// header
