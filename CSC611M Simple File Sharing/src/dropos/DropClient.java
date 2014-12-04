@@ -10,9 +10,11 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
@@ -67,9 +69,9 @@ public class DropClient extends Thread {
 	private void addFile(DirectoryEvent event) {
 		try {
 			File f = new File(Config.getPath() + "\\" + event.getFile().toString());
-			long size = Files.size(event.getFile());
+			long size = Files.size(f.toPath());
+			//long size = Files.size(event.getFile());
 			protocol.sendMessage("ADD " + size + " " + event.getFile());
-			
 			String message = protocol.receiveMessage();
 			
 			if (message.equalsIgnoreCase("GO")){

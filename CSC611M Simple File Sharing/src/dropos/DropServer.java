@@ -8,8 +8,11 @@ import java.util.ArrayList;
 public class DropServer extends Thread {
 	
 	private static ServerSocket serversocket;
+	
+	// for threadpooling
 	private ThreadPool pool;
 	private ArrayList<ClientConnection> clients;
+	
 	public DropServer(int port) throws IOException {
 		serversocket = new ServerSocket(port);
 		//clients = new ArrayList<ClientConnection>();

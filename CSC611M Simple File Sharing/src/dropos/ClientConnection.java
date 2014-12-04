@@ -20,7 +20,7 @@ public class ClientConnection extends Thread {
 		while (true) {
 			try {
 
-				this.connectionSocket = queue.take();
+				connectionSocket = queue.take();
 				protocol = new DropOSProtocol(connectionSocket);
 
 				System.out
