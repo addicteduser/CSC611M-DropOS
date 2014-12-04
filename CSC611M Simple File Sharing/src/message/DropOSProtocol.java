@@ -25,9 +25,9 @@ public class DropOSProtocol {
 	private int headerBytesRead;
 
 	/**
-	 * The packet header has a length of fifty (50) bytes.
+	 * The packet header has a length of 5mb.
 	 */
-	private static final int PACKET_MAX_LENGTH = 1500;
+	private static final int PACKET_MAX_LENGTH = 5 * 1024 * 1024;
 
 	public DropOSProtocol(Socket s) {
 		this.socket = s;
@@ -81,7 +81,7 @@ public class DropOSProtocol {
 		System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
 		
 		// The next bytes would be the packet header
-		System.arraycopy(mes, 0, buf, 1, mes.length);
+		System.arraycopy(mes, 0, buf, 4, mes.length);
 
 		// file
 		FileInputStream fileInputStream = new FileInputStream(f);
@@ -90,7 +90,7 @@ public class DropOSProtocol {
 		BufferedInputStream bin = new BufferedInputStream(fileInputStream);
 		bin.read(fbuf, 0, fbuf.length);
 
-		System.arraycopy(fbuf, 0, buf, mes.length + 1, fbuf.length);
+		System.arraycopy(fbuf, 0, buf, mes.length + 4, fbuf.length);
 		bufferedOutputStream.write(buf, 0, buf.length);
 		bufferedOutputStream.flush();
 		fileInputStream.close();
