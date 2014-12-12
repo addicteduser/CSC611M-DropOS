@@ -38,12 +38,16 @@ public class IndexDriver {
 		FileAndLastModified serverIndexList = new FileAndLastModified();
 		FileAndLastModified clientIndexList = new FileAndLastModified();
 
-		serverIndexList.put("File A", Long.parseLong("123745312630000"));
-		serverIndexList.put("File B", Long.parseLong("123745312630050"));
+		serverIndexList.put("File A", Long.parseLong("123745312690000"));
+		serverIndexList.put("File B", Long.parseLong("123745312690001"));
 
 		clientIndexList.put("File A", Long.parseLong("123745312630023"));
-		clientIndexList.put("File B", Long.parseLong("123745312630023"));
-		clientIndexList.put("File C", Long.parseLong("123745312630023"));
+		clientIndexList.put("File B", Long.parseLong("123745312630024"));
+		clientIndexList.put("File C", Long.parseLong("123745312630025"));
+		
+		System.out.println(serverIndexList);
+		
+		System.out.println(clientIndexList);
 		//
 		// hm = dodi.extractInfoFromIndexListFile(wow);
 
