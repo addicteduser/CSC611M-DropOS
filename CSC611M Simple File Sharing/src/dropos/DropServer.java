@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import dropos.threads.ConnectionHandler;
+import dropos.threads.ThreadPool;
+
 /**
  * A {@link DropServer} is a simple application that waits for connections. During initialization, it produces a thread pool of sixteen (16)
  * {@link ConnectionHandler} instances which are blocked until a connection is made.

@@ -1,9 +1,11 @@
-package dropos;
+package dropos.threads;
 
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import dropos.DropServer;
 
 /**
  * The {@link ThreadPool} creates a {@link LinkedBlockingQueue} which will hold the {@link Socket} instances added by the {@link DropServer}. 

@@ -1,4 +1,4 @@
-package dropos;
+package dropos.threads;
 
 import java.io.IOException;
 import java.net.Socket;
