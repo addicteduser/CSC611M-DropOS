@@ -14,19 +14,19 @@ import dropos.threads.ThreadPool;
  */
 public class DropServer {
 
-	private static ServerSocket serversocket;
+	private static ServerSocket serverSocket;
 	private ThreadPool pool;
 
 	public DropServer(int port) throws IOException {
-		serversocket = new ServerSocket(port);
+		serverSocket = new ServerSocket(port);
 		pool = new ThreadPool(16);
 	}
 
 	public void run() {
 		while (true) {
 			try {
-				System.out.println("[SERVER] Waiting for client connections on port " + serversocket.getLocalPort() + "...");
-				Socket connectionSocket = serversocket.accept();
+				System.out.println("[Server] Waiting for client connections on port " + serverSocket.getLocalPort() + "...");
+				Socket connectionSocket = serverSocket.accept();
 
 				pool.addTask(connectionSocket);
 			} catch (IOException e) {

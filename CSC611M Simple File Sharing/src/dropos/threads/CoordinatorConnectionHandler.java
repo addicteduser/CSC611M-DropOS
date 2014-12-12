@@ -4,23 +4,24 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
-import message.DropOSProtocol;
+import dropos.DropClient;
 import dropos.DropCoordinator;
 import dropos.DropServer;
+import message.DropOSProtocol;
 
 /**
- * During initialization, a {@link ConnectionHandler} is made to block at the queue which holds the pending {@link Socket} instances to be handled.
- * Once a new instance is available, the {@link Socket} is received and is then handled.
+ * <p>During initialization, a {@link CoordinatorConnectionHandler} is made to block at the queue which holds the pending {@link Socket} instances to be handled.
+ * Once a new instance is available, the {@link Socket} is received and is then handled.</p>
  * 
- * <p><b>Note:</b> This class is meant to handle connections from a {@link DropCoordinator} to a {@link DropServer}. 
+ * <p><b>Note:</b> This class is meant to handle connections from a {@link DropClient} to a {@link DropCoordinator}. 
  *
  */
-public class ConnectionHandler extends Thread {
+public class CoordinatorConnectionHandler extends Thread {
 	private BlockingQueue<Socket> queue;
 	private Socket connectionSocket;
 	private DropOSProtocol protocol;
 
-	public ConnectionHandler(BlockingQueue<Socket> queue) {
+	public CoordinatorConnectionHandler(BlockingQueue<Socket> queue) {
 		this.queue = queue;
 		this.start();
 	}
@@ -33,7 +34,7 @@ public class ConnectionHandler extends Thread {
 				this.connectionSocket = queue.take();
 				protocol = new DropOSProtocol(connectionSocket);
 
-				System.out.println("Server has accepted connection from coordinator [" + protocol.getIPAddress() + "]");
+				System.out.println("Coordinator has accepted connection from client [" + protocol.getIPAddress() + "]");
 
 				String headers = protocol.receiveHeader();
 				interpretHeader(headers);
