@@ -24,7 +24,7 @@ public class Config {
 				case "PATH": 
 					path = Paths.get(System.getProperty("user.dir")).resolve(value);
 				break;
-				case "IP":
+				case "COORDINATOR IP":
 					ipAddress = value;
 					break;
 				case "PORT":
