@@ -47,10 +47,37 @@ public class DropClient {
 		Index newerIndex = Index.directory();
 		
 		Resolution compare = Resolution.compare(olderIndex, newerIndex);
-		System.out.println("Here are the offline changes detected: " + compare);
+		System.out.println("[Client] Here are the offline changes detected: " + compare);
+		
+		if (compare.size() > 0){
+			System.out.println("About to update server regarding offline changes...");
+			handleResolution(compare);
+		}
+		
 		
 		
 		new DropClientWindow();
+	}
+
+	private void handleResolution(Resolution compare) {
+		for(String filename : compare.keySet()){
+			String action = compare.get(filename);
+			
+			// Since these changes were detected on this host, we must inform the server to logically synchronize the folder.
+			switch(action){
+			case "NONE":
+				break;
+			
+			case "UPDATE":
+			break;
+			
+			case "REQUEST":
+			break;
+			
+			case "DELETE":
+			break;
+			}
+		}
 	}
 
 	/**

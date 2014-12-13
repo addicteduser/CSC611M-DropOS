@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
+import javax.sound.midi.Receiver;
+
 import message.DropOSProtocol;
 import dropos.DropCoordinator;
 import dropos.DropServer;
@@ -54,6 +56,9 @@ public class ConnectionHandler extends Thread {
 		String params = header.substring(command.length() + 1).trim();
 
 		switch (command) {
+		case "INDEX":
+			receiveIndexFile(params);
+			break;
 		case "ADD":
 			addFile(params);
 			break;
@@ -66,6 +71,14 @@ public class ConnectionHandler extends Thread {
 			deleteFile(params);
 			break;
 		}
+	}
+
+	/**
+	 * This command is sent by the client when it is about to send its index file and is about to request for the server's index file as well. 
+	 * @param params
+	 */
+	private void receiveIndexFile(String params) {
+		
 	}
 
 	private void modifyFile(String params) {
