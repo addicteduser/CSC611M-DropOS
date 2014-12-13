@@ -57,6 +57,7 @@ public class ConnectionHandler extends Thread {
 	 * @throws IOException
 	 */
 	private void interpretHeader(PacketHeader headers) throws IOException {
+		
 		// If an index file is being sent, receive it no matter what.
 		if (headers instanceof IndexListPacketHeader){
 			File clientIndexFile = ((IndexListPacketHeader) headers).receiveFile(protocol);
