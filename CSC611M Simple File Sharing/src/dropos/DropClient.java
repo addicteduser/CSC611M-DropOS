@@ -9,6 +9,8 @@ import indexer.Resolution;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -26,15 +28,17 @@ import dropos.ui.DropClientWindow;
 
 public class DropClient {
 	private DropOSProtocol protocol;
+	private ServerSocket serverSocket;
 
 	/**
 	 * This method is set to false from the GUI, which allows this thread to terminate.
 	 */
 	public static boolean RUNNING = true;
 
-	public DropClient() {
+	public DropClient() throws IOException {
 		System.out.println("[Client] Initializing the client.");
-
+		serverSocket = new ServerSocket(Config.getPort());
+		
 		System.out.println("[Client] Connecting to the server...\n");
 		// Create a connection with the server
 		try {
@@ -66,21 +70,28 @@ public class DropClient {
 
 	private void handleResolution(Resolution compare) {
 		try {
-			// Send your index file
+			System.out.println("[Client] Sending the server my own index list.");
 			protocol.sendIndex();
-			while(protocol.isFinished() == false);
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("[Client] Finished sending the index list.\n");
 		}
+		
+		
 		try {
-			protocol = new DropOSProtocol();
+			System.out.println("[Client] Now waiting for server to connect and send Server index list.");
+			Socket connectionSocket = serverSocket.accept();
+			protocol = new DropOSProtocol(connectionSocket);
 			
 			// Wait for a response (header... and later a file);
 			// Note that we expect the server to respond with an index list as well.
 			IndexListPacketHeader phServerIndex = (IndexListPacketHeader) protocol.receiveHeader();
-
+			
+			System.out.println("[Client] Server index packet header received.");
+			
 			// Receive the file once you have the packet header
 			File serverIndex = phServerIndex.receiveFile(protocol);
+			
+			System.out.println("[Client] Server index list received.");
 
 			// TODO: perform resolution here
 

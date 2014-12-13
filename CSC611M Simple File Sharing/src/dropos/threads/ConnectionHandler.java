@@ -61,13 +61,17 @@ public class ConnectionHandler extends Thread {
 		
 		// If an index file is being sent, receive it no matter what.
 		if (headers instanceof IndexListPacketHeader){
+			System.out.println("[Server] Index file was now received.");
 			File clientIndexFile = ((IndexListPacketHeader) headers).receiveFile(protocol);
 			
+			System.out.println("[Server] A new socke connection is being made...");
 			protocol = new DropOSProtocol(new Socket(protocol.getIPAddress(), Config.getPort()));
 			
+			System.out.println("[Server] Sending the server's index list.");
 			// Respond by sending your own index
 			protocol.sendIndex();
 
+			System.out.println("[Server] Performing resolution...");
 			// Parse the client's index
 			Index clientIndex = Index.read(clientIndexFile);
 			
