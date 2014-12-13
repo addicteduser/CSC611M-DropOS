@@ -93,7 +93,7 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 
 			for (FileAndLastModifiedPair pair : this) {
 				String filename = pair.file;
-				Long lastModified = pair.dateModified;
+				Long lastModified = pair.lastModified;
 				writer.write(filename + ":" + lastModified + "\n");
 			}
 
@@ -252,7 +252,7 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	private long get(String file) {
 		for (FileAndLastModifiedPair pair : this){
 			if (pair.file.equalsIgnoreCase(file)) 
-				return pair.dateModified;
+				return pair.lastModified;
 		}
 		return 0;
 	}
@@ -277,7 +277,7 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 		sort();
 
 		for (FileAndLastModifiedPair pair : this) {
-			Long lastModified = pair.dateModified;
+			Long lastModified = pair.lastModified;
 			String file = pair.file;
 
 			Date date = new Date(lastModified);
@@ -297,9 +297,9 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 */
 	private class IndexComparator implements Comparator<FileAndLastModifiedPair> {
 		public int compare(FileAndLastModifiedPair a, FileAndLastModifiedPair b) {
-			if (a.dateModified < b.dateModified)
+			if (a.lastModified < b.lastModified)
 				return -1;
-			if (a.dateModified > b.dateModified)
+			if (a.lastModified > b.lastModified)
 				return 1;
 			return 0;
 		}
