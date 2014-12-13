@@ -67,7 +67,7 @@ public class SynchronizationEvent {
 			size = Files.size(file);
 			switch (type) {
 			case UPDATE:
-				return "UPDATE " + size + file;
+				return "UPDATE " + size + " " + file;
 			case DELETE:
 				return "DELETE " + file;
 			case REQUEST:

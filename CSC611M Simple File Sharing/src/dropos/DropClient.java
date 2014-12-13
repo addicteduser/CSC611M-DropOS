@@ -107,7 +107,6 @@ public class DropClient {
 	 * @param e
 	 */
 	private void eventPerformed(SynchronizationEvent e) {
-		System.out.println(e);
 		try {
 
 			System.out.println("[Client] New event. Connecting to the server...");

@@ -7,15 +7,18 @@ import dropos.Config;
 
 public class FilePacketHeader extends PacketHeader {
 
-	private long filesize;
-	private String filename;
+	protected long filesize;
+	protected String filename;
 
 	public FilePacketHeader(String header) {
 		super(header);
 		String[] split = header.split(" ");
-		filename = split[2];
+		
 		try {
-			filesize = Long.parseLong(split[1]);	
+			filesize = Long.parseLong(split[1]);
+			filename = split[2];
+		}catch(ArrayIndexOutOfBoundsException e){ 
+			// This is fine, the index has less parameters
 		}catch (Exception e){
 			System.err.println("Failed to parse filesize.");
 		}

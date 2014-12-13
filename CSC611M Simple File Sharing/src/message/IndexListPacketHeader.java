@@ -1,13 +1,17 @@
 package message;
 
+import indexer.Index;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import dropos.Config;
 
 public class IndexListPacketHeader extends FilePacketHeader {
 
-	long filesize = 0;
 	/**
 	 * This method is used when you receive a packet header that is for an index list. 
 	 * @param header
@@ -27,7 +31,11 @@ public class IndexListPacketHeader extends FilePacketHeader {
 	public IndexListPacketHeader() {
 		super("INDEX ");
 		try {
-			filesize = Long.parseLong(header.split(" ")[1]);	
+			File file = Index.getInstance().getFile();
+			BasicFileAttributes attributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+			
+			filename = file.getName();
+			filesize = file.length();	
 		}catch (Exception e){
 			System.err.println("Failed to parse filesize.");
 		}
