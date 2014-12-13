@@ -33,6 +33,11 @@ public class FileAndLastModifiedPair {
 	 * @return true if they are exactly the same
 	 */
 	public boolean exactlyEquals(FileAndLastModifiedPair pair){
-		return file == pair.file && lastModified == pair.lastModified;
+		return file.equalsIgnoreCase(pair.file) && lastModified.equals(pair.lastModified);
+	}
+	
+	@Override
+	public String toString() {
+		return file;
 	}
 }

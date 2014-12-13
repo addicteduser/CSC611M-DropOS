@@ -27,11 +27,15 @@ import dropos.Config;
  */
 public class Index extends ArrayList<FileAndLastModifiedPair> {
 
+	public enum FileDifference {
+		SAME, MISSING, OUTDATED, UPDATED
+	}
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private static Index instance;
 	private static Index preStartup;
 	
@@ -144,8 +148,12 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 		if (preStartup == null)
 			preStartup = readMyIndex();
 		
+		return directory(Config.getPath().toFile());
+	}
+	
+	public static Index getInstance(){
 		if (instance == null)
-			instance = directory(Config.getPath().toFile()); 
+			instance = directory(Config.getPath().toFile());
 		return instance;
 	}
 	
@@ -202,59 +210,28 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 		return index;
 	}
 
+
 	/**
-	 * <p>
-	 * This method is called when you wish to compare the differences between the index lists between a server and a client.
-	 * </p>
+	 * <p>Read this function as <b> the index calling this method has a/n _____ file </b>.</p>
 	 * 
-	 * @param server
-	 *            The Index file of the server
-	 * @param client
-	 *            The Index file of the client
-	 * @return A HashMap of files and their respective actions.
+	 * <p>e.g. <i>This index has an updated file.</i></p> 
+	 * @param pair the file pair to be inspected
+	 * @return FileDifference values of either 'same', 'outdated', 'updated', or 'missing'
 	 */
-	public static Resolution compare(Index server, Index client) {
-		Resolution actions = new Resolution();
-
-		for (FileAndLastModifiedPair pair : client) {
-			String file = pair.file;
+	public FileDifference containsPair(FileAndLastModifiedPair pair) {
+		for (FileAndLastModifiedPair currentPair : this){
 			
-			long clientLastModified = client.get(file);
-			long serverLastModified = server.get(file);
-
-			if (server.containsFile(file) && serverLastModified > clientLastModified) {
-				actions.put(file, "ADD");
-			} else {
-				actions.put(file, "REQUEST");
+			if (currentPair.exactlyEquals(pair)) return FileDifference.SAME;
+			
+			if (currentPair.equals(pair)){
+				if (currentPair.lastModified < pair.lastModified)
+					return FileDifference.OUTDATED;
+				
+				if (currentPair.lastModified > pair.lastModified)
+					return FileDifference.UPDATED;
 			}
 		}
-
-		return actions;
-	}
-
-	/**
-	 * @param file
-	 * @return true if the file is in this index; false if otherwise
-	 */
-	private boolean containsFile(String file) {
-		for (FileAndLastModifiedPair pair : this){
-			if (pair.file.equalsIgnoreCase(file)) 
-				return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Given a specific file name, this method returns the date it was last modified. 
-	 * @param file
-	 * @return the date it was last modified in milliseconds; -1 if deleted or 0 if the file was not found.
-	 */
-	private long get(String file) {
-		for (FileAndLastModifiedPair pair : this){
-			if (pair.file.equalsIgnoreCase(file)) 
-				return pair.lastModified;
-		}
-		return 0;
+		return FileDifference.MISSING;
 	}
 
 	/**
@@ -272,7 +249,7 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 			return sb.toString();
 
 		sb = new StringBuilder();
-		sb = sb.append("Index list:\n");
+		sb = sb.append("\nIndex list:\n");
 
 		sort();
 

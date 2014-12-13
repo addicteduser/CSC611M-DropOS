@@ -17,7 +17,7 @@ public class ClientDriver {
 	        	Index startUp = Index.startUp();
 	    		Index now = Index.directory();
 	    		
-	    		Resolution resolution = Index.compare(startUp, now);
+	    		Resolution resolution = Resolution.compare(startUp, now);
 	    		System.out.println(resolution);
 	    		
 	        	now.write();

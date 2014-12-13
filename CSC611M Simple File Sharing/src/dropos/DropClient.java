@@ -29,7 +29,6 @@ public class DropClient {
 	private Socket clientSocket;
 	private DropOSProtocol protocol;
 	
-	private DropClientWindow window;
 	public static boolean RUNNING = true;
 
 	public DropClient() {
@@ -43,7 +42,7 @@ public class DropClient {
 		Index index = Index.directory();
 		System.out.println(index.toString());
 		
-		window = new DropClientWindow();
+		DropClientWindow window = new DropClientWindow();
 	}
 
 	/**
@@ -119,7 +118,7 @@ public class DropClient {
 		BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 		long lastModified = attributes.lastModifiedTime().toMillis();
 		
-		Index directory = Index.directory();
+		Index directory = Index.getInstance();
 		directory.put(filename, lastModified);
 	}
 
