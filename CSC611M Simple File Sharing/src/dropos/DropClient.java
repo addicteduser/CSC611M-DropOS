@@ -22,7 +22,9 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import message.DropOSProtocol;
+import message.FileAndMessage;
 import message.IndexListPacketHeader;
+import message.Message;
 import dropos.event.SynchronizationEvent;
 import dropos.ui.DropClientWindow;
 
@@ -89,12 +91,15 @@ public class DropClient {
 			System.out.println("[Client] Server index packet header received.");
 			
 			// Receive the file once you have the packet header
-			File serverIndex = phServerIndex.receiveFile(protocol);
+			FileAndMessage message = (FileAndMessage)phServerIndex.interpret(protocol);
 			
 			System.out.println("[Client] Server index list received.");
 
-			// TODO: perform resolution here
-
+			
+			
+			/**
+			 * compare has the results of the offline changes. 
+			 */
 			for (String filename : compare.keySet()) {
 				String action = compare.get(filename);
 
@@ -116,10 +121,14 @@ public class DropClient {
 				}
 
 			}
-
+			
+			// TODO: perform resolution here; use 'interpret'
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		
 	}
 
 	/**

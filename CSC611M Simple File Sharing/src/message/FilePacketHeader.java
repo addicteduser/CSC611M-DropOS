@@ -30,7 +30,7 @@ public class FilePacketHeader extends PacketHeader {
 	 * @return the file sent from the server
 	 * @throws IOException
 	 */
-	public File receiveFile(DropOSProtocol dropOSProtocol) throws IOException{
+	protected File receiveFile(DropOSProtocol dropOSProtocol) throws IOException{
 		return dropOSProtocol.receiveFile(filePath(), filesize);
 	}
 	
@@ -40,6 +40,14 @@ public class FilePacketHeader extends PacketHeader {
 	 */
 	protected String filePath(){
 		return Config.getPath() + "\\" + filename;
+	}
+
+	@Override
+	public Message interpret(DropOSProtocol protocol) throws IOException {
+		File file = receiveFile(protocol);
+		System.out.println("File was received.");
+		FileAndMessage fileAndMessage = new FileAndMessage("INDEX", file);
+		return fileAndMessage;
 	}
 
 }

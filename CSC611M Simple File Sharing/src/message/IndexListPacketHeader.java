@@ -51,4 +51,9 @@ public class IndexListPacketHeader extends FilePacketHeader {
 		return Config.getIpAddress() + ".txt";
 	}
 
+	
+	public Message interpret(DropOSProtocol protocol) throws IOException {
+		System.out.println("Now receiving index file...");
+		return super.interpret(protocol);
+	}
 }

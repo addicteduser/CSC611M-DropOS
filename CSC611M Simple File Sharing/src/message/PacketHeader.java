@@ -1,5 +1,6 @@
 package message;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import dropos.event.SynchronizationEvent;
@@ -40,6 +41,8 @@ public abstract class PacketHeader {
 	public byte[] getBytes() throws UnsupportedEncodingException {
 		return header.getBytes("UTF-8");
 	}
+	
+	public abstract Message interpret(DropOSProtocol protocol) throws IOException;
 
 	
 }
