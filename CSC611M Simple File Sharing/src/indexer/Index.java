@@ -147,8 +147,8 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	public static Index directory() {
 		if (preStartup == null)
 			preStartup = readMyIndex();
-		
-		return directory(Config.getPath().toFile());
+		instance = directory(Config.getPath().toFile());
+		return instance;
 	}
 	
 	public static Index getInstance(){
