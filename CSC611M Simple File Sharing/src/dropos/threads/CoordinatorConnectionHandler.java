@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
+import message.DropOSProtocol;
 import dropos.DropClient;
 import dropos.DropCoordinator;
-import dropos.DropServer;
-import message.DropOSProtocol;
 
 /**
  * <p>During initialization, a {@link CoordinatorConnectionHandler} is made to block at the queue which holds the pending {@link Socket} instances to be handled.
