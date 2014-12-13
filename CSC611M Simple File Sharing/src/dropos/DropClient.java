@@ -5,6 +5,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import indexer.Index;
+import indexer.Resolution;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,8 +43,12 @@ public class DropClient {
 
 		System.out.println("[Client] Producing an Index from the directory: " + Config.getPath().toString());
 		
-		Index index = Index.directory();
-		System.out.println(index.toString());
+		Index olderIndex = Index.startUp();
+		Index newerIndex = Index.directory();
+		
+		Resolution compare = Resolution.compare(olderIndex, newerIndex);
+		System.out.println("Here are the offline changes detected: " + compare);
+		
 		
 		new DropClientWindow();
 	}

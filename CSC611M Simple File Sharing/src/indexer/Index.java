@@ -167,6 +167,8 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 * @return
 	 */
 	public static Index startUp(){
+		if (preStartup == null)
+			preStartup = readMyIndex();
 		return preStartup;
 	}
 
