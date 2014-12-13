@@ -1,6 +1,7 @@
 package drivers;
 
 import indexer.Index;
+import indexer.Resolution;
 
 import java.io.IOException;
 
@@ -13,8 +14,15 @@ public class ClientDriver {
 		// When the application is exited properly (clicking the button to exit, or closing the window), the index is updated and written down.
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 	        public void run() {
-	        	Index index = Index.directory();
-	    		index.write();
+	        	Index startUp = Index.startUp();
+	    		Index now = Index.directory();
+	    		
+	    		Resolution resolution = Index.compare(startUp, now);
+	    		System.out.println(resolution);
+	    		
+	        	now.write();
+	    		
+	    		
 	        }
 	    }, "Shutdown-thread"));
 		

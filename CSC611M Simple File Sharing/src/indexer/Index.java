@@ -213,8 +213,8 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 *            The Index file of the client
 	 * @return A HashMap of files and their respective actions.
 	 */
-	public static FileAndAction compare(Index server, Index client) {
-		FileAndAction actions = new FileAndAction();
+	public static Resolution compare(Index server, Index client) {
+		Resolution actions = new Resolution();
 
 		for (FileAndLastModifiedPair pair : client) {
 			String file = pair.file;
