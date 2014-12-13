@@ -21,7 +21,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import message.DropOSProtocol;
 import message.IndexListPacketHeader;
-import message.PacketHeader;
 import dropos.event.SynchronizationEvent;
 import dropos.ui.DropClientWindow;
 

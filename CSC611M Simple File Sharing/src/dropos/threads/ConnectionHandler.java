@@ -1,11 +1,16 @@
 package dropos.threads;
 
+import indexer.Index;
+import indexer.Resolution;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
 import message.DropOSProtocol;
 import message.FilePacketHeader;
+import message.IndexListPacketHeader;
 import message.PacketHeader;
 import dropos.DropCoordinator;
 import dropos.DropServer;
@@ -52,7 +57,38 @@ public class ConnectionHandler extends Thread {
 	 * @throws IOException
 	 */
 	private void interpretHeader(PacketHeader headers) throws IOException {
-		if (headers instanceof FilePacketHeader)
-			((FilePacketHeader) headers).receiveFile(protocol);
+		// If an index file is being sent, receive it no matter what.
+		if (headers instanceof IndexListPacketHeader){
+			File clientIndexFile = ((IndexListPacketHeader) headers).receiveFile(protocol);
+			
+			// Respond by sending your own index
+			protocol.sendIndex();
+
+			// Parse the client's index
+			Index clientIndex = Index.read(clientIndexFile);
+			
+			// Get your own index
+			Index serverIndex = Index.getInstance();
+			
+			// Perform resolution afterwards
+			Resolution resolution = Resolution.compare(serverIndex, clientIndex);
+			
+			System.out.println("[Server] These were the following changes received:\n" + resolution);
+			
+		}
+
+		// If a file is being sent, verify if it is indeed valid 
+		if (headers instanceof FilePacketHeader){
+			if (isValid(headers)){
+				FilePacketHeader fileHeader = (FilePacketHeader) headers;
+				fileHeader.receiveFile(protocol);	
+			}
+		}	
+	}
+
+	// TODO This is supposed to check the server-side resolution if a file is indeed valid. If so, it should return true to accept the file.
+	private boolean isValid(PacketHeader headers) {
+		
+		return false;
 	}
 }
