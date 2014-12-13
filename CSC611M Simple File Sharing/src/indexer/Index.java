@@ -18,6 +18,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
 
+/**
+ * The {@link Index} holds a {@link HashMap} of file names and their date of last modification. 
+ * @author Kyle
+ *
+ */
 public class Index extends HashMap<String, Long> {
 
 	/**
@@ -204,6 +209,12 @@ public class Index extends HashMap<String, Long> {
 		return sb.toString();
 	}
 
+	/**
+	 * The {@link IndexComparator} is used to sort the {@link Index} by their date of last modification.
+	 * It is used in the toString() method. 
+	 * @author Darren
+	 *
+	 */
 	private class IndexComparator implements Comparator<FileAndLastModifiedPair> {
 		public int compare(FileAndLastModifiedPair a, FileAndLastModifiedPair b) {
 			if (a.dateModified < b.dateModified)
@@ -214,7 +225,12 @@ public class Index extends HashMap<String, Long> {
 		}
 
 	}
-
+	
+	/**
+	 * The {@link FileAndLastModifiedPair} is a data structure used to sort the {@link Index} by their date of last modification.
+	 * @author Darren
+	 *
+	 */
 	private class FileAndLastModifiedPair {
 		String file;
 		Long dateModified;
