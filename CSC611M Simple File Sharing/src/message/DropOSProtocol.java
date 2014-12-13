@@ -198,4 +198,8 @@ public class DropOSProtocol {
 	public String getIPAddress() {
 		return ipAddress;
 	}
+
+	public boolean isFinished() {
+		return socket.isClosed();
+	}
 }

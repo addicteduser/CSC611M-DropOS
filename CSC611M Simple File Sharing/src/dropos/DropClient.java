@@ -27,8 +27,6 @@ import dropos.ui.DropClientWindow;
 public class DropClient {
 	private DropOSProtocol protocol;
 
-	private DropOSProtocol dropOSProtocol;
-
 	/**
 	 * This method is set to false from the GUI, which allows this thread to terminate.
 	 */
@@ -40,7 +38,7 @@ public class DropClient {
 		System.out.println("[Client] Connecting to the server...\n");
 		// Create a connection with the server
 		try {
-			dropOSProtocol = new DropOSProtocol();
+			protocol = new DropOSProtocol();
 		} catch (IOException e) {
 			System.err.println("Cannot create connection to server.");
 		}
@@ -69,14 +67,18 @@ public class DropClient {
 	private void handleResolution(Resolution compare) {
 		try {
 			// Send your index file
-			dropOSProtocol.sendIndex();
-
+			protocol.sendIndex();
+			
+			while(protocol.isFinished() == false);
+			
+			protocol = new DropOSProtocol();
+			
 			// Wait for a response (header... and later a file);
 			// Note that we expect the server to respond with an index list as well.
-			IndexListPacketHeader phServerIndex = (IndexListPacketHeader) dropOSProtocol.receiveHeader();
+			IndexListPacketHeader phServerIndex = (IndexListPacketHeader) protocol.receiveHeader();
 
 			// Receive the file once you have the packet header
-			File serverIndex = phServerIndex.receiveFile(dropOSProtocol);
+			File serverIndex = phServerIndex.receiveFile(protocol);
 
 			// TODO: perform resolution here
 
