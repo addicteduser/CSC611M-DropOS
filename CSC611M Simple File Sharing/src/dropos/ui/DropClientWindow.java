@@ -1,16 +1,11 @@
 package dropos.ui;
 
-import indexer.Index;
-
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import dropos.DropClient;
 
@@ -26,13 +21,7 @@ public class DropClientWindow extends JFrame {
 		super("DropClient");
 		setLayout(new FlowLayout(FlowLayout.CENTER, 4, 4));
 		
-		JButton btnExit = new JButton("Exit and index directory");
-		btnExit.setFocusable(false);
-		btnExit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				exitApplicationProperly();
-			}
-		});
+		JLabel lblExit = new JLabel("Exit this window to stop the system.");
 		
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -44,7 +33,7 @@ public class DropClientWindow extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(250, 75);
 		setLocationRelativeTo(null);
-		add(btnExit);
+		add(lblExit);
 		setVisible(true);
 	}
 	

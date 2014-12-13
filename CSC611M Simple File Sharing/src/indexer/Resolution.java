@@ -29,6 +29,14 @@ public class Resolution extends HashMap<String, String>{
 		return sb.toString();
 	}
 	
+	public int countChanges(){
+		int changes = 0;
+		for (String file : keySet()){
+			if (get(file).equalsIgnoreCase("NONE") == false)
+				changes++;
+		}
+		return changes;
+	}
 
 	/**
 	 * <p>

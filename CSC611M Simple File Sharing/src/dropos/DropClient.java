@@ -34,20 +34,24 @@ public class DropClient {
 	public static boolean RUNNING = true;
 
 	public DropClient() {
-		System.out.println("[Client] Initializing the client...");
+		System.out.println("[Client] Initializing the client.\n");
 
-		System.out.println("[Client] Producing an Index from the directory: " + Config.getPath().toString());
+		System.out.println("[Client] Producing index list from directory:");
+		System.out.println("         " + Config.getPath().toString() +"\n");
 
 		Index olderIndex = Index.startUp();
 		Index newerIndex = Index.directory();
 
 		Resolution compare = Resolution.compare(olderIndex, newerIndex);
-		System.out.println("[Client] Here are the offline changes detected: " + compare);
 
-		if (compare.size() > 0) {
+		if (compare.countChanges() > 0) {
+			System.out.println("[Client] Here are the offline changes detected: " + compare);
 			System.out.println("About to update server regarding offline changes...");
 			handleResolution(compare);
+		}else{
+			System.out.println("[Client] There were no offline changes detected.");
 		}
+		System.out.println();
 
 		new DropClientWindow();
 	}
@@ -106,7 +110,7 @@ public class DropClient {
 		System.out.println(e);
 		try {
 
-			System.out.println("[Client] New event. I am now connecting to the server...");
+			System.out.println("[Client] New event. Connecting to the server...");
 
 			protocol = new DropOSProtocol();
 
@@ -198,7 +202,7 @@ public class DropClient {
 			ioe.printStackTrace();
 		}
 
-		System.out.println("[Client] Watching path: " + clientPath);
+		System.out.println("[Client] Now watching the directory for changes.");
 
 		// We obtain the file system of the Path
 		FileSystem fs = clientPath.getFileSystem();

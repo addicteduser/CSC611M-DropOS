@@ -18,8 +18,10 @@ public class ClientDriver {
 	    		Index now = Index.directory();
 	    		
 	    		Resolution resolution = Resolution.compare(startUp, now);
-	    		System.out.println(resolution);
-	    		
+	    		if (resolution.countChanges() > 0)
+	    			System.out.println(resolution);
+	    		else
+	    			System.out.println("[Client] There were no changes on the directory.");
 	        	now.write();
 	    		
 	    		
