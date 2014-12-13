@@ -29,6 +29,9 @@ public class DropClient {
 	private Socket clientSocket;
 	private DropOSProtocol protocol;
 	
+	/**
+	 * This method is set to false from the GUI, which allows this thread to terminate.
+	 */
 	public static boolean RUNNING = true;
 
 	public DropClient() {
@@ -42,7 +45,7 @@ public class DropClient {
 		Index index = Index.directory();
 		System.out.println(index.toString());
 		
-		DropClientWindow window = new DropClientWindow();
+		new DropClientWindow();
 	}
 
 	/**
