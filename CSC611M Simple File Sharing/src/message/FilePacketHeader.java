@@ -28,8 +28,15 @@ public class FilePacketHeader extends PacketHeader {
 	 * @throws IOException
 	 */
 	public File receiveFile(DropOSProtocol dropOSProtocol) throws IOException{
-		String filePath = Config.getPath() + "\\" + filename;
-		return dropOSProtocol.receiveFile(filePath, filesize);
+		return dropOSProtocol.receiveFile(filePath(), filesize);
+	}
+	
+	/**
+	 * All files are stored in the logically synchronized folder.
+	 * @return
+	 */
+	protected String filePath(){
+		return Config.getPath() + "\\" + filename;
 	}
 
 }

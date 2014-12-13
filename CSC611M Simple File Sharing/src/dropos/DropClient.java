@@ -67,9 +67,8 @@ public class DropClient {
 			IndexListPacketHeader phServerIndex = (IndexListPacketHeader)dropOSProtocol.receiveHeader();
 			
 			// Receive the file once you have the packet header
-			File serverIndex = phServerIndex.receiveIndex(dropOSProtocol);
+			File serverIndex = phServerIndex.receiveFile(dropOSProtocol);
 
-			
 			// TODO: perform resolution here
 			
 			for (String filename : compare.keySet()) {

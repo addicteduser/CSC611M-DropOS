@@ -5,14 +5,16 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
 import message.DropOSProtocol;
-import dropos.DropClient;
+import message.FilePacketHeader;
+import message.PacketHeader;
 import dropos.DropCoordinator;
+import dropos.DropServer;
 
 /**
- * <p>During initialization, a {@link CoordinatorConnectionHandler} is made to block at the queue which holds the pending {@link Socket} instances to be handled.
- * Once a new instance is available, the {@link Socket} is received and is then handled.</p>
+ * During initialization, a {@link ConnectionHandler} is made to block at the queue which holds the pending {@link Socket} instances to be handled.
+ * Once a new instance is available, the {@link Socket} is received and is then handled.
  * 
- * <p><b>Note:</b> This class is meant to handle connections from a {@link DropClient} to a {@link DropCoordinator}. 
+ * <p><b>Note:</b> This class is meant to handle connections from a {@link DropCoordinator} to a {@link DropServer}. 
  *
  */
 public class CoordinatorConnectionHandler extends Thread {
@@ -33,9 +35,9 @@ public class CoordinatorConnectionHandler extends Thread {
 				this.connectionSocket = queue.take();
 				protocol = new DropOSProtocol(connectionSocket);
 
-				System.out.println("Coordinator has accepted connection from client [" + protocol.getIPAddress() + "]");
+				System.out.println("Server has accepted connection from coordinator [" + protocol.getIPAddress() + "]");
 
-				String headers = protocol.receiveHeader();
+				PacketHeader headers = protocol.receiveHeader();
 				interpretHeader(headers);
 
 			} catch (Exception e) {
@@ -46,50 +48,11 @@ public class CoordinatorConnectionHandler extends Thread {
 	
 	/**
 	 * <p>This method interprets the <b>packet headers</b> or the <b>message</b> so that the appropriate actions can be performed.</p>
-	 * @param header
+	 * @param headers
 	 * @throws IOException
 	 */
-	private void interpretHeader(String header) throws IOException {
-		String command = header.split(" ")[0];
-		String params = header.substring(command.length() + 1).trim();
-
-		switch (command) {
-		case "INDEX":
-			receiveIndexFile(params);
-			break;
-		case "UPDATE":
-			addFile(params);
-			break;
-
-		case "MODIFY":
-			modifyFile(params);
-			break;
-
-		case "DELETE":
-			deleteFile(params);
-			break;
-		}
-	}
-
-	private void receiveIndexFile(String params) throws IOException {
-		String fileSize = params.split(" ")[0];
-		String fileName = connectionSocket.getLocalAddress().toString().substring(1) + ".txt";
-		long size = Long.valueOf(fileSize);
-		protocol.receiveFile(fileName, size);
-	}
-
-	private void modifyFile(String params) {
-
-	}
-
-	private void deleteFile(String params) {
-		// deleteIfExists(Path of the file)
-	}
-
-	private void addFile(String params) throws IOException {
-		String fileSize = params.split(" ")[0];
-		String fileName = params.substring(fileSize.length() + 1).trim();
-		long size = Long.valueOf(fileSize);
-		protocol.receiveFile(fileName, size);
+	private void interpretHeader(PacketHeader headers) throws IOException {
+		if (headers instanceof FilePacketHeader)
+			((FilePacketHeader) headers).receiveFile(protocol);
 	}
 }

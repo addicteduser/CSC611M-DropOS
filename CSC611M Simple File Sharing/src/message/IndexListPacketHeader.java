@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import dropos.Config;
 
-public class IndexListPacketHeader extends PacketHeader {
+public class IndexListPacketHeader extends FilePacketHeader {
 
 	long filesize = 0;
 	/**
@@ -35,13 +35,12 @@ public class IndexListPacketHeader extends PacketHeader {
 		// Append filesize of index list
 		header += filesize;
 	}
-
-	public File receiveIndex(DropOSProtocol dropOSProtocol) throws IOException{
-		// Label the server's Index file with its IP address
-		// e.g. '192.168.10.1.txt'
-		
-		String filename = Config.getIpAddress() + ".txt";
-		return dropOSProtocol.receiveFile(filename, filesize);
+	
+	/**
+	 * The index of the server is labeled with the server's IP, and is not stored in the logically synchronized folder.
+	 */
+	protected String filePath() {
+		return Config.getIpAddress() + ".txt";
 	}
 
 }
