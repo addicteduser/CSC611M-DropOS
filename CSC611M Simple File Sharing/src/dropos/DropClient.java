@@ -10,18 +10,16 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
 import message.DropOSProtocol;
 import dropos.event.SynchronizationEvent;
 
-public class DropClient extends Thread {
+public class DropClient {
 	private int port;
 	private String hostname;
 	private Socket clientSocket;
@@ -31,7 +29,7 @@ public class DropClient extends Thread {
 		hostname = Config.getIpAddress();
 		port = Config.getPort();
 
-		System.out.println("[SYSTEM] Created new CLIENT instance");
+		System.out.println("[Client] Initializing the client...");
 
 	}
 
