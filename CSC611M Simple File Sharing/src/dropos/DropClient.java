@@ -28,16 +28,26 @@ import dropos.ui.DropClientWindow;
 public class DropClient {
 	private DropOSProtocol protocol;
 
+	private DropOSProtocol dropOSProtocol;
+
 	/**
 	 * This method is set to false from the GUI, which allows this thread to terminate.
 	 */
 	public static boolean RUNNING = true;
 
 	public DropClient() {
-		System.out.println("[Client] Initializing the client.\n");
+		System.out.println("[Client] Initializing the client.");
+
+		System.out.println("[Client] Connecting to the server...\n");
+		// Create a connection with the server
+		try {
+			dropOSProtocol = new DropOSProtocol();
+		} catch (IOException e) {
+			System.err.println("Cannot create connection to server.");
+		}
 
 		System.out.println("[Client] Producing index list from directory:");
-		System.out.println("         " + Config.getPath().toString() +"\n");
+		System.out.println("         " + Config.getPath().toString() + "\n");
 
 		Index olderIndex = Index.startUp();
 		Index newerIndex = Index.directory();
@@ -48,33 +58,29 @@ public class DropClient {
 			System.out.println("[Client] Here are the offline changes detected: " + compare);
 			System.out.println("About to update server regarding offline changes...");
 			handleResolution(compare);
-		}else{
+		} else {
 			System.out.println("[Client] There were no offline changes detected.");
 		}
 		System.out.println();
 
 		new DropClientWindow();
+
 	}
 
 	private void handleResolution(Resolution compare) {
-		DropOSProtocol dropOSProtocol;
 		try {
-
-			// Create a connection with the server
-			dropOSProtocol = new DropOSProtocol();
-			
 			// Send your index file
 			dropOSProtocol.sendIndex();
-			
+
 			// Wait for a response (header... and later a file);
 			// Note that we expect the server to respond with an index list as well.
-			IndexListPacketHeader phServerIndex = (IndexListPacketHeader)dropOSProtocol.receiveHeader();
-			
+			IndexListPacketHeader phServerIndex = (IndexListPacketHeader) dropOSProtocol.receiveHeader();
+
 			// Receive the file once you have the packet header
 			File serverIndex = phServerIndex.receiveFile(dropOSProtocol);
 
 			// TODO: perform resolution here
-			
+
 			for (String filename : compare.keySet()) {
 				String action = compare.get(filename);
 
