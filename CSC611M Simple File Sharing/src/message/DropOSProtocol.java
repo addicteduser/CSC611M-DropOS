@@ -152,6 +152,7 @@ public class DropOSProtocol {
 		bufferedOutputStream.flush();
 		bufferedOutputStream.close();
 
+		socket.close();
 		return file;
 	}
 
