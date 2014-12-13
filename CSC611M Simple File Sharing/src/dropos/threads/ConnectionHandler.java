@@ -12,6 +12,7 @@ import message.DropOSProtocol;
 import message.FilePacketHeader;
 import message.IndexListPacketHeader;
 import message.PacketHeader;
+import dropos.Config;
 import dropos.DropCoordinator;
 import dropos.DropServer;
 
@@ -61,6 +62,8 @@ public class ConnectionHandler extends Thread {
 		// If an index file is being sent, receive it no matter what.
 		if (headers instanceof IndexListPacketHeader){
 			File clientIndexFile = ((IndexListPacketHeader) headers).receiveFile(protocol);
+			
+			protocol = new DropOSProtocol(new Socket(protocol.getIPAddress(), Config.getPort()));
 			
 			// Respond by sending your own index
 			protocol.sendIndex();
