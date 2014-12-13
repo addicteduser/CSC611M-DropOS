@@ -16,9 +16,9 @@ public class Config {
 			Scanner s = new Scanner(f);
 			
 			while (s.hasNextLine()){
-				String currentLine = s.nextLine().trim().toUpperCase();
+				String currentLine = s.nextLine().trim();
 				String[] pair = currentLine.split("=");
-				String var = pair[0].trim();
+				String var = pair[0].trim().toUpperCase();
 				String value = pair[1].trim();
 				switch(var){
 				case "PATH": 

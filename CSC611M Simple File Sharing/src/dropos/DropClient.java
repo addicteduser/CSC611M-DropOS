@@ -4,33 +4,46 @@ import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import indexer.Index;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
 import message.DropOSProtocol;
 import dropos.event.SynchronizationEvent;
+import dropos.ui.DropClientWindow;
 
 public class DropClient {
 	private int port;
 	private String hostname;
 	private Socket clientSocket;
 	private DropOSProtocol protocol;
+	
+	private DropClientWindow window;
+	public static boolean RUNNING = true;
 
 	public DropClient() {
+		System.out.println("[Client] Initializing the client...");
+		
 		hostname = Config.getIpAddress();
 		port = Config.getPort();
 
-		System.out.println("[Client] Initializing the client...");
-
+		System.out.println("[Client] Producing an Index from the directory: " + Config.getPath().toString());
+		
+		Index index = Index.directory();
+		System.out.println(index.toString());
+		
+		window = new DropClientWindow();
 	}
 
 	/**
@@ -42,7 +55,7 @@ public class DropClient {
 		System.out.println(e);
 		try {
 			clientSocket = new Socket(hostname, port);
-			System.out.println("[CLIENT] New event. I am now connecting to ["
+			System.out.println("[Client] New event. I am now connecting to ["
 					+ hostname + "] on port [" + port + "]");
 
 			protocol = new DropOSProtocol(clientSocket);
@@ -96,8 +109,18 @@ public class DropClient {
 	 * @throws IOException
 	 */
 	private void addFile(SynchronizationEvent e) throws IOException {
-		File f = new File(Config.getPath() + "\\" + e.getFile().toString());
+		Path path = Config.getPath();
+		String filename = e.getFile().toString();
+		
+		File f = new File(path + "\\" + filename);
 		protocol.sendHeaderAndFile(e, f);
+		
+		// Get attributes
+		BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+		long lastModified = attributes.lastModifiedTime().toMillis();
+		
+		Index directory = Index.directory();
+		directory.put(filename, lastModified);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -118,7 +141,7 @@ public class DropClient {
 			ioe.printStackTrace();
 		}
 
-		System.out.println("[CLIENT] Watching path: " + clientPath);
+		System.out.println("[Client] Watching path: " + clientPath);
 
 		// We obtain the file system of the Path
 		FileSystem fs = clientPath.getFileSystem();
@@ -133,7 +156,7 @@ public class DropClient {
 
 			// Start the infinite polling loop
 			WatchKey key = null;
-			while (true) {
+			while (RUNNING) {
 				key = service.take();
 
 				// Dequeueing events
