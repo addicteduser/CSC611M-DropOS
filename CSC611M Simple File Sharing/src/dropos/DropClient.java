@@ -68,9 +68,11 @@ public class DropClient {
 		try {
 			// Send your index file
 			protocol.sendIndex();
-			
 			while(protocol.isFinished() == false);
-			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
 			protocol = new DropOSProtocol();
 			
 			// Wait for a response (header... and later a file);
@@ -103,6 +105,7 @@ public class DropClient {
 				}
 
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
