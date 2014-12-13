@@ -54,7 +54,10 @@ public class CoordinatorConnectionHandler extends Thread {
 		String params = header.substring(command.length() + 1).trim();
 
 		switch (command) {
-		case "ADD":
+		case "INDEX":
+			receiveIndexFile(params);
+			break;
+		case "UPDATE":
 			addFile(params);
 			break;
 
@@ -66,6 +69,13 @@ public class CoordinatorConnectionHandler extends Thread {
 			deleteFile(params);
 			break;
 		}
+	}
+
+	private void receiveIndexFile(String params) throws IOException {
+		String fileSize = params.split(" ")[0];
+		String fileName = connectionSocket.getLocalAddress().toString().substring(1) + ".txt";
+		long size = Long.valueOf(fileSize);
+		protocol.receiveFile(fileName, size);
 	}
 
 	private void modifyFile(String params) {
