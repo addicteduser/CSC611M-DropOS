@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 
+import message.IndexListPacketHeader;
 import dropos.Config;
 
 /**
@@ -30,7 +31,7 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	public enum FileDifference {
 		SAME, MISSING, OUTDATED, UPDATED
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -38,12 +39,12 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 
 	private static Index instance;
 	private static Index preStartup;
-	
+
 	private StringBuilder sb;
 	private int toStringCount = -1;
 
 	private File[] directoryFilePaths;
-	
+
 	public Index() {
 
 	}
@@ -74,7 +75,7 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 				attributes = Files.readAttributes(filePath.toPath(), BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 				String filename = filePath.getName();
 				long lastModified = attributes.lastModifiedTime().toMillis();
-				
+
 				put(filename, lastModified);
 			}
 		}
@@ -150,23 +151,30 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 		instance = directory(Config.getPath().toFile());
 		return instance;
 	}
-	
-	public static Index getInstance(){
+
+	public static Index getInstance() {
 		if (instance == null)
 			instance = directory(Config.getPath().toFile());
 		return instance;
 	}
-	
+
 	/**
-	 * <p>This method returns the {@link Index} when the program was started.</p>
+	 * <p>
+	 * This method returns the {@link Index} when the program was started.
+	 * </p>
 	 * 
-	 * <p>At the start of the program before the {@link Index} directory is updated, the system first retrieves the old {@link Index} by parsing the available <i>indexlist.txt</i> prior to running.
-	 * The values of the old <i>indexlist.txt</i> is returned by this function.</p>
+	 * <p>
+	 * At the start of the program before the {@link Index} directory is updated, the system first retrieves the old {@link Index} by parsing the available
+	 * <i>indexlist.txt</i> prior to running. The values of the old <i>indexlist.txt</i> is returned by this function.
+	 * </p>
 	 * 
-	 * <p>This Index will usually be used to compare the pre-Index (this one) and the post-Index (after changes to the directory have been made).</p>
+	 * <p>
+	 * This Index will usually be used to compare the pre-Index (this one) and the post-Index (after changes to the directory have been made).
+	 * </p>
+	 * 
 	 * @return
 	 */
-	public static Index startUp(){
+	public static Index startUp() {
 		if (preStartup == null)
 			preStartup = readMyIndex();
 		return preStartup;
@@ -201,10 +209,10 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 
 		while ((indexLine = br.readLine()) != null) {
 			String[] i = indexLine.split(":");
-			
+
 			String filename = i[0];
 			Long lastModified = Long.parseLong(i[1]);
-			
+
 			index.put(filename, lastModified);
 		}
 		br.close();
@@ -212,23 +220,29 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 		return index;
 	}
 
-
 	/**
-	 * <p>Read this function as <b> the index calling this method has a/n _____ file </b>.</p>
+	 * <p>
+	 * Read this function as <b> the index calling this method has a/n _____ file </b>.
+	 * </p>
 	 * 
-	 * <p>e.g. <i>This index has an updated file.</i></p> 
-	 * @param pair the file pair to be inspected
+	 * <p>
+	 * e.g. <i>This index has an updated file.</i>
+	 * </p>
+	 * 
+	 * @param pair
+	 *            the file pair to be inspected
 	 * @return FileDifference values of either 'same', 'outdated', 'updated', or 'missing'
 	 */
 	public FileDifference containsPair(FileAndLastModifiedPair pair) {
-		for (FileAndLastModifiedPair currentPair : this){
-			
-			if (currentPair.exactlyEquals(pair)) return FileDifference.SAME;
-			
-			if (currentPair.equals(pair)){
+		for (FileAndLastModifiedPair currentPair : this) {
+
+			if (currentPair.exactlyEquals(pair))
+				return FileDifference.SAME;
+
+			if (currentPair.equals(pair)) {
 				if (currentPair.lastModified < pair.lastModified)
 					return FileDifference.OUTDATED;
-				
+
 				if (currentPair.lastModified > pair.lastModified)
 					return FileDifference.UPDATED;
 			}
@@ -289,7 +303,21 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 		FileAndLastModifiedPair pair = new FileAndLastModifiedPair(filename, lastModified);
 		add(pair);
 	}
-
 	
+	public File getFile(){
+		return new File("indexlist.txt");
+	}
+
+	/**
+	 * <p>This method returns the packet header for sending the index list over the network.</p>
+	 * <p>The format is: <i>INDEX filesize</i></p>
+	 * <p>e.g. INDEX 5294</p>
+	 * 
+	 * 
+	 * @return byte array which contains the packet header
+	 */
+	public IndexListPacketHeader getPacketHeader() {
+		return new IndexListPacketHeader();
+	}
 
 }
