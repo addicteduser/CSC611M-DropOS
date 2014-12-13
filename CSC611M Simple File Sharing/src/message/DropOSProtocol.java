@@ -175,14 +175,7 @@ public class DropOSProtocol {
 		
 		byte[] size = new byte[4];
 		
-		// Keep receiving the initial byte content until you finish reading four bytes.
-		int initialBytesRead = 0;
-		do{
-			bytesRead = bufferedInputStream.read(size, 0, 4);
-			if (bytesRead >= 0)
-				initialBytesRead += bytesRead;
-		}while(initialBytesRead < 4);
-		
+		bytesRead = bufferedInputStream.read(size, 0, 4);
 		
 		// Determine N; how many bytes is the packet header?
 		int length = byteArrayToInt(size);
