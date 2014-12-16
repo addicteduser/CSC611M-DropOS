@@ -93,6 +93,10 @@ public class DropClient {
 			// Receive the file once you have the packet header
 			FileAndMessage message = (FileAndMessage)phServerIndex.interpret(protocol);
 			
+			message.getFile();
+			
+			
+			
 			System.out.println("[Client] Server index list received.");
 
 			
