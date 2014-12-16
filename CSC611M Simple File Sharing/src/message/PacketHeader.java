@@ -3,6 +3,7 @@ package message;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import message.DropOSProtocol.HostType;
 import dropos.event.SynchronizationEvent;
 
 public abstract class PacketHeader {
@@ -26,7 +27,10 @@ public abstract class PacketHeader {
 		
 		switch(command){
 		case "INDEX":
-			result = new IndexListPacketHeader(header);
+			if (DropOSProtocol.type == HostType.Server)
+				result = new ServerIndexListPacketHeader(header);
+			else
+				result = new IndexListPacketHeader(header);
 			break;
 		case "REQUEST":
 			break;

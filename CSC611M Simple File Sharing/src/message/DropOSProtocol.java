@@ -21,6 +21,10 @@ import dropos.Config;
 import dropos.event.SynchronizationEvent;
 
 public class DropOSProtocol {
+	public enum HostType {
+		Client, Coordinator, Server
+	}
+	public static HostType type;
 	private String ipAddress;
 	private Socket socket;
 
