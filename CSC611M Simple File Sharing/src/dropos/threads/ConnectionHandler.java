@@ -40,8 +40,11 @@ public class ConnectionHandler extends Thread {
 
 				this.connectionSocket = queue.take();
 				protocol = new DropOSProtocol(connectionSocket);
+				
+				// Wait for client connections
 
-				System.out.println("Server has accepted connection from coordinator [" + protocol.getIPAddress() + "]");
+				System.out.println("[SERVER] Accepted connection from client [" + protocol.getIPAddress() + "]");
+				//System.out.println("Server has accepted connection from coordinator [" + protocol.getIPAddress() + "]");
 
 				PacketHeader headers = protocol.receiveHeader();
 				Message msg = headers.interpret(protocol);
@@ -78,10 +81,10 @@ public class ConnectionHandler extends Thread {
 	 * @throws IOException
 	 */
 	private void respondWithIndex(FileAndMessage msg) throws UnknownHostException, IOException {
-		System.out.println("[Server] A new socket connection is being made...");
+		System.out.println("[SERVER] A new socket connection is being made...");
 		protocol = new DropOSProtocol(new Socket(protocol.getIPAddress(), Config.getPort()));
 		
-		System.out.println("[Server] Sending the server's index list.");
+		System.out.println("[SERVER] Sending the server's index list.");
 		// Respond by sending your own index
 		protocol.sendIndex();
 
