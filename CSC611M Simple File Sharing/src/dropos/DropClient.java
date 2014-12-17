@@ -271,7 +271,7 @@ public class DropClient {
 						continue;
 					System.out.println("KIND: " + kind.toString());
 					// Fire the event
-					//eventPerformed(directoryEvent);
+					eventPerformed(directoryEvent);
 
 				}
 
