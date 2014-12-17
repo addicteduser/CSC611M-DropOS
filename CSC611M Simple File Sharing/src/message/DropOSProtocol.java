@@ -90,8 +90,8 @@ public class DropOSProtocol {
 		Path path = Config.getPath();
 		File f = new File(path + "\\" + filename);
 		System.out.println("REQUESTED FILE: " + f.toPath());
-		
-		sendFile(PacketHeader.create(msg.message), f);
+		long filesize = Files.size(f.toPath());
+		sendFile(PacketHeader.create(msg.message + " " + filesize), f);
 		//RequestPacketHeader packetHeader = new RequestPacketHeader(msg.message);
 	}
 	
