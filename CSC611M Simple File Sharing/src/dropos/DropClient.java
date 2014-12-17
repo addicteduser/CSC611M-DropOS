@@ -208,16 +208,20 @@ public class DropClient {
 		Path path = Config.getPath();
 		String filename = e.getFile().toString();
 
-		File f = new File(path + "\\" + filename);
-		System.out.println("FILE: " + f.toPath());
-		protocol.performSynchronization(e, f);
-
 		// Get attributes
 		BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 		long lastModified = attributes.lastModifiedTime().toMillis();
 
 		Index directory = Index.getInstance();
 		directory.put(filename, lastModified);
+		
+		File f = new File(path + "\\" + filename);
+		System.out.println("FILE: " + f.toPath());
+		try {
+			protocol.performSynchronization(e, f);
+		} catch(IOException ex) {
+			System.out.println("[CLIENT] The server received the file.");
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -265,9 +269,9 @@ public class DropClient {
 
 					if (kind.toString().equalsIgnoreCase("modify"))
 						continue;
-
+					System.out.println("KIND: " + kind.toString());
 					// Fire the event
-					eventPerformed(directoryEvent);
+					//eventPerformed(directoryEvent);
 
 				}
 
