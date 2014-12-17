@@ -310,7 +310,11 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	}
 
 	public File getFile() throws IOException{
-		return new File("indexlist.txt");
+		File f = new File("indexlist.txt");
+		// create indexlist.txt if it does not exist
+		if (!f.exists())
+			Files.createFile(f.toPath());
+		return f;
 	}
 
 	/**

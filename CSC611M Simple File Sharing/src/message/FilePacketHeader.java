@@ -46,8 +46,7 @@ public class FilePacketHeader extends PacketHeader {
 	public Message interpret(DropOSProtocol protocol) throws IOException {
 		File file = receiveFile(protocol);
 		System.out.println("File was received.");
-		FileAndMessage fileAndMessage = new FileAndMessage("INDEX", file);
-		return fileAndMessage;
+		return new FileAndMessage("UPDATE " + filename, file);
 	}
 
 }
