@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import message.DropOSProtocol.HostType;
 import dropos.Config;
 
 public class IndexListPacketHeader extends FilePacketHeader {
