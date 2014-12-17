@@ -173,7 +173,15 @@ public class DropClient {
 	 *            this contains details of the file to be requested
 	 */
 	private void requestFile(SynchronizationEvent e) {
-
+		//Path path = Config.getPath();
+		//String filename = e.getFile().toString();
+		//File f = new File(path + "\\" + filename);
+		System.out.println("REQUEST FILE: " + e.getFile().toFile());
+		try {
+			protocol.performSynchronization(e, e.getFile().toFile());
+		} catch(IOException ex) {
+			System.out.println("HELLO WORLD");
+		}
 	}
 
 	/**
@@ -216,7 +224,7 @@ public class DropClient {
 		directory.put(filename, lastModified);
 		
 		File f = new File(path + "\\" + filename);
-		System.out.println("FILE: " + f.toPath());
+		System.out.println("UPDATE FILE: " + f.toPath());
 		try {
 			protocol.performSynchronization(e, f);
 		} catch(IOException ex) {

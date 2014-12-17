@@ -75,7 +75,7 @@ public class SynchronizationEvent {
 			case DELETE:
 				return "DELETE " + file;
 			case REQUEST:
-				return "REQUEST " + file;
+				return "REQUEST " + file.getFileName();
 			}
 		} catch (IOException e) {
 			System.err.println("UnknownSynchronizatioEventException!");
