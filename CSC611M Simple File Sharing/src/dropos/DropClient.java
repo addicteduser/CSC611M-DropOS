@@ -38,10 +38,10 @@ public class DropClient {
 	public static boolean RUNNING = true;
 
 	public DropClient() throws IOException {
-		System.out.println("[Client] Initializing the client.");
+		System.out.println("[CLIENT] Initializing the client.");
 		serverSocket = new ServerSocket(Config.getPort());
 		
-		System.out.println("[Client] Connecting to the server...\n");
+		System.out.println("[CLIENT] Connecting to the server...\n");
 		// Create a connection with the server
 		try {
 			protocol = new DropOSProtocol();
@@ -49,7 +49,7 @@ public class DropClient {
 			System.err.println("Cannot create connection to server.");
 		}
 
-		System.out.println("[Client] Producing index list from directory:");
+		System.out.println("[CLIENT] Producing index list from directory:");
 		System.out.println("         " + Config.getPath().toString() + "\n");
 
 		Index olderIndex = Index.startUp();
@@ -58,8 +58,8 @@ public class DropClient {
 		Resolution compare = Resolution.compare(olderIndex, newerIndex);
 
 		if (compare.countChanges() > 0) {
-			System.out.println("[Client] Here are the offline changes detected: " + compare);
-			System.out.println("About to update server regarding offline changes...");
+			System.out.println("[CLIENT] Here are the offline changes detected: " + compare);
+			System.out.println("[CLIENT] About to update server regarding offline changes...");
 			handleResolution(compare);
 		} else {
 			System.out.println("[Client] There were no offline changes detected.");
@@ -72,15 +72,15 @@ public class DropClient {
 
 	private void handleResolution(Resolution compare) {
 		try {
-			System.out.println("[Client] Sending the server my own index list.");
+			System.out.println("[CLIENT] Sending the server my own index list.");
 			protocol.sendIndex();
 		} catch (Exception e) {
-			System.out.println("[Client] Finished sending the index list.\n");
+			System.out.println("[CLIENT] Finished sending the index list.\n");
 		}
 		
 		
 		try {
-			System.out.println("[Client] Now waiting for server to connect and send Server index list.");
+			System.out.println("[CLIENT] Now waiting for server to connect and send Server index list.");
 			Socket connectionSocket = serverSocket.accept();
 			protocol = new DropOSProtocol(connectionSocket);
 			
@@ -88,7 +88,7 @@ public class DropClient {
 			// Note that we expect the server to respond with an index list as well.
 			IndexListPacketHeader phServerIndex = (IndexListPacketHeader) protocol.receiveHeader();
 			
-			System.out.println("[Client] Server index packet header received.");
+			System.out.println("[CLIENT] Server index packet header received.");
 			
 			// Receive the file once you have the packet header
 			FileAndMessage message = (FileAndMessage)phServerIndex.interpret(protocol);
@@ -97,7 +97,7 @@ public class DropClient {
 			
 			
 			
-			System.out.println("[Client] Server index list received.");
+			System.out.println("[CLIENT] Server index list received.");
 
 			
 			
