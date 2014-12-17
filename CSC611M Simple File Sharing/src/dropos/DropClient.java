@@ -25,6 +25,7 @@ import message.DropOSProtocol;
 import message.FileAndMessage;
 import message.IndexListPacketHeader;
 import message.Message;
+import message.RequestPacketHeader;
 import dropos.event.SynchronizationEvent;
 import dropos.ui.DropClientWindow;
 
@@ -178,7 +179,22 @@ public class DropClient {
 		//File f = new File(path + "\\" + filename);
 		System.out.println("REQUEST FILE: " + e.getFile().toFile());
 		try {
-			protocol.sendMessage("REQUEST "+ e.getFile().toFile());
+			protocol.sendMessage("REQUEST "+ e.getFile().toFile());		
+			
+			System.out.println("[CLIENT] Waiting to get the requested file.");
+			Socket connectionSocket = serverSocket.accept();
+			protocol = new DropOSProtocol(connectionSocket);
+			
+			// Wait for a response (header... and later a file);
+			// Note that we expect the server to respond with an index list as well.
+			RequestPacketHeader rph = (RequestPacketHeader) protocol.receiveHeader();
+			
+			System.out.println("[CLIENT] Request packet header received.");
+			
+			// Receive the file once you have the packet header
+			FileAndMessage message = (FileAndMessage)rph.interpret(protocol);
+			
+			
 		} catch(IOException ex) {
 			System.out.println("HELLO WORLD");
 		}
