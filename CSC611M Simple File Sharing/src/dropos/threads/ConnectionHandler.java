@@ -51,7 +51,7 @@ public class ConnectionHandler extends Thread {
 				interpretMessage(msg);
 
 			} catch (IOException e) {
-				System.out.println("[SERVER] Client has received index list");
+				System.out.println("[SERVER] Client has received the file");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -73,10 +73,14 @@ public class ConnectionHandler extends Thread {
 			respondWithIndex((FileAndMessage) msg);
 			break;
 		case "REQUEST":
-			System.out.println(command + " command issued");
+			//get the file
+			//get the file size
+			// build the packet header
+			// send the file
+			respondRequest((FileAndMessage) msg);
 			break;
 		case "UPDATE":
-			System.out.println(command + " command issued");
+			// do nothing
 			break;
 		case "DELETE":
 			System.out.println(command + " command issued");
@@ -84,6 +88,15 @@ public class ConnectionHandler extends Thread {
 		}
 		
 		
+	}
+
+
+	private void respondRequest(FileAndMessage msg) throws UnknownHostException, IOException {
+		System.out.println("[SERVER] A new socket connection is being made...");
+		protocol = new DropOSProtocol(new Socket(protocol.getIPAddress(), Config.getPort()));
+		
+		System.out.println("[SERVER] Sending the requested file");
+		protocol.sendRequestFile(msg);
 	}
 
 	/**
