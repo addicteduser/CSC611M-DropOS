@@ -90,7 +90,7 @@ public class ToCoordinatorConnectionHandler extends Thread {
 			break;
 		
 		case "REQUEST":
-			//
+			// Choose a server from the File and Server Redundancies list that will give the file.
 			break;
 		
 		case "DELETE":
