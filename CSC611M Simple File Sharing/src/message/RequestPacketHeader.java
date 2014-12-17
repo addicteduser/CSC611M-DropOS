@@ -18,6 +18,7 @@ public class RequestPacketHeader extends PacketHeader {
 	public RequestPacketHeader(String header) {
 		super(header);
 		String[] split = header.split(" ");
+		String command = split[0];
 		filename = split[1];
 		Path path = Config.getPath();
 		f = new File(path + "\\" + filename);
@@ -27,7 +28,9 @@ public class RequestPacketHeader extends PacketHeader {
 			System.err.println("Failed to parse filesize.");
 		}
 		
-		System.out.println("HEADER: " + header);
+		super.header = command + " " + filesize + " " + filename;
+		
+		System.out.println("HEADER: " + super.header);
 	}
 
 	@Override
