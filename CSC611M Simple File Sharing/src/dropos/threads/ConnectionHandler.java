@@ -3,9 +3,12 @@ package dropos.threads;
 import indexer.Index;
 import indexer.Resolution;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 
 import message.DropOSProtocol;
@@ -73,10 +76,6 @@ public class ConnectionHandler extends Thread {
 			respondWithIndex((FileAndMessage) msg);
 			break;
 		case "REQUEST":
-			//get the file
-			//get the file size
-			// build the packet header
-			// send the file
 			respondRequest((FileAndMessage) msg);
 			break;
 		case "UPDATE":

@@ -85,13 +85,9 @@ public class DropOSProtocol {
 	}
 	
 	public void sendRequestFile(FileAndMessage msg) throws IOException {
-		//get the file
-		String filename = msg.message.split(" ")[1];
-		Path path = Config.getPath();
-		File f = new File(path + "\\" + filename);
-		System.out.println("REQUESTED FILE: " + f.toPath());
-		long filesize = Files.size(f.toPath());
-		sendFile(PacketHeader.create(msg.message + " " + filesize), f);
+		
+		System.out.println("sendrequestfile");
+		//sendFile(PacketHeader.create(msg.message + " " + filesize), f);
 		//RequestPacketHeader packetHeader = new RequestPacketHeader(msg.message);
 	}
 	
