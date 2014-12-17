@@ -178,7 +178,7 @@ public class DropClient {
 		//File f = new File(path + "\\" + filename);
 		System.out.println("REQUEST FILE: " + e.getFile().toFile());
 		try {
-			protocol.performSynchronization(e, e.getFile().toFile());
+			protocol.sendMessage("REQUEST "+ e.getFile().toFile());
 		} catch(IOException ex) {
 			System.out.println("HELLO WORLD");
 		}
