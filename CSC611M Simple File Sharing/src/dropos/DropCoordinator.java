@@ -28,7 +28,7 @@ public class DropCoordinator {
 	public void run() {
 		while (true) {
 			try {
-				System.out.println("[Coordinator] Waiting for client connections on port " + serverSocket.getLocalPort() + "...");
+				System.out.println("[Coordinator] Waiting for connections on port " + serverSocket.getLocalPort() + "...");
 				Socket connectionSocket = serverSocket.accept();
 
 				pool.addTask(connectionSocket);
