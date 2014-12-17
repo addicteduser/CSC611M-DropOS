@@ -50,6 +50,8 @@ public class ConnectionHandler extends Thread {
 				Message msg = headers.interpret(protocol);
 				interpretMessage(msg);
 
+			} catch (IOException e) {
+				System.out.println("[SERVER] Client has received index list");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -57,8 +59,10 @@ public class ConnectionHandler extends Thread {
 	}
 	
 	private void interpretMessage(Message msg) throws UnknownHostException, IOException {
-		String command = msg.message;
+		String[] split = msg.message.split(" ");
+		String command = split[0];
 		command = command.toUpperCase();
+		System.out.println("COMMAND: " + command);
 		
 		switch(command){
 		case "INDEX":
@@ -69,13 +73,13 @@ public class ConnectionHandler extends Thread {
 			respondWithIndex((FileAndMessage) msg);
 			break;
 		case "REQUEST":
-			System.out.println(command + "command issued");
+			System.out.println(command + " command issued");
 			break;
 		case "UPDATE":
-			System.out.println(command + "command issued");
+			System.out.println(command + " command issued");
 			break;
 		case "DELETE":
-			System.out.println(command + "command issued");
+			System.out.println(command + " command issued");
 			break;
 		}
 		
