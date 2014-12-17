@@ -68,6 +68,15 @@ public class ConnectionHandler extends Thread {
 			 */
 			respondWithIndex((FileAndMessage) msg);
 			break;
+		case "REQUEST":
+			System.out.println(command + "command issued");
+			break;
+		case "UPDATE":
+			System.out.println(command + "command issued");
+			break;
+		case "DELETE":
+			System.out.println(command + "command issued");
+			break;
 		}
 		
 		

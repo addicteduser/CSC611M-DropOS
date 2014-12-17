@@ -205,10 +205,11 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	public static Index read(File indexFile) throws NumberFormatException, IOException {
 		Index index = new Index();
 		String indexLine = null;
-		
+
 		// create indexlist.txt if it does not exist
 		if (!indexFile.exists())
 			Files.createFile(indexFile.toPath());
+
 		BufferedReader br = new BufferedReader(new FileReader(indexFile));
 
 		while ((indexLine = br.readLine()) != null) {
@@ -307,8 +308,8 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 		FileAndLastModifiedPair pair = new FileAndLastModifiedPair(filename, lastModified);
 		add(pair);
 	}
-	
-	public File getFile(){
+
+	public File getFile() throws IOException{
 		return new File("indexlist.txt");
 	}
 
