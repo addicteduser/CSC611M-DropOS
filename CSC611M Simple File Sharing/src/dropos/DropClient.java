@@ -62,7 +62,7 @@ public class DropClient {
 			System.out.println("[CLIENT] About to update server regarding offline changes...");
 			handleResolution(compare);
 		} else {
-			System.out.println("[Client] There were no offline changes detected.");
+			System.out.println("[CLIENT] There were no offline changes detected.");
 		}
 		System.out.println();
 
@@ -143,8 +143,8 @@ public class DropClient {
 	private void eventPerformed(SynchronizationEvent e) {
 		try {
 
-			System.out.println("[Client] New event. Connecting to the server...");
-
+			System.out.println("[CLIENT] New event. Connecting to the server...");
+			System.out.println("Event Type: " + e.getType().toString());
 			protocol = new DropOSProtocol();
 
 			switch (e.getType()) {
@@ -209,6 +209,7 @@ public class DropClient {
 		String filename = e.getFile().toString();
 
 		File f = new File(path + "\\" + filename);
+		System.out.println("FILE: " + f.toPath());
 		protocol.performSynchronization(e, f);
 
 		// Get attributes
@@ -235,7 +236,7 @@ public class DropClient {
 			ioe.printStackTrace();
 		}
 
-		System.out.println("[Client] Now watching the directory for changes.");
+		System.out.println("[CLIENT] Now watching the directory for changes.");
 
 		// We obtain the file system of the Path
 		FileSystem fs = clientPath.getFileSystem();
@@ -258,9 +259,9 @@ public class DropClient {
 					// Get the type of the event
 					kind = watchEvent.kind();
 					Path newPath = ((WatchEvent<Path>) watchEvent).context();
-
+					
 					// Create a directory event from what happened
-					SynchronizationEvent directoryEvent = new SynchronizationEvent(newPath, kind);
+					SynchronizationEvent directoryEvent = new SynchronizationEvent(Config.getPath().resolve(newPath), kind);
 
 					if (kind.toString().equalsIgnoreCase("modify"))
 						continue;

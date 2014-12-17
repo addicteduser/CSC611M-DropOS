@@ -35,6 +35,7 @@ public abstract class PacketHeader {
 		case "REQUEST":
 			break;
 		case "UPDATE":
+				result = new FilePacketHeader(header);
 			break;
 		case "DELETE":
 			break;
