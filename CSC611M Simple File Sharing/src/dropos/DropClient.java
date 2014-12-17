@@ -192,7 +192,7 @@ public class DropClient {
 			System.out.println("[CLIENT] Request packet header received.");
 			
 			// Receive the file once you have the packet header
-			FileAndMessage message = (FileAndMessage)rph.interpret(protocol);
+			FileAndMessage message = (FileAndMessage)rph.interpret2(protocol);
 			
 			
 		} catch(IOException ex) {
