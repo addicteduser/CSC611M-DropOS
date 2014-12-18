@@ -22,7 +22,7 @@ public class DropCoordinator implements Runnable{
 
 	public DropCoordinator(int port) throws IOException {
 		serverSocket = new ServerSocket(port);
-		pool = new CoordinatorThreadPool(16);
+		pool = new CoordinatorThreadPool();
 	}
 
 	public void run() {
