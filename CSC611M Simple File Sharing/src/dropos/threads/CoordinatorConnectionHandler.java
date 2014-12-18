@@ -69,6 +69,10 @@ public class CoordinatorConnectionHandler extends Thread {
 
 				PacketHeader headers = protocol.receiveHeader();
 				Message msg = headers.interpret(protocol);
+				log("Message from host " + host + "");
+				log(headers.toString());
+				System.out.println();
+				
 				interpretMessage(msg);
 				System.out.println();
 				host.release();
