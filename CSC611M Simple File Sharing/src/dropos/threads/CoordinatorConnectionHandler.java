@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 import message.DropOSProtocol;
@@ -30,9 +31,11 @@ public class CoordinatorConnectionHandler extends Thread {
 	private DropOSProtocol protocol;
 	private ArrayList<String> connectedServers;
 	private ArrayList<FileAndServerRedundanciesPairs> redundanciesList;
+	private HashMap<String, Resolution> resolutions;
 
 	public CoordinatorConnectionHandler(BlockingQueue<Socket> queue) {
 		this.queue = queue;
+		resolutions = new HashMap<String, Resolution>();
 		this.start();
 
 		connectedServers = new ArrayList<String>();
@@ -124,7 +127,15 @@ public class CoordinatorConnectionHandler extends Thread {
 		// Perform resolution afterwards
 		Resolution resolution = Resolution.compare(serverIndex, clientIndex);
 		
+		setResolution(protocol.getIPAddress(), resolution);
+		
 		System.out.println("[Server] These were the following changes received:\n" + resolution);	
+	}
+	
+	
+
+	private synchronized void setResolution(String ipAddress, Resolution resolution) {
+		resolutions.put(ipAddress, resolution);
 	}
 
 	// TODO This is supposed to check the server-side resolution if a file is indeed valid. If so, it should return true to accept the file.
