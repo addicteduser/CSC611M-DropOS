@@ -39,7 +39,7 @@ public class DropOSProtocol {
 	 */
 	private static final int PACKET_MAX_LENGTH = 5 * 1024 * 1024;
 
-	public DropOSProtocol() throws UnknownHostException, IOException {
+	private DropOSProtocol() throws UnknownHostException, IOException {
 		socket = new Socket(Config.getIpAddress(), Config.getPort());
 		initialize(socket);
 	}
@@ -233,5 +233,15 @@ public class DropOSProtocol {
 
 	public boolean isFinished() {
 		return socket.isClosed();
+	}
+	
+	public static DropOSProtocol connectToCoordinator(){
+		DropOSProtocol protocol = null;
+		try {
+			protocol = new DropOSProtocol();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return protocol;
 	}
 }

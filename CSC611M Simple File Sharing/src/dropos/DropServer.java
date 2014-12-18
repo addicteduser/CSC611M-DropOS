@@ -30,7 +30,7 @@ public class DropServer implements Runnable{
 
 	public void run() {
 		try {
-			protocol = new DropOSProtocol();
+			protocol = DropOSProtocol.connectToCoordinator();
 			protocol.sendMessage("SREGISTER:" + port);
 		} catch (IOException e) {
 			System.out.println("[Server] Now registered to the coordinator.");
