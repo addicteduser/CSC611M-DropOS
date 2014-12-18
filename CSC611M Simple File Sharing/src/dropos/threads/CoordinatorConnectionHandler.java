@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 import message.DropOSProtocol;
@@ -30,9 +31,11 @@ public class CoordinatorConnectionHandler extends Thread {
 	private DropOSProtocol protocol;
 	private ArrayList<String> connectedServers;
 	private ArrayList<FileAndServerRedundanciesPairs> redundanciesList;
+	private HashMap<String, Resolution> resolutions;
 
 	public CoordinatorConnectionHandler(BlockingQueue<Socket> queue) {
 		this.queue = queue;
+		resolutions = new HashMap<String, Resolution>();
 		this.start();
 
 		connectedServers = new ArrayList<String>();
@@ -86,8 +89,7 @@ public class CoordinatorConnectionHandler extends Thread {
 			break;
 		
 		case "UPDATE":
-			// Check for server redundancies from the File and Server Redundancies list before doing resolution
-			// if file doesn't exist yet in the servers, let the coordinator choose na lang
+			verifyUpdate((FileAndMessage)msg);
 			break;
 		
 		case "REQUEST":
@@ -100,6 +102,26 @@ public class CoordinatorConnectionHandler extends Thread {
 			break;
 		}
 		
+	}
+
+
+	private void verifyUpdate(FileAndMessage msg) {
+		try {
+			String ipAddress = protocol.getIPAddress();
+			String filename = msg.getFile().toString();
+			
+			if (resolutions.containsKey(ipAddress) == false)
+				throw new Exception("Invalid UPDATE message received. Client did not send me his index file.");
+			
+			Resolution resolution = resolutions.get(ipAddress);
+			String action = resolution.get(filename);
+			
+			if (action.equalsIgnoreCase("UPDATE") == false)
+				throw new Exception("Invalid UPDATE message received. File is not marked for update.");
+			
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
 	}
 
 	private void respondWithRequest(FileAndMessage msg) {
@@ -124,7 +146,15 @@ public class CoordinatorConnectionHandler extends Thread {
 		// Perform resolution afterwards
 		Resolution resolution = Resolution.compare(serverIndex, clientIndex);
 		
+		setResolution(protocol.getIPAddress(), resolution);
+		
 		System.out.println("[Server] These were the following changes received:\n" + resolution);	
+	}
+	
+	
+
+	private synchronized void setResolution(String ipAddress, Resolution resolution) {
+		resolutions.put(ipAddress, resolution);
 	}
 
 	// TODO This is supposed to check the server-side resolution if a file is indeed valid. If so, it should return true to accept the file.
