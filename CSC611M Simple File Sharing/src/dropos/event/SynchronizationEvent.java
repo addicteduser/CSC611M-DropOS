@@ -71,11 +71,11 @@ public class SynchronizationEvent {
 			size = Files.size(file);
 			switch (type) {
 			case UPDATE:
-				return "UPDATE " + size + " " + file.getFileName();
+				return "UPDATE:" + size + ":" + file.getFileName();
 			case DELETE:
-				return "DELETE " + file;
+				return "DELETE:" + file;
 			case REQUEST:
-				return "REQUEST " + file.getFileName();
+				return "REQUEST:" + file.getFileName();
 			}
 		} catch (IOException e) {
 			System.err.println("UnknownSynchronizatioEventException!");
