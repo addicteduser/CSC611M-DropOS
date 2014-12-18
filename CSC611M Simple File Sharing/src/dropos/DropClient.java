@@ -35,9 +35,10 @@ import dropos.ui.DropClientWindow;
 public class DropClient implements Runnable{
 	private DropOSProtocol protocol;
 	private ServerSocket serverSocket;
+	private int port;
 	
 	private DropClient(int port) throws IOException{
-		
+		this.port = port;
 		serverSocket = new ServerSocket(port);
 		System.out.println("[CLIENT] Client is now listening on port " + port + ".");
 	}
@@ -47,14 +48,36 @@ public class DropClient implements Runnable{
 	 */
 	public static boolean RUNNING = true;
 
-	public DropClient() throws IOException {
+
+	public void run() {
+		// Check offline changes
+		checkOfflineChanges();
+		
+		// Create GUI
+		new DropClientWindow();
+		
+		// Watch directory
+		Path clientPath = Config.getPath();
+		watchDirectory(clientPath);
+	}
+
+
+	private void checkOfflineChanges() {
+		try {
+			protocol = new DropOSProtocol();
+			protocol.sendMessage("REGISTER:" + port);
+		} catch (IOException e) {
+			System.out.println("[Server] Now registered to the coordinator.");
+		}
+		
 		
 		System.out.println("[CLIENT] Connecting to the server...\n");
 		// Create a connection with the server
 		try {
 			protocol = new DropOSProtocol();
 		} catch (IOException e) {
-			System.err.println("Cannot create connection to server.");
+			System.err.println("[CLIENT] Fatal error: cannot create connection to server. Now exiting...");
+			System.exit(1);
 		}
 
 		System.out.println("[CLIENT] Producing index list from directory:");
@@ -72,16 +95,74 @@ public class DropClient implements Runnable{
 		} else {
 			System.out.println("[CLIENT] There were no offline changes detected.");
 		}
-		System.out.println();
+	}
+	
+	private void watchDirectory(Path clientPath) {
+		// Sanity check - Check if path is a folder
+				try {
+					Boolean isFolder = (Boolean) Files.getAttribute(clientPath, "basic:isDirectory", NOFOLLOW_LINKS);
 
-		new DropClientWindow();
+					if (!isFolder)
+						throw new IllegalArgumentException("Path: " + clientPath + " is not a folder");
 
+				} catch (IOException ioe) {
+					// Folder does not exists
+					ioe.printStackTrace();
+				}
+
+				System.out.println("[CLIENT] Now watching the directory for changes.");
+
+				// We obtain the file system of the Path
+				FileSystem fs = clientPath.getFileSystem();
+
+				// We create the new WatchService using the new try() block
+				try (WatchService service = fs.newWatchService()) {
+
+					// We register the path to the service
+					// We watch for creation events
+					clientPath.register(service, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+
+					// Start the infinite polling loop
+					WatchKey key = null;
+					while (RUNNING) {
+						key = service.take();
+
+						// Dequeueing events
+						Kind<?> kind = null;
+						for (WatchEvent<?> watchEvent : key.pollEvents()) {
+							// Get the type of the event
+							kind = watchEvent.kind();
+							Path newPath = ((WatchEvent<Path>) watchEvent).context();
+							
+							// Create a directory event from what happened
+							SynchronizationEvent directoryEvent = new SynchronizationEvent(Config.getPath().resolve(newPath), kind);
+
+							if (kind.toString().equalsIgnoreCase("modify"))
+								continue;
+							System.out.println("KIND: " + kind.toString());
+							// Fire the event
+							eventPerformed(directoryEvent);
+
+						}
+
+						if (!key.reset()) {
+							break; // loop
+						}
+					}
+
+				} catch (IOException ioe) {
+					ioe.printStackTrace();
+				} catch (InterruptedException ie) {
+					ie.printStackTrace();
+				}
 	}
 
+	
+	/**
+	 * Given a {@link Resolution} instance, the client sends various messages to the coordinator as needed. 
+	 * @param compare
+	 */
 	private void handleResolution(Resolution compare) {
-		/**
-		 * compare has the results of the offline changes. 
-		 */
 		for (String filename : compare.keySet()) {
 			String action = compare.get(filename);
 
@@ -128,12 +209,12 @@ public class DropClient implements Runnable{
 			// Note that we expect the server to respond with an index list as well.
 			IndexListPacketHeader phServerIndex = (IndexListPacketHeader) protocol.receiveHeader();
 			
-			System.out.println("[CLIENT] Server index packet header received.");
 			
 			// Receive the file once you have the packet header
 			FileAndMessage message = (FileAndMessage)phServerIndex.interpret(protocol);
 			
 			File f = message.getFile();
+			
 			
 			// Perform resolution between server and client
 			Index serverIndex = Index.read(f);
@@ -286,69 +367,6 @@ public class DropClient implements Runnable{
 			protocol.performSynchronization(e, f);
 		} catch(IOException ex) {
 			System.out.println("[CLIENT] The server received the file.");
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public void run() {
-		// Sanity check - Check if path is a folder
-
-		Path clientPath = Config.getPath();
-		try {
-			Boolean isFolder = (Boolean) Files.getAttribute(clientPath, "basic:isDirectory", NOFOLLOW_LINKS);
-
-			if (!isFolder)
-				throw new IllegalArgumentException("Path: " + clientPath + " is not a folder");
-
-		} catch (IOException ioe) {
-			// Folder does not exists
-			ioe.printStackTrace();
-		}
-
-		System.out.println("[CLIENT] Now watching the directory for changes.");
-
-		// We obtain the file system of the Path
-		FileSystem fs = clientPath.getFileSystem();
-
-		// We create the new WatchService using the new try() block
-		try (WatchService service = fs.newWatchService()) {
-
-			// We register the path to the service
-			// We watch for creation events
-			clientPath.register(service, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-
-			// Start the infinite polling loop
-			WatchKey key = null;
-			while (RUNNING) {
-				key = service.take();
-
-				// Dequeueing events
-				Kind<?> kind = null;
-				for (WatchEvent<?> watchEvent : key.pollEvents()) {
-					// Get the type of the event
-					kind = watchEvent.kind();
-					Path newPath = ((WatchEvent<Path>) watchEvent).context();
-					
-					// Create a directory event from what happened
-					SynchronizationEvent directoryEvent = new SynchronizationEvent(Config.getPath().resolve(newPath), kind);
-
-					if (kind.toString().equalsIgnoreCase("modify"))
-						continue;
-					System.out.println("KIND: " + kind.toString());
-					// Fire the event
-					eventPerformed(directoryEvent);
-
-				}
-
-				if (!key.reset()) {
-					break; // loop
-				}
-			}
-
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		} catch (InterruptedException ie) {
-			ie.printStackTrace();
 		}
 	}
 

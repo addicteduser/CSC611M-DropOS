@@ -55,7 +55,7 @@ public class IndexListPacketHeader extends FilePacketHeader {
 	
 	public Message interpret(DropOSProtocol protocol) throws IOException {
 		File file = receiveFile(protocol);
-		System.out.println("File was received.");
+		System.out.println("File " + file.getName() + " was received.");
 		return new FileAndMessage("INDEX", file);
 	}
 }
