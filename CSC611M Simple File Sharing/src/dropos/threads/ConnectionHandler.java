@@ -118,7 +118,9 @@ public class ConnectionHandler extends Thread {
 	 * @throws IOException
 	 */
 	private void respondWithIndex(FileAndMessage msg) throws UnknownHostException, IOException {
-		log("A new socket connection is being made...");
+		log("About to send this server's index list to coordinator.");
+		log("Connecting to the server with a new socket.");
+		
 		protocol = new DropOSProtocol(new Socket(protocol.getIPAddress(), Config.getPort()));
 
 		log("Sending the server's index list.");
