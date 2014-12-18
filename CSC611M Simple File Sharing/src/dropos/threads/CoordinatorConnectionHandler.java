@@ -38,8 +38,8 @@ public class CoordinatorConnectionHandler extends Thread {
 	private DropOSProtocol protocol;
 	
 	
-	private ArrayList<Host> connectedServers, connectedClients;
-	private ArrayList<FileAndServerPairs> redundanciesList;
+	private static ArrayList<Host> connectedServers, connectedClients;
+	private static ArrayList<FileAndServerPairs> redundanciesList;
 	
 	private static HashMap<Host, Resolution> resolutions;
 
@@ -84,7 +84,7 @@ public class CoordinatorConnectionHandler extends Thread {
 	 * @param connectionSocket
 	 * @return
 	 */
-	private Host selectHost(Socket connectionSocket) {
+	private synchronized Host selectHost(Socket connectionSocket) {
 		for (Host h : connectedClients){
 			if (h.equals(connectionSocket)){
 				return h;
