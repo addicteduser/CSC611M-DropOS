@@ -133,7 +133,6 @@ public class CoordinatorConnectionHandler extends Thread {
 
 	private void verifyUpdate(FileAndMessage msg) {
 		try {
-			String ipAddress = protocol.getIPAddress();
 			String filename = msg.getFile().toString();
 			
 			isValid(msg, host);
