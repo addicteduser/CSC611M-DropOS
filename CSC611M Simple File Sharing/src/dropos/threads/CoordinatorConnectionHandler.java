@@ -64,12 +64,8 @@ public class CoordinatorConnectionHandler extends Thread {
 				host.acquire();
 				log("Acquired lock on host " + host + ".");
 				
-
-				
 				protocol = host.createProtocol();
 				log("Newly accepted DropOSProtocol created with host [" + host + "]");
-				
-				
 
 				PacketHeader headers = protocol.receiveHeader();
 				Message msg = headers.interpret(protocol);

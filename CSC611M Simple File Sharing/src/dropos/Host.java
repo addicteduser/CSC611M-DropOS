@@ -62,6 +62,8 @@ public class Host {
 	
 	@Override
 	public String toString() {
+		if (type != null)
+			return "(" + type.toString() + ")" + ipAddress + ":" + port; 
 		return ipAddress + ":" + port;
 	}
 
