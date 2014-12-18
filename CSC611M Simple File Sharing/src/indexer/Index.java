@@ -69,7 +69,7 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 			if (filePath.isDirectory()) {
 				// Recursively index the detected folder
 				indexDirectory(filePath);
-			} else {
+			} else if (filePath.getName().startsWith(".") == false){
 
 				// Get the attributes and add an index entry
 				attributes = Files.readAttributes(filePath.toPath(), BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
