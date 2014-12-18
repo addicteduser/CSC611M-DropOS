@@ -63,11 +63,16 @@ public class DropServer implements Runnable{
 				server = new DropServer(port);
 				success = true;
 			} catch (IOException e) {
-				System.out.println("Could not create client on port " + port + ". Attempting to use port " + (port + 1));
+				log("Could not create client on port " + port + ". Attempting to use port " + (port + 1));
 				++port;
 			}
 		} while (success == false);
-		System.out.println("Successfully created a DropServer on port " + port);
+		log("Successfully created a DropServer on port " + port);
 		return server;
+	}
+
+	private static void log(String message) {
+		System.out.println("[Server] " + message);
+		
 	}
 }
