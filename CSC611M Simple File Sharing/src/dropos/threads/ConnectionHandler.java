@@ -17,7 +17,7 @@ import dropos.DropCoordinator;
 import dropos.DropServer;
 
 /**
- * During initialization, a {@link CoordinatorConnectionHandler} is made to block at the queue which holds the pending {@link Socket} instances to be handled.
+ * During initialization, the {@link DropServer} creates 16 {@link CoordinatorConnectionHandler} instances which block at the queue which holds the pending {@link Socket} instances to be handled.
  * Once a new instance is available, the {@link Socket} is received and is then handled.
  * 
  * <p><b>Note:</b> This class is meant to handle connections from a {@link DropCoordinator} to a {@link DropServer}. 
