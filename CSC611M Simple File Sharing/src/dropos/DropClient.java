@@ -77,7 +77,8 @@ public class DropClient implements Runnable {
 
 		log("Producing index list from directory:");
 		System.out.println("         " + Config.getInstancePath(port) + "\n");
-
+		
+		int x;
 		Index olderIndex = Index.startUp();
 		Index newerIndex = Index.directory(port);
 
@@ -97,7 +98,8 @@ public class DropClient implements Runnable {
 			ioe.printStackTrace();
 		}
 
-		log("Now watching the directory for changes.");
+		log("Now watching the following directory for changes:");
+		log("   " + clientPath);
 
 		// We obtain the file system of the Path
 		FileSystem fs = clientPath.getFileSystem();

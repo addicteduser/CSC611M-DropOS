@@ -63,8 +63,11 @@ public class Host {
 		if (obj instanceof Socket){
 			Socket socket = (Socket) obj;
 			return socket.getInetAddress().equals(ipAddress) && port == socket.getPort();
+		}else if (obj instanceof Host){
+			Host host = (Host) obj;
+			return ipAddress.equalsIgnoreCase(host.ipAddress) && host.port == port;
 		}
-		return super.equals(obj);
+		return false;
 	}
 	
 	@Override

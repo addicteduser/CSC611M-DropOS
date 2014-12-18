@@ -110,19 +110,12 @@ public class CoordinatorConnectionHandler extends Thread {
 		String port;
 		switch(command){
 		case "SREGISTER":
-			connectedServers.add(host);
-			host.setType(HostType.Server);
-			port = msg.message.replace("SREGISTER:", "");
-			host.setPort(Integer.parseInt(port));
-			log("Registered host [" + host + "] as a server connection.");
+			addServer(host, msg);
 			break;
 			
 		case "CREGISTER":
-			connectedClients.add(host);
-			host.setType(HostType.Client);
-			port = msg.message.replace("CREGISTER:", "");
-			host.setPort(Integer.parseInt(port));
-			log("Registered host [" + host + "] as a client connection.");
+			addClient(host, msg);
+			
 			break;
 		
 		case "INDEX":
@@ -144,6 +137,30 @@ public class CoordinatorConnectionHandler extends Thread {
 		
 	}
 
+
+	private void addServer(Host host, Message msg) {
+		if (connectedServers.contains(host)){
+			log("Host " + host + " already registered. Ignoring registration message.");
+			return;
+		}
+		connectedServers.add(host);
+		host.setType(HostType.Server);
+		String port = msg.message.replace("SREGISTER:", "");
+		host.setPort(Integer.parseInt(port));
+		log("Registered host [" + host + "] as a server connection.");
+	}
+
+	private void addClient(Host host, Message msg) {
+		if (connectedServers.contains(host)){
+			log("Host " + host + " already registered. Ignoring registration message.");
+			return;
+		}
+		connectedClients.add(host);
+		host.setType(HostType.Client);
+		String port = msg.message.replace("CREGISTER:", "");
+		host.setPort(Integer.parseInt(port));
+		log("Registered host [" + host + "] as a client connection.");
+	}
 
 	private void verifyUpdate(FileAndMessage msg) {
 		try {

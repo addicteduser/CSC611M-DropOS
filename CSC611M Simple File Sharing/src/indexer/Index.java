@@ -62,6 +62,11 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 */
 	private void indexDirectory(File directory) throws IOException {
 		BasicFileAttributes attributes;
+		
+		if (Files.notExists(directory.toPath(), LinkOption.NOFOLLOW_LINKS)){
+			Files.createDirectories(directory.toPath());
+		}
+		
 		directoryFilePaths = directory.listFiles();
 
 		for (File filePath : directoryFilePaths) {
