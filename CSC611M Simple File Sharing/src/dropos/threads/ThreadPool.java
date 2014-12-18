@@ -17,7 +17,7 @@ import dropos.DropServer;
 public class ThreadPool {
 	private final BlockingQueue<Socket> socketQueue;
 	private ArrayList<ConnectionHandler> threadList = new ArrayList<ConnectionHandler>();
-	public static int count = 16;
+	public static int count = 4;
 
 	public ThreadPool() {
 		// Queue for storing "work" (In this case sockets)
