@@ -41,6 +41,7 @@ public class PacketHeader {
 		case "DELETE":
 			break;
 		case "REGISTER":
+			result = new RegisterPacketHeader(header);
 			break;
 		}
 		return result;
