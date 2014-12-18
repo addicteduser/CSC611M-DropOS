@@ -14,7 +14,7 @@ import dropos.threads.ThreadPool;
  * {@link CoordinatorConnectionHandler} instances which are blocked until a connection is made.
  *
  */
-public class DropServer {
+public class DropServer implements Runnable{
 
 	private static ServerSocket serverSocket;
 	private ThreadPool pool;

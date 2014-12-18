@@ -26,13 +26,12 @@ import message.DropOSProtocol;
 import message.FileAndMessage;
 import message.FilePacketHeader;
 import message.IndexListPacketHeader;
-import message.Message;
 import message.PacketHeader;
 import message.RequestPacketHeader;
 import dropos.event.SynchronizationEvent;
 import dropos.ui.DropClientWindow;
 
-public class DropClient {
+public class DropClient implements Runnable{
 	private DropOSProtocol protocol;
 	private ServerSocket serverSocket;
 
