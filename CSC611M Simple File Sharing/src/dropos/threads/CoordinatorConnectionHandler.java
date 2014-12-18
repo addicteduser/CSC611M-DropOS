@@ -91,6 +91,7 @@ public class CoordinatorConnectionHandler extends Thread {
 			break;
 		
 		case "REQUEST":
+			respondWithRequest((FileAndMessage)msg);
 			// Choose a server from the File and Server Redundancies list that will give the file.
 			break;
 		
@@ -98,6 +99,10 @@ public class CoordinatorConnectionHandler extends Thread {
 			// Check for server redundancies from the File and Server Redundancies list before doing resolution
 			break;
 		}
+		
+	}
+
+	private void respondWithRequest(FileAndMessage msg) {
 		
 	}
 
