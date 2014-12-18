@@ -40,7 +40,8 @@ public class PacketHeader {
 			break;
 		case "DELETE":
 			break;
-		case "REGISTER":
+		case "SREGISTER":
+		case "CREGISTER":
 			result = new RegisterPacketHeader(header);
 			break;
 		}
