@@ -84,8 +84,10 @@ public class DropOSProtocol {
 	}
 	
 	public void sendIndex() throws IOException{
-		IndexListPacketHeader packetHeader = Index.getInstance().getPacketHeader();
-		File file = Index.getInstance().getFile();
+		Index index = Index.getInstance();
+		index.write();
+		IndexListPacketHeader packetHeader = index.getPacketHeader();
+		File file = index.getFile();
 		sendFile(packetHeader, file);
 	}
 	

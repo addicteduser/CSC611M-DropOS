@@ -4,6 +4,7 @@ import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import indexer.FileAndLastModifiedPair;
 import indexer.Index;
 import indexer.Resolution;
 
@@ -72,6 +73,38 @@ public class DropClient {
 	}
 
 	private void handleResolution(Resolution compare) {
+		/**
+		 * compare has the results of the offline changes. 
+		 */
+		for (String filename : compare.keySet()) {
+			String action = compare.get(filename);
+
+			// Since these changes were detected on this host, we must inform the server to logically synchronize the folder.
+			switch (action) {
+			case "NONE":
+				// Do nothing
+				break;
+
+			case "UPDATE":
+				try {
+					long dateModified = new File(Config.getPath() + "\\" + filename).length(); 
+					FileAndLastModifiedPair e = new FileAndLastModifiedPair(filename, dateModified);
+					Index.getInstance().add(e);	
+				}catch(Exception err){
+					System.out.println("Error, could not add " + filename + " to the index.");	
+				}
+				break;
+
+			case "REQUEST":
+				break;
+
+			case "DELETE":
+				break;
+			}
+
+		}
+		
+		
 		try {
 			System.out.println("[CLIENT] Sending the server my own index list.");
 			protocol.sendIndex();
@@ -100,34 +133,7 @@ public class DropClient {
 
 			
 			
-			/**
-			 * compare has the results of the offline changes. 
-			 */
-			for (String filename : compare.keySet()) {
-				String action = compare.get(filename);
-
-				// Since these changes were detected on this host, we must inform the server to logically synchronize the folder.
-				switch (action) {
-				case "NONE":
-					// Do nothing
-					break;
-
-				case "UPDATE":
-
-					break;
-
-				case "REQUEST":
-					break;
-
-				case "DELETE":
-					break;
-				}
-
-			}
-			
-			// TODO: perform resolution here; use 'interpret'
-			
-		} catch (Exception e) {
+				} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
