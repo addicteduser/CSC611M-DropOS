@@ -10,7 +10,7 @@ public class RequestPacketHeader extends FilePacketHeader {
 	
 	public RequestPacketHeader(String header) {
 		super(header);
-		filename = header.split(" ")[1];
+		filename = header.split(":")[1];
 	}
 
 	@Override

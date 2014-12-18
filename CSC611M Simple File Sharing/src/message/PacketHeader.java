@@ -23,7 +23,7 @@ public class PacketHeader {
 	
 	public static PacketHeader create(String header) {
 		PacketHeader result = null;
-		String command = header.split(" ")[0].toUpperCase().trim();
+		String command = header.split(":")[0].toUpperCase().trim();
 		
 		switch(command){
 		case "INDEX":

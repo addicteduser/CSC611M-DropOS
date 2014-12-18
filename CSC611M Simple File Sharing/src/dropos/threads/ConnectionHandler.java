@@ -62,7 +62,7 @@ public class ConnectionHandler extends Thread {
 	}
 	
 	private void interpretMessage(Message msg) throws UnknownHostException, IOException {
-		String[] split = msg.message.split(" ");
+		String[] split = msg.message.split(":");
 		String command = split[0];
 		command = command.toUpperCase();
 		System.out.println("COMMAND: " + command);

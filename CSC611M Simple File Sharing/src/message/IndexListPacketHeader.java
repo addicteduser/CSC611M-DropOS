@@ -20,7 +20,7 @@ public class IndexListPacketHeader extends FilePacketHeader {
 	public IndexListPacketHeader(String header) {
 		super(header);
 		try {
-			filesize = Long.parseLong(header.split(" ")[1]);	
+			filesize = Long.parseLong(header.split(":")[1]);	
 		}catch (Exception e){
 			System.err.println("Failed to parse filesize.");
 		}
@@ -30,7 +30,7 @@ public class IndexListPacketHeader extends FilePacketHeader {
 	 * This method is used when you are about to send an index list, and you are preparing the stream's packet header.
 	 */
 	public IndexListPacketHeader() {
-		super("INDEX ");
+		super("INDEX:");
 		try {
 			File file = Index.getInstance().getFile();
 			BasicFileAttributes attributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);

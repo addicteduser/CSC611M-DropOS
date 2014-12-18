@@ -12,7 +12,7 @@ public class FilePacketHeader extends PacketHeader {
 
 	public FilePacketHeader(String header) {
 		super(header);
-		String[] split = header.split(" ");
+		String[] split = header.split(":");
 		
 		try {
 			filesize = Long.parseLong(split[1]);

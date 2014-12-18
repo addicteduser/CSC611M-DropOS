@@ -174,7 +174,7 @@ public class DropClient {
 	 */
 	private void requestFile(SynchronizationEvent e) throws IOException {
 		System.out.println("[CLIENT] Now requesting for file: " + e.getFile().toFile());
-		protocol.sendMessage("REQUEST "+ e.getFile().toFile());
+		protocol.sendMessage("REQUEST:"+ e.getFile().toFile());
 		
 		System.out.println("[CLIENT] Waiting to get the requested file.");
 		Socket connectionSocket = serverSocket.accept();

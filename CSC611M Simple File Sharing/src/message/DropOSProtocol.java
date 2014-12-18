@@ -91,7 +91,7 @@ public class DropOSProtocol {
 	
 	public void sendRequestFile(FileAndMessage msg) throws IOException {
 		File f = msg.file;
-		String message = "UPDATE " + f.length() + " " + f.getName();
+		String message = "UPDATE:" + f.length() + ":" + f.getName();
 		PacketHeader packetHeader = PacketHeader.create(message);
 		sendFile(packetHeader, f);
 	}
