@@ -6,12 +6,11 @@ import indexer.Resolution;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 
 import message.DropOSProtocol;
 import message.FileAndMessage;
-import message.FilePacketHeader;
-import message.IndexListPacketHeader;
 import message.Message;
 import message.PacketHeader;
 import dropos.Config;
@@ -29,10 +28,26 @@ public class CoordinatorConnectionHandler extends Thread {
 	private BlockingQueue<Socket> queue;
 	private Socket connectionSocket;
 	private DropOSProtocol protocol;
+	private ArrayList<String> connectedServers;
+	private ArrayList<FileAndServerRedundanciesPairs> redundanciesList;
 
 	public CoordinatorConnectionHandler(BlockingQueue<Socket> queue) {
 		this.queue = queue;
 		this.start();
+
+		connectedServers = new ArrayList<String>();
+		redundanciesList = new ArrayList<FileAndServerRedundanciesPairs>();
+	}
+	
+
+	private class FileAndServerRedundanciesPairs {
+		String fileName;
+		ArrayList<String> serverIPs;
+		
+		public FileAndServerRedundanciesPairs(String filename, ArrayList<String> serverips) {
+			this.fileName = filename;
+			this.serverIPs = serverips;
+		}
 	}
 
 
@@ -61,11 +76,28 @@ public class CoordinatorConnectionHandler extends Thread {
 		command = command.toUpperCase();
 		
 		switch(command){
+		case "REGISTER":
+			connectedServers.add(protocol.getIPAddress());
+			System.out.println("[Coordinator] Connection from [" + protocol.getIPAddress() + "] is a SERVER connection");
+			break;
+		
 		case "INDEX":
 			respondWithIndex((FileAndMessage) msg);
 			break;
-		}
 		
+		case "UPDATE":
+			// Check for server redundancies from the File and Server Redundancies list before doing resolution
+			// if file doesn't exist yet in the servers, let the coordinator choose na lang
+			break;
+		
+		case "REQUEST":
+			// Choose a server from the File and Server Redundancies list that will give the file.
+			break;
+		
+		case "DELETE":
+			// Check for server redundancies from the File and Server Redundancies list before doing resolution
+			break;
+		}
 		
 	}
 
