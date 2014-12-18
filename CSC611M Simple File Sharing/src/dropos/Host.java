@@ -69,9 +69,17 @@ public class Host {
 	
 	@Override
 	public String toString() {
+		StringBuilder name = new StringBuilder();
+		
 		if (type != null)
-			return "(" + type.toString() + ")" + ipAddress + ":" + port; 
-		return ipAddress + ":" + port;
+			name.append("(" + type.toString() + ")");
+		
+		name.append(ipAddress);
+		
+		if (port > 0)
+			name.append( ":" + port );
+		
+		return name.toString();
 	}
 
 	public String getIpAddress() {
