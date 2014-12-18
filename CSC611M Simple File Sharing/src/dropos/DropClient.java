@@ -135,11 +135,9 @@ public class DropClient implements Runnable{
 			
 			File f = message.getFile();
 			
+			// Perform resolution between server and client
 			Index serverIndex = Index.read(f);
 			Index myIndex = Index.getInstance();
-			
-			// Perform resolution between server and client
-			
 			
 			Resolution resolution = Resolution.compare(serverIndex, myIndex);
 			for (String filename : resolution.keySet()) {
@@ -162,6 +160,7 @@ public class DropClient implements Runnable{
 					// Wait for server to send UPDATE message
 					Socket s = serverSocket.accept();
 					p = new DropOSProtocol(s);
+					
 					FilePacketHeader requestHeader = (FilePacketHeader)p.receiveHeader();
 					// Interpret message and copy to actual folder destination
 					FileAndMessage requestMessage = (FileAndMessage)phServerIndex.interpret(protocol);
