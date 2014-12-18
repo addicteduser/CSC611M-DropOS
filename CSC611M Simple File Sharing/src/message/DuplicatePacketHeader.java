@@ -2,7 +2,6 @@ package message;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.function.LongPredicate;
 
 import dropos.Config;
 
