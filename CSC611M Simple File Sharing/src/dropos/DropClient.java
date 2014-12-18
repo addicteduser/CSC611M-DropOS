@@ -96,8 +96,6 @@ public class DropClient {
 			
 			message.getFile();
 			
-			
-			
 			System.out.println("[CLIENT] Server index list received.");
 
 			
@@ -172,31 +170,28 @@ public class DropClient {
 	 * 
 	 * @param e
 	 *            this contains details of the file to be requested
+	 * @throws IOException 
 	 */
-	private void requestFile(SynchronizationEvent e) {
-		//Path path = Config.getPath();
-		//String filename = e.getFile().toString();
-		//File f = new File(path + "\\" + filename);
-		System.out.println("REQUEST FILE: " + e.getFile().toFile());
+	private void requestFile(SynchronizationEvent e) throws IOException {
+		System.out.println("[CLIENT] Now requesting for file: " + e.getFile().toFile());
+		protocol.sendMessage("REQUEST "+ e.getFile().toFile());
+		
+		System.out.println("[CLIENT] Waiting to get the requested file.");
+		Socket connectionSocket = serverSocket.accept();
+		protocol = new DropOSProtocol(connectionSocket);
+		
+		// Wait for a response (header... and later a file);
+		// Note that we expect the server to respond with an index list as well.
 		try {
-			protocol.sendMessage("REQUEST "+ e.getFile().toFile());		
-			
-			System.out.println("[CLIENT] Waiting to get the requested file.");
-			Socket connectionSocket = serverSocket.accept();
-			protocol = new DropOSProtocol(connectionSocket);
-			
-			// Wait for a response (header... and later a file);
-			// Note that we expect the server to respond with an index list as well.
 			RequestPacketHeader rph = (RequestPacketHeader) protocol.receiveHeader();
 			
+
 			System.out.println("[CLIENT] Request packet header received.");
+			rph.interpret(protocol);
 			
-			// Receive the file once you have the packet header
-			FileAndMessage message = (FileAndMessage)rph.interpret2(protocol);
-			
-			
-		} catch(IOException ex) {
-			System.out.println("HELLO WORLD");
+			System.out.println("[CLIENT] File received.");
+		}catch(Exception err){
+			err.printStackTrace();
 		}
 	}
 
