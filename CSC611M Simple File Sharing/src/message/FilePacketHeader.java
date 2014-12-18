@@ -3,6 +3,9 @@ package message;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 import dropos.Config;
@@ -54,7 +57,17 @@ public class FilePacketHeader extends PacketHeader {
 	
 	public void writeFile(int port){
 		File temporaryFile = new File(filePath());
+		Path portInstancePath = Paths.get(port+"\\");
+		if (Files.exists(portInstancePath, LinkOption.NOFOLLOW_LINKS) == false){
+			try {
+				Files.createDirectory(portInstancePath);
+			} catch (IOException e) {
+				System.out.println("Could not create folder " + portInstancePath);
+			}
+		}
+		
 		File actualFile = new File(Config.getInstancePath(port) + "\\" + filename);
+		
 		try {
 			Files.copy(temporaryFile.toPath(), actualFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
