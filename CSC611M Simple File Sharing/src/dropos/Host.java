@@ -29,7 +29,7 @@ public class Host {
 			System.exit(1);
 		}
 		
-		ipAddress = connectionSocket.getInetAddress().toString();
+		ipAddress = connectionSocket.getInetAddress().toString().substring(1);
 		port = connectionSocket.getPort();
 		mutexLock = new Semaphore(1);
 	}
