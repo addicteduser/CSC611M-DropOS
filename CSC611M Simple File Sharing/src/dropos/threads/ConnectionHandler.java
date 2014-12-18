@@ -94,7 +94,7 @@ public class ConnectionHandler extends Thread {
 		System.out.println("[SERVER] A new socket connection is being made...");
 		protocol = new DropOSProtocol(new Socket(protocol.getIPAddress(), Config.getPort()));
 		
-		System.out.println("[SERVER] Sending the requested file");
+		System.out.println("[SERVER] Sending the requested file.");
 		protocol.sendRequestFile(msg);
 	}
 
