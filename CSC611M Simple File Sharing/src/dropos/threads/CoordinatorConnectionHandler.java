@@ -98,7 +98,7 @@ public class CoordinatorConnectionHandler extends Thread {
 	}
 
 	private void interpretMessage(Message msg) throws UnknownHostException, IOException {
-		String command = msg.message;
+		String command = msg.message.split(":")[0];
 		command = command.toUpperCase();
 		
 		FileAndMessage fileAndMsg = null;
@@ -110,7 +110,7 @@ public class CoordinatorConnectionHandler extends Thread {
 		case "SREGISTER":
 			connectedServers.add(host);
 			host.setType(HostType.Server);
-			port = command.replace("SREGISTER ", "");
+			port = msg.message.replace("SREGISTER:", "");
 			host.setPort(Integer.parseInt(port));
 			log("Registered host [" + host + "] as a server connection.");
 			break;
@@ -118,7 +118,7 @@ public class CoordinatorConnectionHandler extends Thread {
 		case "CREGISTER":
 			connectedClients.add(host);
 			host.setType(HostType.Client);
-			port = command.replace("CREGISTER ", "");
+			port = msg.message.replace("CREGISTER:", "");
 			host.setPort(Integer.parseInt(port));
 			log("Registered host [" + host + "] as a client connection.");
 			break;
