@@ -70,6 +70,7 @@ public class CoordinatorConnectionHandler extends Thread {
 				PacketHeader headers = protocol.receiveHeader();
 				Message msg = headers.interpret(protocol);
 				interpretMessage(msg);
+				System.out.println();
 
 			} catch (Exception e) {
 				e.printStackTrace();

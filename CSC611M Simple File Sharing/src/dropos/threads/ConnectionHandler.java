@@ -54,6 +54,7 @@ public class ConnectionHandler extends Thread {
 				
 				log("Received message from coordinator: " + msg.toString());
 				interpretMessage(msg);
+				System.out.println();
 
 			} catch (IOException e) {
 				log("The Coordinator has received the file.");
