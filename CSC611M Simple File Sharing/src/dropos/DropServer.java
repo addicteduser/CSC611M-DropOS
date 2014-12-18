@@ -3,7 +3,9 @@ package dropos;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
+import message.DropOSProtocol;
 import dropos.threads.CoordinatorConnectionHandler;
 import dropos.threads.ThreadPool;
 
@@ -16,6 +18,7 @@ public class DropServer {
 
 	private static ServerSocket serverSocket;
 	private ThreadPool pool;
+	private DropOSProtocol protocol;
 
 	public DropServer(int port) throws IOException {
 		serverSocket = new ServerSocket(port);
@@ -23,6 +26,13 @@ public class DropServer {
 	}
 
 	public void run() {
+		try {
+			protocol = new DropOSProtocol();
+			protocol.sendMessage("REGISTER");
+		} catch (UnknownHostException e) {
+		} catch (IOException e) {
+		}
+		
 		while (true) {
 			try {
 				System.out.println("[SERVER] Waiting for client connections on port " + serverSocket.getLocalPort() + "...");

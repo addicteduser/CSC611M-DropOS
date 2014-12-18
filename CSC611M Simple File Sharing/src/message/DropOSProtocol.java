@@ -73,9 +73,14 @@ public class DropOSProtocol {
 		
 		// The next bytes would be the packet header
 		System.arraycopy(mes, 0, buf, 4, mes.length);
-
+		try {
+			
+		
 		bufferedOutputStream.write(buf, 0, buf.length);
 		bufferedOutputStream.flush();
+		}catch(Exception e){
+			System.out.println("Message sent: " + message);
+		}
 	}
 	
 	public void sendIndex() throws IOException{
