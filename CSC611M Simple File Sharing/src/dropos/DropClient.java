@@ -74,7 +74,7 @@ public class DropClient implements Runnable{
 	private Resolution checkOfflineChanges() {
 		try {
 			protocol = new DropOSProtocol();
-			protocol.sendMessage("REGISTER:" + port);
+			protocol.sendMessage("CREGISTER:" + port);
 		} catch (IOException e) {
 			System.out.println("[Server] Now registered to the coordinator.");
 		}
