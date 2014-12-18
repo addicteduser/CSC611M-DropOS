@@ -29,7 +29,6 @@ public class DropCoordinator {
 			try {
 				System.out.println("[Coordinator] Waiting for connections on port " + serverSocket.getLocalPort() + "...");
 				Socket connectionSocket = serverSocket.accept();
-
 				pool.addTask(connectionSocket);
 			} catch (IOException e) {
 				e.printStackTrace();
