@@ -11,7 +11,7 @@ public class Host {
 	}
 	private DropOSProtocol protocol;
 	private String ipAddress;
-	private int port;
+	private int port = -1;
 	private HostType type = null;
 	private Semaphore mutexLock;
 	
@@ -30,7 +30,7 @@ public class Host {
 		}
 		
 		ipAddress = connectionSocket.getInetAddress().toString().substring(1);
-		port = connectionSocket.getPort();
+		port = connectionSocket.getLocalPort();
 		mutexLock = new Semaphore(1);
 	}
 	
@@ -39,6 +39,13 @@ public class Host {
 			this.type = type;
 		else
 			System.err.println("TypeError. Cannot re-set the type of a host.");
+	}
+	
+	public void setPort(int port){
+		if (this.port == -1)
+			this.port = port;
+		else
+			System.err.println("PortError. Cannot re-set the port of a host.");
 	}
 	
 	public void acquire() throws InterruptedException{
@@ -94,5 +101,4 @@ public class Host {
 		}
 		return protocol;
 	}
-
 }

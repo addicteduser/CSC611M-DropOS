@@ -105,17 +105,21 @@ public class CoordinatorConnectionHandler extends Thread {
 		if (msg instanceof FileAndMessage)
 			fileAndMsg = (FileAndMessage)msg;
 		
-		
+		String port;
 		switch(command){
 		case "SREGISTER":
 			connectedServers.add(host);
 			host.setType(HostType.Server);
+			port = command.replace("SREGISTER ", "");
+			host.setPort(Integer.parseInt(port));
 			log("Registered host [" + host + "] as a server connection.");
 			break;
 			
 		case "CREGISTER":
 			connectedClients.add(host);
 			host.setType(HostType.Client);
+			port = command.replace("CREGISTER ", "");
+			host.setPort(Integer.parseInt(port));
 			log("Registered host [" + host + "] as a client connection.");
 			break;
 		
