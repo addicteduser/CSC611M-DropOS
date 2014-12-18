@@ -1,5 +1,6 @@
 package dropos;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
@@ -30,7 +31,6 @@ public class Host {
 		}
 		
 		ipAddress = connectionSocket.getInetAddress().toString().substring(1);
-		port = connectionSocket.getLocalPort();
 		mutexLock = new Semaphore(1);
 	}
 	
@@ -91,12 +91,21 @@ public class Host {
 	 * @return
 	 */
 	public DropOSProtocol createProtocol(){
+		Socket s = null;
+		try {
+			s = new Socket(ipAddress, port);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return createProtocol(s);
+	}
+	
+	public DropOSProtocol createProtocol(Socket s){
 		DropOSProtocol protocol = null;
 		try {
-			Socket s = new Socket(ipAddress, port);
 			protocol = new DropOSProtocol(s);
 		}catch(Exception e){
-			System.err.println("Could not create a connection with the host " + toString());
+			System.err.println("Could not create a connection with the host " + toString() + " using socket " + s);
 			e.printStackTrace();
 		}
 		return protocol;
