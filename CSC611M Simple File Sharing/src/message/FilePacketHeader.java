@@ -1,7 +1,11 @@
 package message;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import dropos.Config;
 
@@ -9,6 +13,7 @@ public class FilePacketHeader extends PacketHeader {
 
 	protected long filesize;
 	protected String filename;
+	private File file;
 
 	public FilePacketHeader(String header) {
 		super(header);
@@ -39,14 +44,24 @@ public class FilePacketHeader extends PacketHeader {
 	 * @return
 	 */
 	protected String filePath(){
-		return Config.getPath() + "\\" + filename;
+		return Config.getPath() + "\\temp\\" + filename;
 	}
 
 	@Override
 	public Message interpret(DropOSProtocol protocol) throws IOException {
-		File file = receiveFile(protocol);
+		file = receiveFile(protocol);
 		System.out.println("File was received.");
 		return new FileAndMessage("UPDATE " + filename, file);
+	}
+	
+	public void writeFile(){
+		File temporaryFile = new File(filePath());
+		File actualFile = new File(Config.getPath() + "\\" + filename);
+		try {
+			Files.copy(temporaryFile.toPath(), actualFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			System.out.println("Failed to copy file to actual directory: " + actualFile.getName());
+		}
 	}
 
 }

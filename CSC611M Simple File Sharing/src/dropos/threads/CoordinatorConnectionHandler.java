@@ -89,8 +89,7 @@ public class CoordinatorConnectionHandler extends Thread {
 			break;
 		
 		case "UPDATE":
-			// Check for server redundancies from the File and Server Redundancies list before doing resolution
-			// if file doesn't exist yet in the servers, let the coordinator choose na lang
+			verifyUpdate((FileAndMessage)msg);
 			break;
 		
 		case "REQUEST":
@@ -103,6 +102,26 @@ public class CoordinatorConnectionHandler extends Thread {
 			break;
 		}
 		
+	}
+
+
+	private void verifyUpdate(FileAndMessage msg) {
+		try {
+			String ipAddress = protocol.getIPAddress();
+			String filename = msg.getFile().toString();
+			
+			if (resolutions.containsKey(ipAddress) == false)
+				throw new Exception("Invalid UPDATE message received. Client did not send me his index file.");
+			
+			Resolution resolution = resolutions.get(ipAddress);
+			String action = resolution.get(filename);
+			
+			if (action.equalsIgnoreCase("UPDATE") == false)
+				throw new Exception("Invalid UPDATE message received. File is not marked for update.");
+			
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
 	}
 
 	private void respondWithRequest(FileAndMessage msg) {
