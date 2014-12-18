@@ -2,8 +2,6 @@ package drivers;
 
 import java.io.IOException;
 
-import message.DropOSProtocol;
-import message.DropOSProtocol.HostType;
 import dropos.Config;
 import dropos.DropServer;
 
@@ -13,7 +11,9 @@ public class ServerDriver {
 		Config.initialize();
 
 		DropServer s = DropServer.create();
-		s.run();
+		
+		Thread thread = new Thread(s);
+		thread.run();
 	}
 
 }

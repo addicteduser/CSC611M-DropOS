@@ -29,8 +29,9 @@ public class ClientDriver {
 
 		Config.initialize();
 		DropClient c = DropClient.create();
-		c.run();
-
+		
+		Thread thread = new Thread(c);
+		thread.run();
 	}
 
 }
