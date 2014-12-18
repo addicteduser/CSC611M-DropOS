@@ -51,7 +51,16 @@ public class DropClient implements Runnable{
 
 	public void run() {
 		// Check offline changes
-		checkOfflineChanges();
+		Resolution compare = checkOfflineChanges();
+		
+		// If changes exist, handle them
+		if (compare.countChanges() > 0) {
+			System.out.println("[CLIENT] Here are the offline changes detected: " + compare);
+			System.out.println("[CLIENT] About to update server regarding offline changes...");
+			handleResolution(compare);
+		} else {
+			System.out.println("[CLIENT] There were no offline changes detected.");
+		}
 		
 		// Create GUI
 		new DropClientWindow();
@@ -62,7 +71,7 @@ public class DropClient implements Runnable{
 	}
 
 
-	private void checkOfflineChanges() {
+	private Resolution checkOfflineChanges() {
 		try {
 			protocol = new DropOSProtocol();
 			protocol.sendMessage("REGISTER:" + port);
@@ -86,15 +95,7 @@ public class DropClient implements Runnable{
 		Index olderIndex = Index.startUp();
 		Index newerIndex = Index.directory();
 
-		Resolution compare = Resolution.compare(olderIndex, newerIndex);
-
-		if (compare.countChanges() > 0) {
-			System.out.println("[CLIENT] Here are the offline changes detected: " + compare);
-			System.out.println("[CLIENT] About to update server regarding offline changes...");
-			handleResolution(compare);
-		} else {
-			System.out.println("[CLIENT] There were no offline changes detected.");
-		}
+		return Resolution.compare(olderIndex, newerIndex);		
 	}
 	
 	private void watchDirectory(Path clientPath) {
