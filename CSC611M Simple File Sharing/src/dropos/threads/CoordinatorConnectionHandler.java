@@ -179,7 +179,7 @@ public class CoordinatorConnectionHandler extends Thread {
 			
 			String header = duplicateHeader + updateHeader;
 			
-			PacketHeader update = PacketHeader.create(header);
+			PacketHeader update = PacketHeader.create(header, Config.getPort());
 			
 			Host arbitraryFirstHost = selectedServersForRedundancy.get(0);
 			
@@ -215,7 +215,7 @@ public class CoordinatorConnectionHandler extends Thread {
 		Index clientIndex = Index.read(msg.getFile());
 		
 		// Get your own index
-		Index serverIndex = Index.getInstance();
+		Index serverIndex = Index.getInstance(Config.getPort());
 		
 		// Perform resolution afterwards
 		Resolution resolution = Resolution.compare(serverIndex, clientIndex);

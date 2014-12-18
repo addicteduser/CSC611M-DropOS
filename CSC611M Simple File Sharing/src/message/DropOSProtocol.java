@@ -28,6 +28,7 @@ public class DropOSProtocol {
 
 	public static HostType type;
 	private String ipAddress;
+	private int port;
 	private Socket socket;
 
 	private BufferedInputStream bufferedInputStream;
@@ -50,6 +51,7 @@ public class DropOSProtocol {
 
 	private void initialize(Socket s) {
 		socket = s;
+		port = socket.getLocalPort();
 		try {
 			InputStream inputStream = s.getInputStream();
 			bufferedInputStream = new BufferedInputStream(inputStream);
@@ -85,9 +87,9 @@ public class DropOSProtocol {
 	}
 
 	public void sendIndex() throws IOException {
-		Index index = Index.getInstance();
+		Index index = Index.getInstance(port);
 		index.write();
-		IndexListPacketHeader packetHeader = index.getPacketHeader();
+		IndexListPacketHeader packetHeader = index.getPacketHeader(port);
 		File file = index.getFile();
 		sendFile(packetHeader, file);
 	}
@@ -95,7 +97,7 @@ public class DropOSProtocol {
 	public void sendRequestFile(FileAndMessage msg) throws IOException {
 		File f = msg.file;
 		String message = "UPDATE:" + f.length() + ":" + f.getName();
-		PacketHeader packetHeader = PacketHeader.create(message);
+		PacketHeader packetHeader = PacketHeader.create(message, port);
 		sendFile(packetHeader, f);
 	}
 
@@ -141,7 +143,7 @@ public class DropOSProtocol {
 	 * @throws IOException
 	 */
 	public void performSynchronization(SynchronizationEvent event, File f) throws IOException {
-		sendFile(PacketHeader.create(event), f);
+		sendFile(PacketHeader.create(event, port), f);
 	}
 
 	/**
@@ -224,7 +226,7 @@ public class DropOSProtocol {
 		} while (headerBytesRead < length);
 
 		message = new String(buf);
-		return PacketHeader.create(message);
+		return PacketHeader.create(message, port);
 	}
 
 	public String getIPAddress() {

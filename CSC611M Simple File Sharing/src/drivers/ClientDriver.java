@@ -15,7 +15,8 @@ public class ClientDriver {
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			public void run() {
 				Index startUp = Index.startUp();
-				Index now = Index.directory();
+				// TODO: This is a problem, not all host folders are indexed
+				Index now = Index.directory(Config.getPort());
 
 				Resolution resolution = Resolution.compare(startUp, now);
 				if (resolution.countChanges() > 0)

@@ -65,7 +65,7 @@ public class DropClient implements Runnable {
 		new DropClientWindow();
 
 		// Watch directory
-		Path clientPath = Config.getPath();
+		Path clientPath = Config.getInstancePath(port);
 		watchDirectory(clientPath);
 	}
 
@@ -80,10 +80,10 @@ public class DropClient implements Runnable {
 		protocol = DropOSProtocol.connectToCoordinator();
 
 		log("Producing index list from directory:");
-		System.out.println("         " + Config.getPath().toString() + "\n");
+		System.out.println("         " + Config.getInstancePath(port) + "\n");
 
 		Index olderIndex = Index.startUp();
-		Index newerIndex = Index.directory();
+		Index newerIndex = Index.directory(port);
 
 		return Resolution.compare(olderIndex, newerIndex);
 	}
@@ -126,7 +126,7 @@ public class DropClient implements Runnable {
 					Path newPath = ((WatchEvent<Path>) watchEvent).context();
 
 					// Create a directory event from what happened
-					SynchronizationEvent directoryEvent = new SynchronizationEvent(Config.getPath().resolve(newPath), kind);
+					SynchronizationEvent directoryEvent = new SynchronizationEvent(Config.getInstancePath(port).resolve(newPath), kind);
 
 					if (kind.toString().equalsIgnoreCase("modify"))
 						continue;
@@ -165,9 +165,9 @@ public class DropClient implements Runnable {
 
 			case "UPDATE":
 				try {
-					long dateModified = new File(Config.getPath() + "\\" + filename).length();
+					long dateModified = new File(Config.getInstancePath(port) + "\\" + filename).length();
 					FileAndLastModifiedPair e = new FileAndLastModifiedPair(filename, dateModified);
-					Index.getInstance().add(e);
+					Index.getInstance(port).add(e);
 				} catch (Exception err) {
 					log("Error, could not add " + filename + " to the index.");
 				}
@@ -205,7 +205,7 @@ public class DropClient implements Runnable {
 
 			// Perform resolution between coordinator and client
 			Index serverIndex = Index.read(f);
-			Index myIndex = Index.getInstance();
+			Index myIndex = Index.getInstance(port);
 
 			Resolution resolution = Resolution.compare(serverIndex, myIndex);
 			for (String filename : resolution.keySet()) {
@@ -214,11 +214,11 @@ public class DropClient implements Runnable {
 				switch (action) {
 				case "UPDATE":
 					Long size = new File(filename).length();
-					PacketHeader header = PacketHeader.create("UPDATE:" + size + ":" + filename);
+					PacketHeader header = PacketHeader.create("UPDATE:" + size + ":" + filename, port);
 					p.sendFile(header, f);
 					break;
 				case "DELETE":
-					Files.delete(Config.getPath().resolve(filename));
+					Files.delete(Config.getInstancePath(port).resolve(filename));
 					break;
 				case "REQUEST":
 					// Send file request to server
@@ -232,7 +232,7 @@ public class DropClient implements Runnable {
 					FilePacketHeader requestHeader = (FilePacketHeader) p.receiveHeader();
 					// Interpret message and copy to actual folder destination
 					FileAndMessage requestMessage = (FileAndMessage) phServerIndex.interpret(protocol);
-					requestHeader.writeFile();
+					requestHeader.writeFile(port);
 					break;
 				}
 			}
@@ -316,7 +316,7 @@ public class DropClient implements Runnable {
 	 * @throws IOException
 	 */
 	private void deleteFile(SynchronizationEvent e) throws IOException {
-		File f = new File(Config.getPath() + "\\" + e.getFile().toString());
+		File f = new File(Config.getInstancePath(port) + "\\" + e.getFile().toString());
 		Files.delete(f.toPath());
 		log("File " + f + " was deleted.");
 	}
@@ -335,14 +335,14 @@ public class DropClient implements Runnable {
 	 * @throws IOException
 	 */
 	private void addFile(SynchronizationEvent e) throws IOException {
-		Path path = Config.getPath();
+		Path path = Config.getInstancePath(port);
 		String filename = e.getFile().toString();
 
 		// Get attributes
 		BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 		long lastModified = attributes.lastModifiedTime().toMillis();
 
-		Index directory = Index.getInstance();
+		Index directory = Index.getInstance(port);
 		directory.put(filename, lastModified);
 
 		File f = new File(path + "\\" + filename);

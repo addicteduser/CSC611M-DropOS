@@ -42,7 +42,19 @@ public class Config {
 		}
 	}
 
-	public static Path getPath() {
+	/**
+	 * Since we can run multiple clients on one computer, the instance path is the folder 
+	 * of the designated host. They are differentiated by their port number. Therefore,
+	 * the hosts have their own separate 'instance folders' labeled by their port number.
+	 *  
+	 * @param port
+	 * @return
+	 */
+	public static Path getInstancePath(int port){
+		return null;
+	}
+	
+	public static Path getAbsolutePath() {
 		return path;
 	}
 
