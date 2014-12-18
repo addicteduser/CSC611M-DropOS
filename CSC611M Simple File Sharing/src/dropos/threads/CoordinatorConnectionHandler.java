@@ -3,11 +3,13 @@ package dropos.threads;
 import indexer.Index;
 import indexer.Resolution;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 
 import message.DropOSProtocol;
@@ -118,6 +120,41 @@ public class CoordinatorConnectionHandler extends Thread {
 			
 			if (action.equalsIgnoreCase("UPDATE") == false)
 				throw new Exception("Invalid UPDATE message received. File is not marked for update.");
+			
+			int numberOfServers = connectedServers.size();
+			int onethirdReliability = Math.round((numberOfServers * 1 / 3) + 1);
+			
+			ArrayList<String> redList = new ArrayList<String>();
+			Random rand = new Random();
+			int sRand;
+			
+			for (int r = 0; r < onethirdReliability; r++) {
+				do {
+					sRand = rand.nextInt(numberOfServers);
+				} while (redList.contains(connectedServers.get(sRand)));
+				
+				redList.add(connectedServers.get(sRand));
+			}
+			
+			String duplicateHeader = "DUPLICATE";
+			
+			for(String ipAdd : redList) {
+				duplicateHeader += ":" + ipAdd;
+			}
+			
+			duplicateHeader += "\n";
+			
+			File f = new File(filename);
+			String updateHeader = "UPDATE:" + f.length() + ":" + f.getName();
+			
+			String header = duplicateHeader + updateHeader;
+			
+			PacketHeader update = PacketHeader.create(header);
+			
+			Socket socket = new Socket(redList.get(0), Config.getPort());
+			protocol = new DropOSProtocol(socket);
+			
+			protocol.sendFile(update, f);
 			
 		}catch(Exception e){
 			System.out.println(e.getMessage());
