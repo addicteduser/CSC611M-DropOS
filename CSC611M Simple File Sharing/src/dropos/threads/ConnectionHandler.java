@@ -3,12 +3,9 @@ package dropos.threads;
 import indexer.Index;
 import indexer.Resolution;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 
 import message.DropOSProtocol;
