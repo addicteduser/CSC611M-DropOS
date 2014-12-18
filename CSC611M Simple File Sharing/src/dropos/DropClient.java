@@ -24,8 +24,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import message.DropOSProtocol;
 import message.FileAndMessage;
+import message.FilePacketHeader;
 import message.IndexListPacketHeader;
 import message.Message;
+import message.PacketHeader;
 import message.RequestPacketHeader;
 import dropos.event.SynchronizationEvent;
 import dropos.ui.DropClientWindow;
@@ -127,7 +129,42 @@ public class DropClient {
 			// Receive the file once you have the packet header
 			FileAndMessage message = (FileAndMessage)phServerIndex.interpret(protocol);
 			
-			message.getFile();
+			File f = message.getFile();
+			
+			Index serverIndex = Index.read(f);
+			Index myIndex = Index.getInstance();
+			
+			// Perform resolution between server and client
+			
+			
+			Resolution resolution = Resolution.compare(serverIndex, myIndex);
+			for (String filename : resolution.keySet()) {
+				DropOSProtocol p = new DropOSProtocol();
+				String action = resolution.get(filename);
+				switch(action){
+				case "UPDATE":
+					Long size = new File(filename).length();
+					PacketHeader header = PacketHeader.create("UPDATE:"+size+":"+filename);
+					p.sendFile(header ,f);
+					break;
+				case "DELETE":
+					Files.delete(Config.getPath().resolve(filename));
+					break;
+				case "REQUEST":
+					// Send file request to server
+					p.sendMessage("REQUEST:"+filename);
+					serverSocket = new ServerSocket(Config.getPort());
+					
+					// Wait for server to send UPDATE message
+					Socket s = serverSocket.accept();
+					p = new DropOSProtocol(s);
+					FilePacketHeader requestHeader = (FilePacketHeader)p.receiveHeader();
+					// Interpret message and copy to actual folder destination
+					FileAndMessage requestMessage = (FileAndMessage)phServerIndex.interpret(protocol);
+					requestHeader.writeFile();
+					break;
+				}
+			}
 			
 			System.out.println("[CLIENT] Server index list received.");
 
