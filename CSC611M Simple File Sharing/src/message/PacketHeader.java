@@ -6,7 +6,7 @@ import java.io.UnsupportedEncodingException;
 import message.DropOSProtocol.HostType;
 import dropos.event.SynchronizationEvent;
 
-public abstract class PacketHeader {
+public class PacketHeader {
 	String header;
 	public PacketHeader(String header) {
 		this.header = header;
@@ -40,6 +40,8 @@ public abstract class PacketHeader {
 			break;
 		case "DELETE":
 			break;
+		case "REGISTER":
+			break;
 		}
 		return result;
 	}
@@ -48,7 +50,9 @@ public abstract class PacketHeader {
 		return header.getBytes("UTF-8");
 	}
 	
-	public abstract Message interpret(DropOSProtocol protocol) throws IOException;
+	public Message interpret(DropOSProtocol protocol) throws IOException{
+		return new Message(header);
+	}
 
 	
 }
