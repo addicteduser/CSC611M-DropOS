@@ -6,9 +6,13 @@ import java.util.concurrent.Semaphore;
 import message.DropOSProtocol;
 
 public class Host {
+	public enum HostType {
+		Server, Client
+	}
 	private DropOSProtocol protocol;
 	private String ipAddress;
 	private int port;
+	private HostType type = null;
 	private Semaphore mutexLock;
 	
 	
@@ -28,6 +32,13 @@ public class Host {
 		ipAddress = connectionSocket.getInetAddress().toString();
 		port = connectionSocket.getPort();
 		mutexLock = new Semaphore(1);
+	}
+	
+	public void setType(HostType type){
+		if (this.type == null)
+			this.type = type;
+		else
+			System.err.println("TypeError. Cannot re-set the type of a host.");
 	}
 	
 	public void acquire() throws InterruptedException{

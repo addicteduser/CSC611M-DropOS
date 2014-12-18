@@ -57,15 +57,18 @@ public class CoordinatorConnectionHandler extends Thread {
 		while (true) {
 			try {
 				this.connectionSocket = queue.take();
+				
 				host = selectHost(connectionSocket);
 				log("Attempting to get lock on host " + host + ".");
 				host.acquire();
 				log("Acquired lock on host " + host + ".");
 				
-				log("Connection from " + host + " received.");
-				protocol = host.createProtocol();
+
 				
-				log("Newly accepted connection from host [" + host + "]");
+				protocol = host.createProtocol();
+				log("Newly accepted DropOSProtocol created with host [" + host + "]");
+				
+				
 
 				PacketHeader headers = protocol.receiveHeader();
 				Message msg = headers.interpret(protocol);
@@ -76,9 +79,12 @@ public class CoordinatorConnectionHandler extends Thread {
 			}
 		}
 	}
-	
 
-	
+	/**
+	 * This method checks if the host is already available on the connected hosts (either client or server).
+	 * @param connectionSocket
+	 * @return
+	 */
 	private Host selectHost(Socket connectionSocket) {
 		for (Host h : connectedClients){
 			if (h.equals(connectionSocket)){
@@ -90,8 +96,7 @@ public class CoordinatorConnectionHandler extends Thread {
 			if (h.equals(connectionSocket)){
 				return h;
 			}
-		}
-		
+		}		
 		return new Host(connectionSocket);
 	}
 
