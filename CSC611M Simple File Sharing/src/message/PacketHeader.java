@@ -33,8 +33,10 @@ public abstract class PacketHeader {
 				result = new IndexListPacketHeader(header);
 			break;
 		case "REQUEST":
+			result = new RequestPacketHeader(header);
 			break;
 		case "UPDATE":
+				result = new FilePacketHeader(header);
 			break;
 		case "DELETE":
 			break;

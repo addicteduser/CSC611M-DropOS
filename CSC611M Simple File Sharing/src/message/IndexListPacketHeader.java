@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import message.DropOSProtocol.HostType;
 import dropos.Config;
 
 public class IndexListPacketHeader extends FilePacketHeader {
@@ -53,7 +54,8 @@ public class IndexListPacketHeader extends FilePacketHeader {
 
 	
 	public Message interpret(DropOSProtocol protocol) throws IOException {
-		System.out.println("Now receiving index file...");
-		return super.interpret(protocol);
+		File file = receiveFile(protocol);
+		System.out.println("File was received.");
+		return new FileAndMessage("INDEX", file);
 	}
 }

@@ -11,7 +11,6 @@ public class ServerDriver {
 	
 	public static void main(String[] args) throws IOException {
 		Config.initialize();
-		
 		DropOSProtocol.type = HostType.Server;
 		DropServer s = new DropServer(Config.getPort());
 		s.run();

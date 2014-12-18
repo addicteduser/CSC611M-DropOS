@@ -16,6 +16,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import dropos.Config;
 import dropos.event.SynchronizationEvent;
@@ -81,6 +82,13 @@ public class DropOSProtocol {
 		IndexListPacketHeader packetHeader = Index.getInstance().getPacketHeader();
 		File file = Index.getInstance().getFile();
 		sendFile(packetHeader, file);
+	}
+	
+	public void sendRequestFile(FileAndMessage msg) throws IOException {
+		File f = msg.file;
+		String message = "UPDATE " + f.length() + " " + f.getName();
+		PacketHeader packetHeader = PacketHeader.create(message);
+		sendFile(packetHeader, f);
 	}
 	
 	public void sendFile(PacketHeader header, File f) throws IOException{

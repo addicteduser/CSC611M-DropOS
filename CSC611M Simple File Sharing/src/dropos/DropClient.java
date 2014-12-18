@@ -25,6 +25,7 @@ import message.DropOSProtocol;
 import message.FileAndMessage;
 import message.IndexListPacketHeader;
 import message.Message;
+import message.RequestPacketHeader;
 import dropos.event.SynchronizationEvent;
 import dropos.ui.DropClientWindow;
 
@@ -38,10 +39,10 @@ public class DropClient {
 	public static boolean RUNNING = true;
 
 	public DropClient() throws IOException {
-		System.out.println("[Client] Initializing the client.");
+		System.out.println("[CLIENT] Initializing the client.");
 		serverSocket = new ServerSocket(Config.getPort());
 		
-		System.out.println("[Client] Connecting to the server...\n");
+		System.out.println("[CLIENT] Connecting to the server...\n");
 		// Create a connection with the server
 		try {
 			protocol = new DropOSProtocol();
@@ -49,7 +50,7 @@ public class DropClient {
 			System.err.println("Cannot create connection to server.");
 		}
 
-		System.out.println("[Client] Producing index list from directory:");
+		System.out.println("[CLIENT] Producing index list from directory:");
 		System.out.println("         " + Config.getPath().toString() + "\n");
 
 		Index olderIndex = Index.startUp();
@@ -58,11 +59,11 @@ public class DropClient {
 		Resolution compare = Resolution.compare(olderIndex, newerIndex);
 
 		if (compare.countChanges() > 0) {
-			System.out.println("[Client] Here are the offline changes detected: " + compare);
-			System.out.println("About to update server regarding offline changes...");
+			System.out.println("[CLIENT] Here are the offline changes detected: " + compare);
+			System.out.println("[CLIENT] About to update server regarding offline changes...");
 			handleResolution(compare);
 		} else {
-			System.out.println("[Client] There were no offline changes detected.");
+			System.out.println("[CLIENT] There were no offline changes detected.");
 		}
 		System.out.println();
 
@@ -72,15 +73,15 @@ public class DropClient {
 
 	private void handleResolution(Resolution compare) {
 		try {
-			System.out.println("[Client] Sending the server my own index list.");
+			System.out.println("[CLIENT] Sending the server my own index list.");
 			protocol.sendIndex();
 		} catch (Exception e) {
-			System.out.println("[Client] Finished sending the index list.\n");
+			System.out.println("[CLIENT] Finished sending the index list.\n");
 		}
 		
 		
 		try {
-			System.out.println("[Client] Now waiting for server to connect and send Server index list.");
+			System.out.println("[CLIENT] Now waiting for server to connect and send Server index list.");
 			Socket connectionSocket = serverSocket.accept();
 			protocol = new DropOSProtocol(connectionSocket);
 			
@@ -88,16 +89,14 @@ public class DropClient {
 			// Note that we expect the server to respond with an index list as well.
 			IndexListPacketHeader phServerIndex = (IndexListPacketHeader) protocol.receiveHeader();
 			
-			System.out.println("[Client] Server index packet header received.");
+			System.out.println("[CLIENT] Server index packet header received.");
 			
 			// Receive the file once you have the packet header
 			FileAndMessage message = (FileAndMessage)phServerIndex.interpret(protocol);
 			
 			message.getFile();
 			
-			
-			
-			System.out.println("[Client] Server index list received.");
+			System.out.println("[CLIENT] Server index list received.");
 
 			
 			
@@ -143,8 +142,8 @@ public class DropClient {
 	private void eventPerformed(SynchronizationEvent e) {
 		try {
 
-			System.out.println("[Client] New event. Connecting to the server...");
-
+			System.out.println("[CLIENT] New event. Connecting to the server...");
+			System.out.println("Event Type: " + e.getType().toString());
 			protocol = new DropOSProtocol();
 
 			switch (e.getType()) {
@@ -171,9 +170,29 @@ public class DropClient {
 	 * 
 	 * @param e
 	 *            this contains details of the file to be requested
+	 * @throws IOException 
 	 */
-	private void requestFile(SynchronizationEvent e) {
+	private void requestFile(SynchronizationEvent e) throws IOException {
+		System.out.println("[CLIENT] Now requesting for file: " + e.getFile().toFile());
+		protocol.sendMessage("REQUEST "+ e.getFile().toFile());
+		
+		System.out.println("[CLIENT] Waiting to get the requested file.");
+		Socket connectionSocket = serverSocket.accept();
+		protocol = new DropOSProtocol(connectionSocket);
+		
+		// Wait for a response (header... and later a file);
+		// Note that we expect the server to respond with an index list as well.
+		try {
+			RequestPacketHeader rph = (RequestPacketHeader) protocol.receiveHeader();
+			
 
+			System.out.println("[CLIENT] Request packet header received.");
+			rph.interpret(protocol);
+			
+			System.out.println("[CLIENT] File received.");
+		}catch(Exception err){
+			err.printStackTrace();
+		}
 	}
 
 	/**
@@ -208,15 +227,20 @@ public class DropClient {
 		Path path = Config.getPath();
 		String filename = e.getFile().toString();
 
-		File f = new File(path + "\\" + filename);
-		protocol.performSynchronization(e, f);
-
 		// Get attributes
 		BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 		long lastModified = attributes.lastModifiedTime().toMillis();
 
 		Index directory = Index.getInstance();
 		directory.put(filename, lastModified);
+		
+		File f = new File(path + "\\" + filename);
+		System.out.println("UPDATE FILE: " + f.toPath());
+		try {
+			protocol.performSynchronization(e, f);
+		} catch(IOException ex) {
+			System.out.println("[CLIENT] The server received the file.");
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -235,7 +259,7 @@ public class DropClient {
 			ioe.printStackTrace();
 		}
 
-		System.out.println("[Client] Now watching the directory for changes.");
+		System.out.println("[CLIENT] Now watching the directory for changes.");
 
 		// We obtain the file system of the Path
 		FileSystem fs = clientPath.getFileSystem();
@@ -258,13 +282,13 @@ public class DropClient {
 					// Get the type of the event
 					kind = watchEvent.kind();
 					Path newPath = ((WatchEvent<Path>) watchEvent).context();
-
+					
 					// Create a directory event from what happened
-					SynchronizationEvent directoryEvent = new SynchronizationEvent(newPath, kind);
+					SynchronizationEvent directoryEvent = new SynchronizationEvent(Config.getPath().resolve(newPath), kind);
 
 					if (kind.toString().equalsIgnoreCase("modify"))
 						continue;
-
+					System.out.println("KIND: " + kind.toString());
 					// Fire the event
 					eventPerformed(directoryEvent);
 

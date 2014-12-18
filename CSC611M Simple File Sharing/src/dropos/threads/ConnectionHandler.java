@@ -3,9 +3,12 @@ package dropos.threads;
 import indexer.Index;
 import indexer.Resolution;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 
 import message.DropOSProtocol;
@@ -40,13 +43,18 @@ public class ConnectionHandler extends Thread {
 
 				this.connectionSocket = queue.take();
 				protocol = new DropOSProtocol(connectionSocket);
+				
+				// Wait for client connections
 
-				System.out.println("Server has accepted connection from coordinator [" + protocol.getIPAddress() + "]");
+				System.out.println("[SERVER] Accepted connection from client [" + protocol.getIPAddress() + "]");
+				//System.out.println("Server has accepted connection from coordinator [" + protocol.getIPAddress() + "]");
 
 				PacketHeader headers = protocol.receiveHeader();
 				Message msg = headers.interpret(protocol);
 				interpretMessage(msg);
 
+			} catch (IOException e) {
+				System.out.println("[SERVER] Client has received the file");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -54,8 +62,10 @@ public class ConnectionHandler extends Thread {
 	}
 	
 	private void interpretMessage(Message msg) throws UnknownHostException, IOException {
-		String command = msg.message;
+		String[] split = msg.message.split(" ");
+		String command = split[0];
 		command = command.toUpperCase();
+		System.out.println("COMMAND: " + command);
 		
 		switch(command){
 		case "INDEX":
@@ -65,9 +75,27 @@ public class ConnectionHandler extends Thread {
 			 */
 			respondWithIndex((FileAndMessage) msg);
 			break;
+		case "REQUEST":
+			respondRequest((FileAndMessage) msg);
+			break;
+		case "UPDATE":
+			// do nothing
+			break;
+		case "DELETE":
+			System.out.println(command + " command issued");
+			break;
 		}
 		
 		
+	}
+
+
+	private void respondRequest(FileAndMessage msg) throws UnknownHostException, IOException {
+		System.out.println("[SERVER] A new socket connection is being made...");
+		protocol = new DropOSProtocol(new Socket(protocol.getIPAddress(), Config.getPort()));
+		
+		System.out.println("[SERVER] Sending the requested file.");
+		protocol.sendRequestFile(msg);
 	}
 
 	/**
@@ -78,10 +106,10 @@ public class ConnectionHandler extends Thread {
 	 * @throws IOException
 	 */
 	private void respondWithIndex(FileAndMessage msg) throws UnknownHostException, IOException {
-		System.out.println("[Server] A new socket connection is being made...");
+		System.out.println("[SERVER] A new socket connection is being made...");
 		protocol = new DropOSProtocol(new Socket(protocol.getIPAddress(), Config.getPort()));
 		
-		System.out.println("[Server] Sending the server's index list.");
+		System.out.println("[SERVER] Sending the server's index list.");
 		// Respond by sending your own index
 		protocol.sendIndex();
 

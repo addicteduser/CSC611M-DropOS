@@ -4,10 +4,13 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent.Kind;
+
+import dropos.Config;
 
 public class SynchronizationEvent {
 	private Path file;
@@ -31,7 +34,7 @@ public class SynchronizationEvent {
 	
 	public SynchronizationEvent(Path file, Kind<?> kind) {
 		this.file = file;
-		
+		System.out.println("CREATE SYNC PATH TO STRING: "+file.toString());
 		if (ENTRY_CREATE == kind) {
 			type = EventType.UPDATE;
 		} else if (ENTRY_DELETE == kind) {
@@ -46,7 +49,8 @@ public class SynchronizationEvent {
 	}
 
 	public Path getFile() {
-		return file;
+		// return file;
+		return file.getFileName();
 	}
 
 	public byte[] getBytes() {
@@ -67,14 +71,15 @@ public class SynchronizationEvent {
 			size = Files.size(file);
 			switch (type) {
 			case UPDATE:
-				return "UPDATE " + size + " " + file;
+				return "UPDATE " + size + " " + file.getFileName();
 			case DELETE:
 				return "DELETE " + file;
 			case REQUEST:
-				return "REQUEST " + file;
+				return "REQUEST " + file.getFileName();
 			}
 		} catch (IOException e) {
 			System.err.println("UnknownSynchronizatioEventException!");
+			e.printStackTrace();
 		}
 		return "Unknown directory event type!";
 	}
