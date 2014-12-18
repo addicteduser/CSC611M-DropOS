@@ -105,6 +105,11 @@ public class CoordinatorConnectionHandler extends Thread {
 		String command = msg.message;
 		command = command.toUpperCase();
 		
+		FileAndMessage fileAndMsg = null;
+		if (msg instanceof FileAndMessage)
+			fileAndMsg = (FileAndMessage)msg;
+		
+		
 		switch(command){
 		case "SREGISTER":
 			connectedServers.add(host);
@@ -119,16 +124,15 @@ public class CoordinatorConnectionHandler extends Thread {
 			break;
 		
 		case "INDEX":
-			respondWithIndex((FileAndMessage) msg);
+			respondWithIndex(fileAndMsg);
 			break;
 		
 		case "UPDATE":
-			verifyUpdate((FileAndMessage)msg);
+			verifyUpdate(fileAndMsg);
 			break;
 		
 		case "REQUEST":
-			respondWithRequest((FileAndMessage)msg);
-			// Choose a server from the File and Server Redundancies list that will give the file.
+			respondWithFile(fileAndMsg);
 			break;
 		
 		case "DELETE":
@@ -186,8 +190,14 @@ public class CoordinatorConnectionHandler extends Thread {
 		}
 	}
 
-	private void respondWithRequest(FileAndMessage msg) {
+	private void respondWithFile(FileAndMessage msg) {
+		// Find out who has the file
 		
+		// Choose a random server
+		
+		// Get the file 
+		
+		// Pass back to client 
 	}
 
 	private void respondWithIndex(FileAndMessage msg) throws UnknownHostException, IOException {
