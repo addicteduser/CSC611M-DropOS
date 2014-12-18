@@ -13,7 +13,7 @@ public class FilePacketHeader extends PacketHeader {
 
 	protected long filesize;
 	protected String filename;
-	private File file;
+	protected File file;
 
 	public FilePacketHeader(String header) {
 		super(header);

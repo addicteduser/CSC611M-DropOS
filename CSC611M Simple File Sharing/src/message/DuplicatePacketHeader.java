@@ -38,7 +38,11 @@ public class DuplicatePacketHeader extends FilePacketHeader{
 	public void duplicateRedundancy(DropOSProtocol protocol) {
 		for(String ip : ipAddresses) {
 			PacketHeader updatepacket = PacketHeader.create("UPDATE:"+filesize+":"+filename);
-			// protocol.sendFile(updatepacket, f);
+			try {
+				protocol.sendFile(updatepacket, file);
+			} catch (IOException e) {
+				System.err.println("Could not send "+file.toPath()+" to IP Address "+ ip);
+			}
 		}
 	}
 }
