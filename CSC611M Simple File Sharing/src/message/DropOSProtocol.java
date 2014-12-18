@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -66,24 +67,26 @@ public class DropOSProtocol {
 		}
 	}
 
-	public void sendMessage(String message) throws IOException {
-		byte[] buf = new byte[BUFFER_LENGTH];
-		byte[] mes = message.getBytes("UTF-8");
-		byte[] packetHeaderLength = intToByteArray(mes.length);
-
-		System.out.println("Sending message: " + message);
-
-		// First 4 bytes contain an integer value, which is the length of the packet header
-		System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
-
-		// The next bytes would be the packet header
-		System.arraycopy(mes, 0, buf, 4, mes.length);
-
+	public void sendMessage(String message) {
 		try {
+			byte[] buf = new byte[BUFFER_LENGTH];
+			byte[] mes = message.getBytes("UTF-8");
+			byte[] packetHeaderLength = intToByteArray(mes.length);
+
+			System.out.println("Sending message: " + message);
+
+			// First 4 bytes contain an integer value, which is the length of the packet header
+			System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
+
+			// The next bytes would be the packet header
+			System.arraycopy(mes, 0, buf, 4, mes.length);
+
 			bufferedOutputStream.write(buf, 0, buf.length);
 			bufferedOutputStream.flush();
-		} catch (Exception e) {
-			System.out.println("Message sent!");
+		} catch (UnsupportedEncodingException e) {
+			System.out.println("Message could not be converted into bytes.");
+		}catch (IOException e){
+			e.printStackTrace();
 		}
 	}
 
@@ -124,29 +127,25 @@ public class DropOSProtocol {
 			bufferedOutputStream.write(mes, bytesWrittenOffset, mes.length);
 
 			bytesWrittenOffset += mes.length;
-			
-			
-			
-			
-			
+
 			// The last stream of bytes contains the payload; the file
 			FileInputStream fileInputStream = new FileInputStream(f);
 			BufferedInputStream bin = new BufferedInputStream(fileInputStream);
-			
+
 			int fileBytesWritten = 0;
-			do{
+			do {
 				int bytesRead = bin.read(buf, fileBytesWritten, BUFFER_LENGTH);
 				// If you read something enough to fit the buffer, then write it out to the socket
-				if (bytesRead > 0){
+				if (bytesRead > 0) {
 					fileBytesWritten += bytesRead;
 					// System.arraycopy(fbuf, 0, buf, mes.length + 4, fbuf.length);
 					bufferedOutputStream.write(buf, bytesWrittenOffset, bytesRead);
 					bytesWrittenOffset += bytesRead;
 				}
-			}while(fileBytesWritten < f.length());
+			} while (fileBytesWritten < f.length());
 
 			fileInputStream.close();
-			
+
 		} catch (Exception e) {
 			System.out.println("File " + f + " was sent. (Recepient closed the socket.)");
 		}
@@ -196,12 +195,12 @@ public class DropOSProtocol {
 		do {
 			// Read from input stream into buffer
 			bytesRead = bufferedInputStream.read(buf, totalBytesRead, BUFFER_LENGTH);
-			
+
 			// If you read something, then write it out onto the file
-			if (bytesRead >= 0){
+			if (bytesRead >= 0) {
 				// Write buffer into to file
 				bufferedOutputStream.write(buf, totalBytesRead, bytesRead);
-				
+
 				totalBytesRead += bytesRead;
 			}
 		} while (totalBytesRead < filesize);

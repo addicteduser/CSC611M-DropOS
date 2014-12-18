@@ -70,12 +70,8 @@ public class DropClient implements Runnable {
 	}
 
 	private Resolution checkOfflineChanges() {
-		try {
-			protocol = DropOSProtocol.connectToCoordinator();
-			protocol.sendMessage("CREGISTER:" + port);
-		} catch (IOException e) {
-			log("Now registered to the coordinator.");
-		}
+		protocol = DropOSProtocol.connectToCoordinator();
+		protocol.sendMessage("CREGISTER:" + port);
 
 		protocol = DropOSProtocol.connectToCoordinator();
 

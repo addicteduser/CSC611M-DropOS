@@ -71,6 +71,7 @@ public class CoordinatorConnectionHandler extends Thread {
 				Message msg = headers.interpret(protocol);
 				interpretMessage(msg);
 				System.out.println();
+				host.release();
 
 			} catch (Exception e) {
 				e.printStackTrace();

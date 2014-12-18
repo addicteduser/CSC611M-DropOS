@@ -29,12 +29,9 @@ public class DropServer implements Runnable{
 	}
 
 	public void run() {
-		try {
-			protocol = DropOSProtocol.connectToCoordinator();
-			protocol.sendMessage("SREGISTER:" + port);
-		} catch (IOException e) {
-			System.out.println("[Server] Now registered to the coordinator.");
-		}
+		protocol = DropOSProtocol.connectToCoordinator();
+		protocol.sendMessage("SREGISTER:" + port);
+		
 		
 		while (true) {
 			try {
