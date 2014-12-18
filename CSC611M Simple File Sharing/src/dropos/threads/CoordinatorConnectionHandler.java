@@ -21,6 +21,7 @@ import dropos.Config;
 import dropos.DropCoordinator;
 import dropos.DropServer;
 import dropos.Host;
+import dropos.Host.HostType;
 
 /**
  * During initialization, a {@link ConnectionHandler} is made to block at the queue which holds the pending {@link Socket} instances to be handled.
@@ -107,11 +108,13 @@ public class CoordinatorConnectionHandler extends Thread {
 		switch(command){
 		case "SREGISTER":
 			connectedServers.add(host);
+			host.setType(HostType.Server);
 			log("Registered host [" + host + "] as a server connection.");
 			break;
 			
 		case "CREGISTER":
 			connectedClients.add(host);
+			host.setType(HostType.Client);
 			log("Registered host [" + host + "] as a client connection.");
 			break;
 		
