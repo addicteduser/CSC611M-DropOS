@@ -28,12 +28,19 @@ import message.FilePacketHeader;
 import message.IndexListPacketHeader;
 import message.PacketHeader;
 import message.RequestPacketHeader;
+import message.DropOSProtocol.HostType;
 import dropos.event.SynchronizationEvent;
 import dropos.ui.DropClientWindow;
 
 public class DropClient implements Runnable{
 	private DropOSProtocol protocol;
 	private ServerSocket serverSocket;
+	
+	private DropClient(int port) throws IOException{
+		
+		serverSocket = new ServerSocket(port);
+		System.out.println("[CLIENT] Client is now listening on port " + port + ".");
+	}
 
 	/**
 	 * This method is set to false from the GUI, which allows this thread to terminate.
@@ -41,8 +48,6 @@ public class DropClient implements Runnable{
 	public static boolean RUNNING = true;
 
 	public DropClient() throws IOException {
-		System.out.println("[CLIENT] Initializing the client.");
-		serverSocket = new ServerSocket(Config.getPort());
 		
 		System.out.println("[CLIENT] Connecting to the server...\n");
 		// Create a connection with the server
@@ -348,4 +353,26 @@ public class DropClient implements Runnable{
 		}
 	}
 
+	
+	/**
+	 * Factory pattern to create a {@link DropClient} instance on the next available port. The function begins with the port dictated on the {@link Config} file.
+	 * @return
+	 */
+	public static DropClient create() {
+		boolean success = false;
+		DropClient client = null;
+		int port = Config.getPort();
+		do {
+			try {
+				DropOSProtocol.type = HostType.Server;
+				client = new DropClient(port);
+				success = true;
+			} catch (IOException e) {
+				System.out.println("Could not create client on port " + port + ". Attempting to use port " + (port + 1));
+				++port;
+			}
+		} while (success == false);
+		System.out.println("Successfully created a DropClient on port " + port);
+		return client;
+	}
 }
