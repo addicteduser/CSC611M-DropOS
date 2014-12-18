@@ -25,6 +25,7 @@ public class DropOSProtocol {
 	public enum HostType {
 		Client, Coordinator, Server
 	}
+
 	public static HostType type;
 	private String ipAddress;
 	private Socket socket;
@@ -37,17 +38,17 @@ public class DropOSProtocol {
 	 * The packet header has a length of 5mb.
 	 */
 	private static final int PACKET_MAX_LENGTH = 5 * 1024 * 1024;
-	
-	public DropOSProtocol() throws UnknownHostException, IOException{
+
+	public DropOSProtocol() throws UnknownHostException, IOException {
 		socket = new Socket(Config.getIpAddress(), Config.getPort());
 		initialize(socket);
 	}
-	
+
 	public DropOSProtocol(Socket s) {
 		initialize(s);
 	}
-	
-	private void initialize(Socket s){
+
+	private void initialize(Socket s) {
 		socket = s;
 		try {
 			InputStream inputStream = s.getInputStream();
@@ -67,47 +68,47 @@ public class DropOSProtocol {
 		byte[] buf = new byte[PACKET_MAX_LENGTH];
 		byte[] mes = message.getBytes("UTF-8");
 		byte[] packetHeaderLength = intToByteArray(mes.length);
-		
+
+		System.out.println("Sending message: " + message);
+
 		// First 4 bytes contain an integer value, which is the length of the packet header
 		System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
-		
+
 		// The next bytes would be the packet header
 		System.arraycopy(mes, 0, buf, 4, mes.length);
 		try {
-			
-		
-		bufferedOutputStream.write(buf, 0, buf.length);
-		bufferedOutputStream.flush();
-		}catch(Exception e){
-			System.out.println("Message sent: " + message);
+			bufferedOutputStream.write(buf, 0, buf.length);
+			bufferedOutputStream.flush();
+		} catch (Exception e) {
+			System.out.println("Message sent!");
 		}
 	}
-	
-	public void sendIndex() throws IOException{
+
+	public void sendIndex() throws IOException {
 		Index index = Index.getInstance();
 		index.write();
 		IndexListPacketHeader packetHeader = index.getPacketHeader();
 		File file = index.getFile();
 		sendFile(packetHeader, file);
 	}
-	
+
 	public void sendRequestFile(FileAndMessage msg) throws IOException {
 		File f = msg.file;
 		String message = "UPDATE:" + f.length() + ":" + f.getName();
 		PacketHeader packetHeader = PacketHeader.create(message);
 		sendFile(packetHeader, f);
 	}
-	
-	public void sendFile(PacketHeader header, File f) throws IOException{
-		
+
+	public void sendFile(PacketHeader header, File f) throws IOException {
+
 		// header
 		byte[] buf = new byte[PACKET_MAX_LENGTH];
 		byte[] mes = header.getBytes();
 		byte[] packetHeaderLength = intToByteArray(mes.length);
-		
+
 		// First 4 bytes contain an integer value, which is the length of the packet header
 		System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
-		
+
 		// The next bytes would be the packet header
 		System.arraycopy(mes, 0, buf, 4, mes.length);
 
@@ -117,13 +118,13 @@ public class DropOSProtocol {
 
 		BufferedInputStream bin = new BufferedInputStream(fileInputStream);
 		bin.read(fbuf, 0, fbuf.length);
-		
+
 		try {
 
 			System.arraycopy(fbuf, 0, buf, mes.length + 4, fbuf.length);
 			bufferedOutputStream.write(buf, 0, buf.length);
 			bufferedOutputStream.flush();
-		}catch(Exception e){
+		} catch (Exception e) {
 			System.out.println("File " + f + " was sent. (Recepient closed the socket.)");
 		}
 
@@ -131,19 +132,25 @@ public class DropOSProtocol {
 	}
 
 	/**
-	 * This method is called when changes are detected on your directory while the program is running. 
-	 * @param event the kind of event fired
-	 * @param f the file that was modified/added/deleted
+	 * This method is called when changes are detected on your directory while the program is running.
+	 * 
+	 * @param event
+	 *            the kind of event fired
+	 * @param f
+	 *            the file that was modified/added/deleted
 	 * @throws IOException
 	 */
 	public void performSynchronization(SynchronizationEvent event, File f) throws IOException {
 		sendFile(PacketHeader.create(event), f);
 	}
-	
+
 	/**
 	 * This method handles receiving a file
-	 * @param filePath the absolute path of where to save the file
-	 * @param filesize the size of the file; in number of bytes
+	 * 
+	 * @param filePath
+	 *            the absolute path of where to save the file
+	 * @param filesize
+	 *            the size of the file; in number of bytes
 	 * @return the complete file received from the network
 	 * @throws IOException
 	 */
@@ -182,33 +189,33 @@ public class DropOSProtocol {
 	}
 
 	private static int byteArrayToInt(byte[] b) {
-	    final ByteBuffer bb = ByteBuffer.wrap(b);
-	    bb.order(ByteOrder.LITTLE_ENDIAN);
-	    return bb.getInt();
+		final ByteBuffer bb = ByteBuffer.wrap(b);
+		bb.order(ByteOrder.LITTLE_ENDIAN);
+		return bb.getInt();
 	}
 
 	private static byte[] intToByteArray(int i) {
-	    final ByteBuffer bb = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
-	    bb.order(ByteOrder.LITTLE_ENDIAN);
-	    bb.putInt(i);
-	    return bb.array();
+		final ByteBuffer bb = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
+		bb.order(ByteOrder.LITTLE_ENDIAN);
+		bb.putInt(i);
+		return bb.array();
 	}
-	
+
 	public PacketHeader receiveHeader() throws IOException {
 		String message = null;
 		int bytesRead = 0;
-		
+
 		byte[] size = new byte[4];
-		
+
 		bytesRead = bufferedInputStream.read(size, 0, 4);
-		
+
 		// Determine N; how many bytes is the packet header?
 		int length = byteArrayToInt(size);
 
 		byte[] buf = new byte[length];
 		bytesRead = 0;
 		headerBytesRead = 0;
-		
+
 		// Keep receiving the packet header content until you finish reading N number of bytes.
 		do {
 			bytesRead = bufferedInputStream.read(buf, headerBytesRead, length - headerBytesRead);

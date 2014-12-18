@@ -20,8 +20,10 @@ public class DropServer implements Runnable{
 	private static ServerSocket serverSocket;
 	private ThreadPool pool;
 	private DropOSProtocol protocol;
+	private int port;
 
 	private DropServer(int port) throws IOException {
+		this.port = port;
 		serverSocket = new ServerSocket(port);
 		pool = new ThreadPool(16);
 	}
@@ -29,9 +31,9 @@ public class DropServer implements Runnable{
 	public void run() {
 		try {
 			protocol = new DropOSProtocol();
-			protocol.sendMessage("REGISTER");
-		} catch (UnknownHostException e) {
+			protocol.sendMessage("REGISTER:" + port);
 		} catch (IOException e) {
+			System.out.println("[Server] Now registered to the coordinator.");
 		}
 		
 		while (true) {
