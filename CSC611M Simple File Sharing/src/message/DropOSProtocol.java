@@ -110,10 +110,16 @@ public class DropOSProtocol {
 
 		BufferedInputStream bin = new BufferedInputStream(fileInputStream);
 		bin.read(fbuf, 0, fbuf.length);
+		
+		try {
 
-		System.arraycopy(fbuf, 0, buf, mes.length + 4, fbuf.length);
-		bufferedOutputStream.write(buf, 0, buf.length);
-		bufferedOutputStream.flush();
+			System.arraycopy(fbuf, 0, buf, mes.length + 4, fbuf.length);
+			bufferedOutputStream.write(buf, 0, buf.length);
+			bufferedOutputStream.flush();
+		}catch(Exception e){
+			System.out.println("File " + f + " was sent. (Recepient closed the socket.)");
+		}
+
 		fileInputStream.close();
 	}
 
