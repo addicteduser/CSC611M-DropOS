@@ -15,7 +15,8 @@ import dropos.threads.CoordinatorThreadPool;
  * @author Darren
  *
  */
-public class DropCoordinator {
+public class DropCoordinator implements Runnable{
+	private static DropCoordinator instance;
 	private static ServerSocket serverSocket;
 	private CoordinatorThreadPool pool;
 
@@ -34,5 +35,19 @@ public class DropCoordinator {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static DropCoordinator create(){
+		if (instance == null){
+			try {
+				instance = new DropCoordinator(Config.getPort());
+			} catch (IOException e) {
+				System.out.println("[Coordinator] The coordinator could not run because it is not using port " + Config.getPort() +". Please start the coordinator first.");
+				System.exit(1);
+			}
+		}else{
+			System.out.println("[Coordinator] The coordinator is already instantiated. Returning reference...");
+		}
+		return instance;
 	}
 }
