@@ -31,7 +31,7 @@ public class ClientDriver {
 		DropClient c = DropClient.create();
 		
 		Thread thread = new Thread(c);
-		thread.run();
+		thread.start();
 	}
 
 }

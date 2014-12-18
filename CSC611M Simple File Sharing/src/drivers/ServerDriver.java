@@ -13,7 +13,7 @@ public class ServerDriver {
 		DropServer s = DropServer.create();
 		
 		Thread thread = new Thread(s);
-		thread.run();
+		thread.start();
 	}
 
 }
