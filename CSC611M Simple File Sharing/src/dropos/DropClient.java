@@ -196,8 +196,8 @@ public class DropClient implements Runnable {
 					BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 					long lastModified = attributes.lastModifiedTime().toMillis();
 					
-					FileAndLastModifiedPair e = new FileAndLastModifiedPair(filename, lastModified);
-					Index.getInstance(port).add(e);
+					Index instance = Index.getInstance(port);
+					instance.put(filename, lastModified);
 				} catch (Exception err) {
 					log("Error, could not add " + filename + " to the index.");
 				}
@@ -310,6 +310,8 @@ public class DropClient implements Runnable {
 				log(e.toString());
 				break;
 			}
+			// Write on index again
+			Index.getInstance(port).write(port);
 		} catch (IOException err) {
 			err.printStackTrace();
 		}
