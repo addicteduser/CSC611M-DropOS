@@ -3,6 +3,7 @@ package dropos.threads;
 import indexer.Index;
 import indexer.Resolution;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -11,7 +12,10 @@ import java.util.concurrent.BlockingQueue;
 import message.DropOSProtocol;
 import message.FileAndMessage;
 import message.Message;
-import message.PacketHeader;
+import message.packet.FilePacketHeader;
+import message.packet.PacketHeader;
+import message.packet.RequestPacketHeader;
+import message.packet.UpdatePacketHeader;
 import dropos.Config;
 import dropos.DropCoordinator;
 import dropos.DropServer;
@@ -90,24 +94,28 @@ public class ConnectionHandler extends Thread {
 			respondWithIndex((FileAndMessage) msg);
 			break;
 		case "REQUEST":
-			respondRequest((FileAndMessage) msg);
+			respondToRequest((FileAndMessage) msg);
 			break;
 		case "UPDATE":
 			// do nothing
 			break;
 		case "DELETE":
-			System.out.println(command + " command issued");
+			System.out.println(command + " command issued.");
 			break;
 		}
 
 	}
 
-	private void respondRequest(FileAndMessage msg) throws UnknownHostException, IOException {
+	private void respondToRequest(FileAndMessage msg) throws UnknownHostException, IOException {
+		File f = msg.getFile();
 		protocol = DropOSProtocol.connectToCoordinator();
 		log("Created a new socket connection to the Coordinator.");
 
-		log("Sending the requested file [" + msg.getFile() + "]...");
-		protocol.sendRequestFile(msg);
+		log("Sending the requested file [" + f.getName() + "] as an update...");
+		
+		UpdatePacketHeader updatePacket = PacketHeader.createUpdate(f.getName(), Config.getPort());
+		
+		protocol.sendFile(updatePacket, f);
 		log("Sent.");
 	}
 

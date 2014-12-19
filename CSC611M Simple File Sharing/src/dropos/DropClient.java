@@ -24,11 +24,12 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import message.DropOSProtocol;
 import message.DropOSProtocol.HostType;
+import message.packet.FilePacketHeader;
+import message.packet.IndexListPacketHeader;
+import message.packet.PacketHeader;
+import message.packet.RequestPacketHeader;
 import message.FileAndMessage;
-import message.FilePacketHeader;
-import message.IndexListPacketHeader;
-import message.PacketHeader;
-import message.RequestPacketHeader;
+import message.Message;
 import dropos.event.SynchronizationEvent;
 import dropos.ui.DropClientWindow;
 
@@ -82,7 +83,9 @@ public class DropClient implements Runnable {
 
 	private Resolution checkOfflineChanges() {
 		protocol = DropOSProtocol.connectToCoordinator();
-		protocol.sendMessage("CREGISTER:" + port);
+		
+		PacketHeader packet = PacketHeader.createClientRegister(port);
+		protocol.sendMessage(packet);
 
 		log("Producing index list from directory:");
 		System.out.println("         " + Config.getInstancePath(port) + "\n");
@@ -242,7 +245,7 @@ public class DropClient implements Runnable {
 				switch (action) {
 				case "UPDATE":
 					Long size = new File(filename).length();
-					PacketHeader header = PacketHeader.create("UPDATE:" + size + ":" + filename, port);
+					PacketHeader header = PacketHeader.createUpdate(filename, port);
 					p.sendFile(header, f);
 					break;
 				case "DELETE":
@@ -250,8 +253,9 @@ public class DropClient implements Runnable {
 					break;
 				case "REQUEST":
 					// Send file request to server
-					p.sendMessage("REQUEST:" + filename);
-					serverSocket = new ServerSocket(Config.getPort());
+					RequestPacketHeader packet = PacketHeader.createRequest(filename, port);
+					
+					p.sendMessage(packet);
 
 					// Wait for coordinator to send UPDATE message
 					Socket s = serverSocket.accept();
@@ -318,25 +322,22 @@ public class DropClient implements Runnable {
 	 * @throws IOException
 	 */
 	private void requestFile(SynchronizationEvent e) throws IOException {
-		log("Now requesting for file: " + e.getFile().toFile());
-		protocol.sendMessage("REQUEST:" + e.getFile().toFile());
 
-		log("Waiting to get the requested file.");
+		log("Now requesting for file: " + e.getFile().toFile());
+		PacketHeader requestPacket = PacketHeader.create(e, port);
+		protocol.sendMessage(requestPacket);
+
 		Socket connectionSocket = serverSocket.accept();
 		protocol = new DropOSProtocol(connectionSocket);
 
-		// Wait for a response (header... and later a file);
-		// Note that we expect the coordinator to respond with an index list as well.
-		try {
-			RequestPacketHeader rph = (RequestPacketHeader) protocol.receiveHeader();
+		FilePacketHeader filePacketHeader = (FilePacketHeader) protocol.receiveHeader();
 
-			log("Request packet header received.");
-			rph.interpret(protocol);
+		filePacketHeader.interpret(protocol);
+		log("File update packet header received from server.");
+		
+		filePacketHeader.writeFile(port);
+		log("File received.");
 
-			log("File received.");
-		} catch (Exception err) {
-			err.printStackTrace();
-		}
 	}
 
 	/**
@@ -350,21 +351,8 @@ public class DropClient implements Runnable {
 	 * @throws IOException
 	 */
 	private void deleteFile(SynchronizationEvent e){
-		File f = new File(Config.getInstancePath(port) + "\\" + e.getFile().toString());
-		try {
-			Path path = f.toPath();
-			if (Files.exists(path)){
-				Files.delete(path);
-				log("File " + f + " was deleted.");
-			}else{
-				log("File " + f + " could not be deleted because it is missing / already deleted.");
-			}
-				
-		}catch(IOException err){
-			log("Could not delete file: ");
-			log(f.toString());
-			err.printStackTrace();
-		}
+		PacketHeader deletePacket = PacketHeader.create(e, port);
+		protocol.sendMessage(deletePacket);
 	}
 
 	/**

@@ -1,6 +1,9 @@
-package message;
+package message.packet;
 
 import java.io.IOException;
+
+import message.DropOSProtocol;
+import message.Message;
 
 public class ServerIndexListPacketHeader extends IndexListPacketHeader {
 	String ipAddress;

@@ -10,6 +10,7 @@ import java.nio.file.Path;
 
 import message.DropOSProtocol;
 import message.DropOSProtocol.HostType;
+import message.packet.PacketHeader;
 import dropos.threads.CoordinatorConnectionHandler;
 import dropos.threads.ThreadPool;
 
@@ -35,7 +36,9 @@ public class DropServer implements Runnable {
 
 	public void run() {
 		protocol = DropOSProtocol.connectToCoordinator();
-		protocol.sendMessage("SREGISTER:" + port);
+		
+		PacketHeader serverRegister = PacketHeader.createServerRegister(port);
+		protocol.sendMessage(serverRegister);
 
 
 		// Check if folder exists

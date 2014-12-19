@@ -1,15 +1,18 @@
-package message;
+package message.packet;
 
 import java.io.File;
 import java.nio.file.Files;
 
+import message.DropOSProtocol;
+import message.Message;
 import dropos.Config;
 
 public class DeletePacketHeader extends PacketHeader {
 	protected String filename;
-	public DeletePacketHeader(int port, String header) {
-		super(port, header);
-		filename = header.split(":")[1];
+	
+	public DeletePacketHeader(int port, String filename) {
+		super(port, "DELETE:" + filename);
+		this.filename = filename;
 	}
 
 	public Message interpret(DropOSProtocol protocol) {
