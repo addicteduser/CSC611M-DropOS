@@ -10,7 +10,8 @@ public class CoordinatorDriver {
 	public static void main(String[] args) throws IOException {
 		Config.initialize();
 		
-		DropCoordinator coordinator = new DropCoordinator(Config.getPort());
-		coordinator.run();
+		DropCoordinator coordinator = DropCoordinator.create();
+		Thread thread = new Thread(coordinator);
+		thread.start();
 	}
 }
