@@ -167,7 +167,6 @@ public class CoordinatorConnectionHandler extends Thread {
 					
 					selectedServersForRedundancy.add(connectedServers.get(sRand));
 				}
-	
 			}
 						
 			// create the duplicate packet header

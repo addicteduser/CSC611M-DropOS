@@ -405,7 +405,7 @@ public class DropClient implements Runnable {
 		int port = Config.getPort();
 		do {
 			try {
-				DropOSProtocol.type = HostType.Server;
+				DropOSProtocol.type = HostType.Client;
 				client = new DropClient(port);
 				success = true;
 			} catch (IOException e) {
