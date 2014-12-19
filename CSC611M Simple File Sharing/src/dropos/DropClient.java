@@ -152,11 +152,16 @@ public class DropClient implements Runnable {
 					Path newPath = ((WatchEvent<Path>) watchEvent).context();
 
 					// Create a directory event from what happened
-					SynchronizationEvent directoryEvent = new SynchronizationEvent(Config.getInstancePath(port).resolve(newPath), kind);
+					Path file = Config.getInstancePath(port).resolve(newPath);
+					SynchronizationEvent directoryEvent = new SynchronizationEvent(file, kind);
 
 					if (kind.toString().equalsIgnoreCase("modify"))
 						continue;
-					System.out.println("KIND: " + kind.toString());
+					
+					// Ignore changes to the index list
+					if (file.toFile().getName().equalsIgnoreCase("indexlist.txt"))
+						continue;
+
 					// Fire the event
 					eventPerformed(directoryEvent);
 					
@@ -288,7 +293,6 @@ public class DropClient implements Runnable {
 	 */
 	private void eventPerformed(SynchronizationEvent e) {
 		try {
-
 			log("New DirectoryEvent of type [" + e.getType() + "] detected. Connecting to the coordinator...");
 			protocol = DropOSProtocol.connectToCoordinator();
 
