@@ -15,6 +15,6 @@ public class FileAndMessage extends Message {
 	
 	@Override
 	public String toString() {
-		return message + "\n" + file.toString();
+		return message + "\n" + file.getName();
 	}
 }

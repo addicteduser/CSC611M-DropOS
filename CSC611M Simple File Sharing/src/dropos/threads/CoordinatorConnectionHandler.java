@@ -236,7 +236,7 @@ public class CoordinatorConnectionHandler extends Thread {
 	
 	// TODO This is supposed to check the server-side resolution if a file is indeed valid. If so, it should return true to accept the file.
 	private boolean isValid(FileAndMessage msg, Host host) throws Exception {
-			if (resolutions.containsKey(host.getIpAddress()) == false)
+			if (resolutions.containsKey(host) == false)
 				throw new Exception("Invalid UPDATE message received. Client did not send me his index file.");
 			
 			Resolution resolution = resolutions.get(host);
