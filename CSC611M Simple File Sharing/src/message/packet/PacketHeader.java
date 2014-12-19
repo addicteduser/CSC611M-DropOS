@@ -93,7 +93,7 @@ public class PacketHeader {
 
 	public static PacketHeader parsePacket(String message, int port) {
 		String command = message.split(":")[0];
-		String filename = message.split(":")[2];
+		String filename = message.split(":")[1];
 		
 		//returns a PacketHeader of the specified type
 		switch(command){
@@ -106,6 +106,7 @@ public class PacketHeader {
 			case "CREGISTER": return new RegisterPacketHeader(port,command);
 			case "INDEX": return new IndexListPacketHeader(port,message);
 			case "DELETE": return new DeletePacketHeader(port,filename);
+			case "DUPLICATE": return new DuplicatePacketHeader(port, message);
 		}
 		return null;
 	}
