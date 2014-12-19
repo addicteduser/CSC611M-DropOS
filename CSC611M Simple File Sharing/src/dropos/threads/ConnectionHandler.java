@@ -94,13 +94,27 @@ public class ConnectionHandler extends Thread {
 			respondToRequest((FileAndMessage) msg);
 			break;
 		case "UPDATE":
-			// do nothing
+			sendToRedundancies((FileAndMessage) msg);
 			break;
 		case "DELETE":
 			System.out.println(command + " command issued.");
 			break;
 		}
 
+	}
+
+	private void sendToRedundancies(FileAndMessage msg) {
+		// Get the file
+		File f = msg.getFile();
+		
+		protocol = DropOSProtocol.connectToCoordinator();
+		log("Created a new socket connection to the Coordinator.");
+
+		log("Sending the requested file [" + f.getName() + "] as an update...");
+		
+		// for each IP in the redundancy
+			// create packet header
+			// send file
 	}
 
 	private void respondToRequest(FileAndMessage msg) throws UnknownHostException, IOException {
