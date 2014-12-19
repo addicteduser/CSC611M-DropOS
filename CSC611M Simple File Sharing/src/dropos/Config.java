@@ -47,6 +47,9 @@ public class Config {
 	 * of the designated host. They are differentiated by their port number. Therefore,
 	 * the hosts have their own separate 'instance folders' labeled by their port number.
 	 *  
+	 *  Note, the folders should not be specified as 'client' because these are used by all 
+	 *  hosts whether Client, Coordinator, or Server.
+	 *  
 	 * @param port
 	 * @return
 	 */
