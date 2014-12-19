@@ -93,13 +93,19 @@ public class PacketHeader {
 
 	public static PacketHeader parsePacket(String message, int port) {
 		String command = message.split(":")[0];
+		String filename = message.split(":")[2];
+		
+		//returns a PacketHeader of the specified type
 		switch(command){
-			case "REQUEST": break;
-			case "UPDATE": break;
-			case "SREGISTER": break;
-			case "CREGISTER": break;
-			case "INDEX": break;
-			case "DELETE": break;
+			//For request,update and delete, constructor needs port and filename
+			//For index, constructor already parses the message
+			//For sregister and cregister, type is specified by the command
+			case "REQUEST": return new RequestPacketHeader(port,filename);
+			case "UPDATE": return new UpdatePacketHeader(port,filename);
+			case "SREGISTER":
+			case "CREGISTER": return new RegisterPacketHeader(port,command);
+			case "INDEX": return new IndexListPacketHeader(port,message);
+			case "DELETE": return new DeletePacketHeader(port,filename);
 		}
 		return null;
 	}
