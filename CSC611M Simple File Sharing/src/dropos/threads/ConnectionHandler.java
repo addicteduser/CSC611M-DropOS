@@ -82,39 +82,31 @@ public class ConnectionHandler extends Thread {
 		command = command.toUpperCase();
 		System.out.println("COMMAND: " + command);
 
+		FileAndMessage fileAndMsg = null;
+		if (msg instanceof FileAndMessage){
+			fileAndMsg = (FileAndMessage) msg;
+		}
+		
 		switch (command) {
 		case "INDEX":
 			/**
 			 * If the server receives an index command, it means that the client sent its index. What the server is supposed to do is to respond with its own
 			 * index and perform resolution.
 			 */
-			respondWithIndex((FileAndMessage) msg);
+			respondWithIndex(fileAndMsg);
 			break;
 		case "REQUEST":
-			respondToRequest((FileAndMessage) msg);
+			respondToRequest(fileAndMsg);
 			break;
 		case "UPDATE":
-			sendToRedundancies((FileAndMessage) msg);
+			// Handled in interpret
+
 			break;
 		case "DELETE":
-			System.out.println(command + " command issued.");
+			// Handled in interpret
 			break;
 		}
 
-	}
-
-	private void sendToRedundancies(FileAndMessage msg) {
-		// Get the file
-		File f = msg.getFile();
-		
-		protocol = DropOSProtocol.connectToCoordinator();
-		log("Created a new socket connection to the Coordinator.");
-
-		log("Sending the requested file [" + f.getName() + "] as an update...");
-		
-		// for each IP in the redundancy
-			// create packet header
-			// send file
 	}
 
 	private void respondToRequest(FileAndMessage msg) throws UnknownHostException, IOException {
