@@ -3,10 +3,12 @@ package message.packet;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import message.DropOSProtocol;
 import message.Message;
+import dropos.Config;
 import dropos.Host;
 import dropos.event.SynchronizationEvent;
 
@@ -26,6 +28,10 @@ public class PacketHeader {
 	public static PacketHeader create(SynchronizationEvent event, int port) {
 		File file = event.getFile().toFile();
 		String filename = file.getName();
+		Path path = Config.getInstancePath(port).resolve(filename);
+		file = path.toFile();
+		
+		
 		
 		switch(event.getType()){
 		case DELETE:

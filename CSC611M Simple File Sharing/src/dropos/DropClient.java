@@ -383,7 +383,7 @@ public class DropClient implements Runnable {
 		directory.put(filename, lastModified);
 
 		File f = new File(path + "\\" + filename);
-		protocol.performSynchronization(e, f);
+		protocol.performSynchronization(e, f, port);
 	}
 
 	public static void log(String message) {

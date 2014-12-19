@@ -164,7 +164,7 @@ public class DropOSProtocol {
 	 *            the file that was modified/added/deleted
 	 * @throws IOException
 	 */
-	public void performSynchronization(SynchronizationEvent event, File f) throws IOException {
+	public void performSynchronization(SynchronizationEvent event, File f, int port) throws IOException {
 		sendFile(PacketHeader.create(event, port), f);
 	}
 

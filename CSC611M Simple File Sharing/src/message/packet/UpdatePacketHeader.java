@@ -10,10 +10,6 @@ public class UpdatePacketHeader extends FilePacketHeader {
 		this.filename = filename;
 		this.filesize = filesize;
 		
-		String path = filePath();
-		Path p = Paths.get(path);
-		this.filesize = p.toFile().length();
-		
 		this.header += ":" + filesize;
 		
 		this.header += ":" + filename;
