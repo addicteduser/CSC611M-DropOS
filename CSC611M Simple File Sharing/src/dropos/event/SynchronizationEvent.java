@@ -20,27 +20,14 @@ public class SynchronizationEvent {
 		UPDATE, REQUEST, DELETE
 	}
 	
-	public SynchronizationEvent(Path file, String action){
-		this.file = file;
-		
-		if (action.equalsIgnoreCase("UPDATE")){
-			type = EventType.UPDATE;
-		} else if (action.equalsIgnoreCase("DELETE")){
-			type = EventType.DELETE;
-		} else if (action.equalsIgnoreCase("REQUEST")) {
-			type = EventType.REQUEST;
-		}
-	}
-	
 	public SynchronizationEvent(Path file, Kind<?> kind) {
 		this.file = file;
-		System.out.println("CREATE SYNC PATH TO STRING: "+file.toString());
 		if (ENTRY_CREATE == kind) {
 			type = EventType.UPDATE;
 		} else if (ENTRY_DELETE == kind) {
 			type = EventType.DELETE;
 		} else if (ENTRY_MODIFY == kind) {
-			type = EventType.REQUEST;
+			type = EventType.UPDATE;
 		}
 	}
 

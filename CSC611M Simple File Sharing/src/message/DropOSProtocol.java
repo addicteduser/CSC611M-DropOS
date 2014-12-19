@@ -129,20 +129,13 @@ public class DropOSProtocol {
 		byte[] packetHeaderLength = intToByteArray(mes.length);
 
 		try {
-
-			int bytesWrittenOffset = 0;
-
 			// First 4 bytes contain an integer value, which is the length of the packet header
 			// System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
-			bufferedOutputStream.write(packetHeaderLength, bytesWrittenOffset, packetHeaderLength.length);
-
-			bytesWrittenOffset += packetHeaderLength.length;
+			bufferedOutputStream.write(packetHeaderLength, 0, packetHeaderLength.length);
 
 			// The next bytes would be the packet header
 			// System.arraycopy(mes, 0, buf, 4, mes.length);
-			bufferedOutputStream.write(mes, bytesWrittenOffset, mes.length);
-
-			bytesWrittenOffset += mes.length;
+			bufferedOutputStream.write(mes, 0, mes.length);
 
 			// The last stream of bytes contains the payload; the file
 			FileInputStream fileInputStream = new FileInputStream(f);
@@ -153,10 +146,8 @@ public class DropOSProtocol {
 				int bytesRead = bin.read(buf, fileBytesWritten, BUFFER_LENGTH);
 				// If you read something enough to fit the buffer, then write it out to the socket
 				if (bytesRead > 0) {
+					bufferedOutputStream.write(buf, fileBytesWritten, bytesRead);
 					fileBytesWritten += bytesRead;
-					// System.arraycopy(fbuf, 0, buf, mes.length + 4, fbuf.length);
-					bufferedOutputStream.write(buf, bytesWrittenOffset, bytesRead);
-					bytesWrittenOffset += bytesRead;
 				}
 			} while (fileBytesWritten < f.length());
 

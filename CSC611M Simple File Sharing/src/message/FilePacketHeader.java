@@ -26,7 +26,7 @@ public class FilePacketHeader extends PacketHeader {
 		}catch(ArrayIndexOutOfBoundsException e){ 
 			// This is fine, the index has less parameters
 		}catch (Exception e){
-			System.err.println("Failed to parse filesize.");
+			// 
 		}
 	}
 	

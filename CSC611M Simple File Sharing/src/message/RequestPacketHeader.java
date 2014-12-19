@@ -18,7 +18,7 @@ public class RequestPacketHeader extends FilePacketHeader {
 	@Override
 	public Message interpret(DropOSProtocol protocol) throws IOException {
 		File f = new File(Config.getInstancePath(port) + "\\" +  filename);
-		return new FileAndMessage("REQUEST " + filename, f);
+		return new FileAndMessage("REQUEST:" + filename, f);
 	}
 	
 	protected File receiveFile(DropOSProtocol protocol) throws IOException {
