@@ -98,12 +98,10 @@ public class ConnectionHandler extends Thread {
 		case "REQUEST":
 			respondToRequest(fileAndMsg);
 			break;
+			// Handled in interpret
 		case "UPDATE":
-			// Handled in interpret
-
-			break;
 		case "DELETE":
-			// Handled in interpret
+			Index.directory(port).write(port);
 			break;
 		}
 
