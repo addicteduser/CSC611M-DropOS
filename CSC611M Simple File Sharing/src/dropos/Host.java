@@ -14,13 +14,11 @@ public class Host {
 	private String ipAddress;
 	private int port = -1;
 	private HostType type = null;
-	private Semaphore mutexLock;
 	
 	
 	public Host(String ipAddress, int port) {
 		this.ipAddress = ipAddress;
 		this.port = port;
-		mutexLock = new Semaphore(1);
 	}
 	
 	public Host(Socket socket) {
@@ -31,7 +29,6 @@ public class Host {
 		}
 		
 		ipAddress = socket.getInetAddress().toString().substring(1);
-		mutexLock = new Semaphore(1);
 	}
 	
 	public void setType(HostType type){
@@ -48,25 +45,11 @@ public class Host {
 			System.err.println("PortError. Cannot re-set the port of a host " + ipAddress + " to " + port + " because it is already " + this.port);
 	}
 	
-	public void acquire() throws InterruptedException{
-		mutexLock.acquire();
-	}
-	
-	public void release(){
-		mutexLock.release();
-	}
-
 	/**
 	 * Returns true of the Host is the same Host, or if the Socket provided deals with the same host.
 	 */
 	public boolean equals(Object obj) {
-		if (obj instanceof Socket){
-			Socket socket = (Socket) obj;
-			String ipAddress = socket.getInetAddress().toString().substring(1);
-			int socketPort = socket.getPort();
-			int socketLocalPort = socket.getLocalPort();
-			return ipAddress.equalsIgnoreCase(this.ipAddress) && (port == socketPort || port == socketLocalPort);
-		}else if (obj instanceof Host){
+		if (obj instanceof Host){
 			Host host = (Host) obj;
 			return ipAddress.equalsIgnoreCase(host.ipAddress) && host.port == port;
 		}

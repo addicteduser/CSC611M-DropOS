@@ -59,9 +59,7 @@ public class CoordinatorConnectionHandler extends Thread {
 			try {
 				this.connectionSocket = queue.take();
 				
-				host = selectHost(connectionSocket);
-				log("Attempting to get lock on host " + host + ".");
-				host.acquire();
+				host = new Host(connectionSocket);
 				log("Acquired lock on host " + host + ".");
 				
 				protocol = host.createProtocol(connectionSocket);
@@ -75,7 +73,6 @@ public class CoordinatorConnectionHandler extends Thread {
 				
 				interpretMessage(msg);
 				System.out.println();
-				host.release();
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -83,25 +80,6 @@ public class CoordinatorConnectionHandler extends Thread {
 		}
 	}
 
-	/**
-	 * This method checks if the host is already available on the connected hosts (either client or server).
-	 * @param connectionSocket
-	 * @return
-	 */
-	private synchronized Host selectHost(Socket connectionSocket) {
-		for (Host h : connectedClients){
-			if (h.equals(connectionSocket)){
-				return h;
-			}
-		}
-		
-		for (Host h : connectedServers){
-			if (h.equals(connectionSocket)){
-				return h;
-			}
-		}		
-		return new Host(connectionSocket);
-	}
 
 	private void interpretMessage(Message msg) throws UnknownHostException, IOException {
 		String command = msg.message.split(":")[0];
