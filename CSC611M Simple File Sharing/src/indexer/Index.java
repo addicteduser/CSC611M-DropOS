@@ -220,13 +220,10 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 		Index index = new Index();
 		String indexLine = null;
 
-		try {
 			// create indexlist.txt if it does not exist
 			if (!indexFile.exists())
 				Files.createFile(indexFile.toPath());
-		} catch(Exception e) {
-			// do nothing
-		}
+		
 
 		BufferedReader br = new BufferedReader(new FileReader(indexFile));
 
