@@ -200,8 +200,9 @@ public class DropClient implements Runnable {
 			case "DELETE":
 				break;
 			}
-
 		}
+		
+		Index.getInstance(port).write(port);
 
 		try {
 			log("Sending the coordinator my own index list.");
