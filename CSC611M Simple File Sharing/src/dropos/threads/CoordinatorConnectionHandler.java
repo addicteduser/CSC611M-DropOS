@@ -16,7 +16,7 @@ import java.util.concurrent.Semaphore;
 import message.DropOSProtocol;
 import message.FileAndMessage;
 import message.Message;
-import message.PacketHeader;
+import message.packet.PacketHeader;
 import dropos.Config;
 import dropos.DropCoordinator;
 import dropos.DropServer;
@@ -165,25 +165,12 @@ public class CoordinatorConnectionHandler extends Thread {
 				selectedServersForRedundancy.add(connectedServers.get(sRand));
 			}
 			
-			String duplicateHeader = "DUPLICATE";
-			
-			for(Host h : selectedServersForRedundancy) {
-				duplicateHeader += ":" + h.getIpAddress();
-			}
-			
-			duplicateHeader += "\n";
-			
-			File f = new File(filename);
-			String updateHeader = "UPDATE:" + f.length() + ":" + f.getName();
-			
-			String header = duplicateHeader + updateHeader;
-			
-			PacketHeader update = PacketHeader.create(header, Config.getPort());
+			PacketHeader update = PacketHeader.createDuplicate(filename, Config.getPort(), selectedServersForRedundancy);
 			
 			Host arbitraryFirstHost = selectedServersForRedundancy.get(0);
 			
 			protocol = arbitraryFirstHost.createProtocol();
-			protocol.sendFile(update, f);
+			protocol.sendFile(update, msg.getFile());
 			
 		}catch(Exception e){
 			log(e.getMessage());

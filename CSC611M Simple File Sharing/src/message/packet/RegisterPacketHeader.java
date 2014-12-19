@@ -1,11 +1,14 @@
-package message;
+package message.packet;
 
 import java.io.IOException;
 
+import message.DropOSProtocol;
+import message.Message;
+
 public class RegisterPacketHeader extends PacketHeader {
 
-	public RegisterPacketHeader(int port, String header) {
-		super(port, header);
+	public RegisterPacketHeader(int port, String registerType) {
+		super(port, registerType + ":" + port);
 	}
 	
 	

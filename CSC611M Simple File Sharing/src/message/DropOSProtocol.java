@@ -18,6 +18,8 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import message.packet.IndexListPacketHeader;
+import message.packet.PacketHeader;
 import dropos.Config;
 import dropos.Host;
 import dropos.event.SynchronizationEvent;
@@ -84,13 +86,13 @@ public class DropOSProtocol {
 		}
 	}
 
-	public void sendMessage(String message) {
+	public void sendMessage(PacketHeader packetHeader) {
 		try {
 			byte[] buf = new byte[BUFFER_LENGTH];
-			byte[] mes = message.getBytes("UTF-8");
+			byte[] mes = packetHeader.toString().getBytes("UTF-8");
 			byte[] packetHeaderLength = intToByteArray(mes.length);
 
-			log("Sending message: " + message);
+			log("Sending message: " + packetHeader);
 
 			// First 4 bytes contain an integer value, which is the length of the packet header
 			System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
@@ -113,13 +115,6 @@ public class DropOSProtocol {
 		IndexListPacketHeader packetHeader = index.getPacketHeader(port);
 		File file = index.getFile();
 		sendFile(packetHeader, file);
-	}
-
-	public void sendRequestFile(FileAndMessage msg) throws IOException {
-		File f = msg.file;
-		String message = "UPDATE:" + f.length() + ":" + f.getName();
-		PacketHeader packetHeader = PacketHeader.create(message, port);
-		sendFile(packetHeader, f);
 	}
 
 	public void sendFile(PacketHeader header, File f) throws IOException {
@@ -271,9 +266,11 @@ public class DropOSProtocol {
 		} while (headerBytesRead < length);
 		
 		message = new String(buf);
+		
 		if (bufferedInputStream.available() == 0)
 			socket.close();
-		return PacketHeader.create(message, port);
+		
+		return PacketHeader.parsePacket(message, port);
 	}
 
 	public String getIPAddress() {

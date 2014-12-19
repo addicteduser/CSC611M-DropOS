@@ -18,7 +18,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 
-import message.IndexListPacketHeader;
+import message.packet.IndexListPacketHeader;
 import dropos.Config;
 
 /**

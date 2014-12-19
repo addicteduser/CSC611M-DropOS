@@ -1,4 +1,4 @@
-package message;
+package message.packet;
 
 import indexer.Index;
 
@@ -8,6 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import message.DropOSProtocol;
+import message.FileAndMessage;
+import message.Message;
 import dropos.Config;
 
 public class IndexListPacketHeader extends FilePacketHeader {

@@ -1,4 +1,4 @@
-package message;
+package message.packet;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +8,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import message.DropOSProtocol;
+import message.FileAndMessage;
+import message.Message;
 import dropos.Config;
 
 public class FilePacketHeader extends PacketHeader {
