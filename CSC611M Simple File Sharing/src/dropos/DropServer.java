@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import message.DropOSProtocol;
+import message.DropOSProtocol.HostType;
 import dropos.threads.CoordinatorConnectionHandler;
 import dropos.threads.ThreadPool;
 
@@ -14,24 +15,23 @@ import dropos.threads.ThreadPool;
  * {@link CoordinatorConnectionHandler} instances which are blocked until a connection is made.
  *
  */
-public class DropServer {
+public class DropServer implements Runnable{
 
 	private static ServerSocket serverSocket;
 	private ThreadPool pool;
 	private DropOSProtocol protocol;
+	private int port;
 
-	public DropServer(int port) throws IOException {
+	private DropServer(int port) throws IOException {
+		this.port = port;
 		serverSocket = new ServerSocket(port);
-		pool = new ThreadPool(16);
+		pool = new ThreadPool();
 	}
 
 	public void run() {
-		try {
-			protocol = new DropOSProtocol();
-			protocol.sendMessage("REGISTER");
-		} catch (UnknownHostException e) {
-		} catch (IOException e) {
-		}
+		protocol = DropOSProtocol.connectToCoordinator();
+		protocol.sendMessage("SREGISTER:" + port);
+		
 		
 		while (true) {
 			try {
@@ -43,5 +43,33 @@ public class DropServer {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+
+	/**
+	 * Factory pattern to create a {@link DropServer} instance on the next available port. The function begins with the port dictated on the {@link Config} file.
+	 * @return
+	 */
+	public static DropServer create() {
+		boolean success = false;
+		DropServer server = null;
+		int port = Config.getPort();
+		do {
+			try {
+				DropOSProtocol.type = HostType.Server;
+				server = new DropServer(port);
+				success = true;
+			} catch (IOException e) {
+				log("Could not create client on port " + port + ". Attempting to use port " + (port + 1));
+				++port;
+			}
+		} while (success == false);
+		log("Successfully created a DropServer on port " + port);
+		return server;
+	}
+
+	private static void log(String message) {
+		System.out.println("[Server] " + message);
+		
 	}
 }

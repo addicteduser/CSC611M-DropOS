@@ -10,7 +10,7 @@ public class RegisterPacketHeader extends PacketHeader {
 	
 	
 	public Message interpret(DropOSProtocol protocol) throws IOException {
-		return super.interpret(protocol);
+		return new Message(header);
 	}
 
 }

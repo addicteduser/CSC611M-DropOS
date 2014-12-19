@@ -8,15 +8,17 @@ import dropos.Config;
 
 public class DeletePacketHeader extends PacketHeader {
 	protected String filename;
-	public DeletePacketHeader(String header) {
+	private int port;
+	public DeletePacketHeader(String header, int port) {
 		super(header);
+		this.port = port;
 		filename = header.split(":")[1];
 	}
 
 	public Message interpret(DropOSProtocol protocol) {
 		File f = null;
 		try {
-			f = new File(Config.getPath() + "\\" +  filename);
+			f = new File(Config.getInstancePath(port) + "\\" +  filename);
 			Files.delete(f.toPath());
 		} catch(Exception e) {
 			System.err.println("Could not delete " + f.toPath());

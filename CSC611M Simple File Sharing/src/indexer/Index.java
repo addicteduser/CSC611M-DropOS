@@ -62,6 +62,11 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 */
 	private void indexDirectory(File directory) throws IOException {
 		BasicFileAttributes attributes;
+		
+		if (Files.notExists(directory.toPath(), LinkOption.NOFOLLOW_LINKS)){
+			Files.createDirectories(directory.toPath());
+		}
+		
 		directoryFilePaths = directory.listFiles();
 
 		for (File filePath : directoryFilePaths) {
@@ -142,19 +147,19 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 * <p>
 	 * When no parameter is passed to the directory static method, it indexes the directory specified in the {@link Config}.
 	 * </p>
-	 * 
+	 * @param port the instance value of the port
 	 * @return
 	 */
-	public static Index directory() {
+	public static Index directory(int port) {
 		if (preStartup == null)
 			preStartup = readMyIndex();
-		instance = directory(Config.getPath().toFile());
+		instance = directory(Config.getInstancePath(port).toFile());
 		return instance;
 	}
 
-	public static Index getInstance() {
+	public static Index getInstance(int port) {
 		if (instance == null)
-			instance = directory(Config.getPath().toFile());
+			instance = directory(Config.getInstancePath(port).toFile());
 		return instance;
 	}
 
@@ -325,8 +330,8 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 * 
 	 * @return byte array which contains the packet header
 	 */
-	public IndexListPacketHeader getPacketHeader() {
-		return new IndexListPacketHeader();
+	public IndexListPacketHeader getPacketHeader(int port) {
+		return new IndexListPacketHeader("INDEX", port);
 	}
 
 }

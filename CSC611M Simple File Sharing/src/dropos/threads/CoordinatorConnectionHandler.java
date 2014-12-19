@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Semaphore;
 
 import message.DropOSProtocol;
 import message.FileAndMessage;
@@ -19,6 +20,8 @@ import message.PacketHeader;
 import dropos.Config;
 import dropos.DropCoordinator;
 import dropos.DropServer;
+import dropos.Host;
+import dropos.Host.HostType;
 
 /**
  * During initialization, a {@link ConnectionHandler} is made to block at the queue which holds the pending {@link Socket} instances to be handled.
@@ -29,74 +32,106 @@ import dropos.DropServer;
  */
 public class CoordinatorConnectionHandler extends Thread {
 	private BlockingQueue<Socket> queue;
+	
 	private Socket connectionSocket;
+	private Host host;
 	private DropOSProtocol protocol;
-	private ArrayList<String> connectedServers;
-	private ArrayList<FileAndServerRedundanciesPairs> redundanciesList;
-	private HashMap<String, Resolution> resolutions;
+	
+	
+	private static ArrayList<Host> connectedServers, connectedClients;
+	private static ArrayList<FileAndServerPairs> redundanciesList;
+	
+	private static HashMap<Host, Resolution> resolutions;
 
 	public CoordinatorConnectionHandler(BlockingQueue<Socket> queue) {
 		this.queue = queue;
-		resolutions = new HashMap<String, Resolution>();
+		resolutions = new HashMap<Host, Resolution>();
 		this.start();
 
-		connectedServers = new ArrayList<String>();
-		redundanciesList = new ArrayList<FileAndServerRedundanciesPairs>();
+		connectedClients = new ArrayList<Host>();
+		connectedServers = new ArrayList<Host>();
+		redundanciesList = new ArrayList<FileAndServerPairs>();
 	}
-	
-
-	private class FileAndServerRedundanciesPairs {
-		String fileName;
-		ArrayList<String> serverIPs;
-		
-		public FileAndServerRedundanciesPairs(String filename, ArrayList<String> serverips) {
-			this.fileName = filename;
-			this.serverIPs = serverips;
-		}
-	}
-
 
 	@Override
 	public void run() {
 		while (true) {
 			try {
-
 				this.connectionSocket = queue.take();
-				protocol = new DropOSProtocol(connectionSocket);
-
-				System.out.println("Server has accepted connection from coordinator [" + protocol.getIPAddress() + "]");
+				
+				host = selectHost(connectionSocket);
+				log("Attempting to get lock on host " + host + ".");
+				host.acquire();
+				log("Acquired lock on host " + host + ".");
+				
+				protocol = host.createProtocol(connectionSocket);
+				log("Newly accepted DropOSProtocol created with host [" + host + "]");
 
 				PacketHeader headers = protocol.receiveHeader();
 				Message msg = headers.interpret(protocol);
+				log("Message from host " + host + "");
+				log(headers.toString());
+				System.out.println();
+				
 				interpretMessage(msg);
+				System.out.println();
+				host.release();
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
+	/**
+	 * This method checks if the host is already available on the connected hosts (either client or server).
+	 * @param connectionSocket
+	 * @return
+	 */
+	private synchronized Host selectHost(Socket connectionSocket) {
+		for (Host h : connectedClients){
+			if (h.equals(connectionSocket)){
+				return h;
+			}
+		}
+		
+		for (Host h : connectedServers){
+			if (h.equals(connectionSocket)){
+				return h;
+			}
+		}		
+		return new Host(connectionSocket);
+	}
+
 	private void interpretMessage(Message msg) throws UnknownHostException, IOException {
-		String command = msg.message;
+		String command = msg.message.split(":")[0];
 		command = command.toUpperCase();
 		
+		FileAndMessage fileAndMsg = null;
+		if (msg instanceof FileAndMessage)
+			fileAndMsg = (FileAndMessage)msg;
+		
+		String port;
 		switch(command){
-		case "REGISTER":
-			connectedServers.add(protocol.getIPAddress());
-			System.out.println("[Coordinator] Connection from [" + protocol.getIPAddress() + "] is a SERVER connection");
+		case "SREGISTER":
+			addServer(host, msg);
+			break;
+			
+		case "CREGISTER":
+			addClient(host, msg);
+			
 			break;
 		
 		case "INDEX":
-			respondWithIndex((FileAndMessage) msg);
+			respondWithIndex(fileAndMsg);
 			break;
 		
 		case "UPDATE":
-			verifyUpdate((FileAndMessage)msg);
+			verifyUpdate(fileAndMsg);
 			break;
 		
 		case "REQUEST":
-			respondWithRequest((FileAndMessage)msg);
-			// Choose a server from the File and Server Redundancies list that will give the file.
+			respondWithFile(fileAndMsg);
 			break;
 		
 		case "DELETE":
@@ -107,39 +142,56 @@ public class CoordinatorConnectionHandler extends Thread {
 	}
 
 
+	private void addServer(Host host, Message msg) {
+		if (connectedServers.contains(host)){
+			log("Host " + host + " already registered. Ignoring registration message.");
+			return;
+		}
+		connectedServers.add(host);
+		host.setType(HostType.Server);
+		String port = msg.message.replace("SREGISTER:", "");
+		host.setPort(Integer.parseInt(port));
+		log("Registered host [" + host + "] as a server connection.");
+	}
+
+	private void addClient(Host host, Message msg) {
+		if (connectedServers.contains(host)){
+			log("Host " + host + " already registered. Ignoring registration message.");
+			return;
+		}
+		connectedClients.add(host);
+		host.setType(HostType.Client);
+		String port = msg.message.replace("CREGISTER:", "");
+		host.setPort(Integer.parseInt(port));
+		log("Registered host [" + host + "] as a client connection.");
+	}
+
 	private void verifyUpdate(FileAndMessage msg) {
 		try {
-			String ipAddress = protocol.getIPAddress();
 			String filename = msg.getFile().toString();
 			
-			if (resolutions.containsKey(ipAddress) == false)
-				throw new Exception("Invalid UPDATE message received. Client did not send me his index file.");
-			
-			Resolution resolution = resolutions.get(ipAddress);
-			String action = resolution.get(filename);
-			
-			if (action.equalsIgnoreCase("UPDATE") == false)
-				throw new Exception("Invalid UPDATE message received. File is not marked for update.");
+			isValid(msg, host);
 			
 			int numberOfServers = connectedServers.size();
+			// this is the number of servers required for duplication
 			int onethirdReliability = Math.round((numberOfServers * 1 / 3) + 1);
 			
-			ArrayList<String> redList = new ArrayList<String>();
+			ArrayList<Host> selectedServersForRedundancy = new ArrayList<Host>();
 			Random rand = new Random();
 			int sRand;
 			
 			for (int r = 0; r < onethirdReliability; r++) {
 				do {
 					sRand = rand.nextInt(numberOfServers);
-				} while (redList.contains(connectedServers.get(sRand)));
+				} while (selectedServersForRedundancy.contains(connectedServers.get(sRand)));
 				
-				redList.add(connectedServers.get(sRand));
+				selectedServersForRedundancy.add(connectedServers.get(sRand));
 			}
 			
 			String duplicateHeader = "DUPLICATE";
 			
-			for(String ipAdd : redList) {
-				duplicateHeader += ":" + ipAdd;
+			for(Host h : selectedServersForRedundancy) {
+				duplicateHeader += ":" + h.getIpAddress();
 			}
 			
 			duplicateHeader += "\n";
@@ -149,54 +201,84 @@ public class CoordinatorConnectionHandler extends Thread {
 			
 			String header = duplicateHeader + updateHeader;
 			
-			PacketHeader update = PacketHeader.create(header);
+			PacketHeader update = PacketHeader.create(header, Config.getPort());
 			
-			Socket socket = new Socket(redList.get(0), Config.getPort());
-			protocol = new DropOSProtocol(socket);
+			Host arbitraryFirstHost = selectedServersForRedundancy.get(0);
 			
+			protocol = arbitraryFirstHost.createProtocol();
 			protocol.sendFile(update, f);
 			
 		}catch(Exception e){
-			System.out.println(e.getMessage());
+			log(e.getMessage());
 		}
 	}
 
-	private void respondWithRequest(FileAndMessage msg) {
+	private void respondWithFile(FileAndMessage msg) {
+		// Find out who has the file
 		
+		// Choose a random server
+		
+		// Get the file 
+		
+		// Pass back to client 
 	}
 
 	private void respondWithIndex(FileAndMessage msg) throws UnknownHostException, IOException {
-		System.out.println("[Server] A new socket connection is being made...");
-		protocol = new DropOSProtocol(new Socket(protocol.getIPAddress(), Config.getPort()));
 		
-		System.out.println("[Server] Sending the server's index list.");
+		log("A new socket connection is being made...");
+		protocol = host.createProtocol();
+		
+		log("Sending the server's index list.");
 		// Respond by sending your own index
 		protocol.sendIndex();
 
-		System.out.println("[Server] Performing resolution...");
+		log("Performing resolution...");
 		// Parse the client's index
 		Index clientIndex = Index.read(msg.getFile());
 		
 		// Get your own index
-		Index serverIndex = Index.getInstance();
+		Index serverIndex = Index.getInstance(Config.getPort());
 		
 		// Perform resolution afterwards
 		Resolution resolution = Resolution.compare(serverIndex, clientIndex);
 		
-		setResolution(protocol.getIPAddress(), resolution);
+		// Assigning resolution
+		setResolution(host, resolution);
 		
-		System.out.println("[Server] These were the following changes received:\n" + resolution);	
+		log("These were the following changes received:\n" + resolution);	
+	}
+
+	private synchronized void setResolution(Host host, Resolution resolution) {
+		resolutions.put(host, resolution);
+	}
+
+	private static void log(String message){
+		System.out.println("[Coordinator] " + message);
 	}
 	
 	
-
-	private synchronized void setResolution(String ipAddress, Resolution resolution) {
-		resolutions.put(ipAddress, resolution);
-	}
-
 	// TODO This is supposed to check the server-side resolution if a file is indeed valid. If so, it should return true to accept the file.
-	private boolean isValid(PacketHeader headers) {
-		
+	private boolean isValid(FileAndMessage msg, Host host) throws Exception {
+			if (resolutions.containsKey(host.getIpAddress()) == false)
+				throw new Exception("Invalid UPDATE message received. Client did not send me his index file.");
+			
+			Resolution resolution = resolutions.get(host);
+			String action = resolution.get(msg.getFile().getName());
+			
+			if (action.equalsIgnoreCase("UPDATE") == false)
+				throw new Exception("Invalid UPDATE message received. File is not marked for update.");
+					
 		return false;
 	}
+	
+	private class FileAndServerPairs {
+		String fileName;
+		ArrayList<Host> servers;
+		
+		public FileAndServerPairs(String filename, ArrayList<Host> servers) {
+			this.fileName = filename;
+			this.servers = servers;
+		}
+	}
+
 }

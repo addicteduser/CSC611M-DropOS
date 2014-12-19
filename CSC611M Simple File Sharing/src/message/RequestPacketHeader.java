@@ -7,15 +7,17 @@ import dropos.Config;
 
 public class RequestPacketHeader extends FilePacketHeader {
 	protected String filename;
+	private int port;
 	
-	public RequestPacketHeader(String header) {
+	public RequestPacketHeader(String header, int port) {
 		super(header);
+		this.port = port;
 		filename = header.split(":")[1];
 	}
 
 	@Override
 	public Message interpret(DropOSProtocol protocol) throws IOException {
-		File f = new File(Config.getPath() + "\\" +  filename);
+		File f = new File(Config.getInstancePath(port) + "\\" +  filename);
 		return new FileAndMessage("REQUEST " + filename, f);
 	}
 	
@@ -24,6 +26,6 @@ public class RequestPacketHeader extends FilePacketHeader {
 	}
 	
 	protected String filePath() {
-		return Config.getPath() + "\\" + filename;
+		return Config.getInstancePath(port) + "\\" + filename;
 	}
 }

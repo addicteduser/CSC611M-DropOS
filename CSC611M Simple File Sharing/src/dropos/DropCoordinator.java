@@ -3,7 +3,6 @@ package dropos;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
 import dropos.threads.CoordinatorConnectionHandler;
 import dropos.threads.CoordinatorThreadPool;
@@ -16,13 +15,14 @@ import dropos.threads.CoordinatorThreadPool;
  * @author Darren
  *
  */
-public class DropCoordinator {
+public class DropCoordinator implements Runnable{
+	private static DropCoordinator instance;
 	private static ServerSocket serverSocket;
 	private CoordinatorThreadPool pool;
 
 	public DropCoordinator(int port) throws IOException {
 		serverSocket = new ServerSocket(port);
-		pool = new CoordinatorThreadPool(16);
+		pool = new CoordinatorThreadPool();
 	}
 
 	public void run() {
@@ -30,11 +30,24 @@ public class DropCoordinator {
 			try {
 				System.out.println("[Coordinator] Waiting for connections on port " + serverSocket.getLocalPort() + "...");
 				Socket connectionSocket = serverSocket.accept();
-
 				pool.addTask(connectionSocket);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static DropCoordinator create(){
+		if (instance == null){
+			try {
+				instance = new DropCoordinator(Config.getPort());
+			} catch (IOException e) {
+				System.out.println("[Coordinator] The coordinator could not run because it is not using port " + Config.getPort() +". Please start the coordinator first.");
+				System.exit(1);
+			}
+		}else{
+			System.out.println("[Coordinator] The coordinator is already instantiated. Returning reference...");
+		}
+		return instance;
 	}
 }
