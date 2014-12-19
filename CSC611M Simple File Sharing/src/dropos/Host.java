@@ -13,13 +13,7 @@ public class Host {
 	private String ipAddress;
 	private int port = -1;
 	private HostType type = null;
-	
-	
-	public Host(String ipAddress, int port) {
-		this.ipAddress = ipAddress;
-		this.port = port;
-	}
-	
+		
 	public Host(Socket socket) {
 		if (socket.equals(null))
 		{

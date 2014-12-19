@@ -118,6 +118,7 @@ public class PacketHeader {
 		// S/CREGISTER:PORT
 			case "SREGISTER":
 			case "CREGISTER": 
+				port = Integer.parseInt(split[1]);
 				return new RegisterPacketHeader(port,command);
 				
 		// INDEX

@@ -48,8 +48,7 @@ public class DropOSProtocol {
 			socket = new Socket(Config.getIpAddress(), Config.getPort());
 			initialize(socket);
 		} catch (ConnectException e) {
-			Host host = new Host(Config.getIpAddress(), Config.getPort());
-			loge("Fatal error. Could not connect to host at " + host + ".");
+			loge("Fatal error. Could not connect to coordinator at " + Config.getIpAddress() + ".");
 			loge("Please check config.ini if the coordinator's IP address is configured properly.");
 			System.out.println();
 			System.exit(1);
