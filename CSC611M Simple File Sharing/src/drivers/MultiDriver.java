@@ -16,6 +16,7 @@ public class MultiDriver {
 		DropCoordinator coordinator = DropCoordinator.create();
 		thread = new Thread(coordinator);
 		thread.start();
+		System.out.println("Coordinator generated.\n");
 		
 		// Create the servers
 		int servers = 3;
@@ -24,6 +25,7 @@ public class MultiDriver {
 			DropServer s = DropServer.create();
 			thread = new Thread(s);
 			thread.start();	
+			System.out.println("Server " + (i + 1) + " generated.\n");
 		}
 		
 		// Create the clients
@@ -33,6 +35,7 @@ public class MultiDriver {
 			DropClient c = DropClient.create();
 			thread = new Thread(c);
 			thread.start();
+			System.out.println("Client " + (i + 1) + " generated.\n");
 		}
 	}
 
