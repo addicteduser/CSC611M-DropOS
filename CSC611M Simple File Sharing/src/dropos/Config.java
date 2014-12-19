@@ -51,7 +51,7 @@ public class Config {
 	 * @return
 	 */
 	public static Path getInstancePath(int port){
-		return Paths.get(System.getProperty("user.dir")).resolve(port+"\\");
+		return path.resolve(port+"\\");
 	}
 	
 	public static Path getAbsolutePath() {

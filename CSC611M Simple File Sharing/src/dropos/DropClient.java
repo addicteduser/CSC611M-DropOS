@@ -353,7 +353,7 @@ public class DropClient implements Runnable {
 	}
 
 	public static void log(String message) {
-		System.out.println("[CLIENT] " + message);
+		System.out.println("[Client] " + message);
 	}
 
 	/**

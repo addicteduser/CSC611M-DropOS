@@ -53,7 +53,7 @@ public class DropOSProtocol {
 		}
 	}
 	private void loge(String message) {
-		System.err.println("[PROTOCOL] " + message);
+		System.err.println("[Protocol] " + message);
 	}
 	public DropOSProtocol(Socket s) {
 		initialize(s);
@@ -161,7 +161,7 @@ public class DropOSProtocol {
 	}
 
 	private void log(String message) {
-		System.out.println("[PROTOCOL] " + message);
+		System.out.println("[Protocol] " + message);
 	}
 	/**
 	 * This method is called when changes are detected on your directory while the program is running.
