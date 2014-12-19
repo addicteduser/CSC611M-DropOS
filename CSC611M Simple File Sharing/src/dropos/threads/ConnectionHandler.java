@@ -134,18 +134,6 @@ public class ConnectionHandler extends Thread {
 		log("Sending the server's index list.");
 		// Respond by sending your own index
 		protocol.sendIndex(port);
-
-		log("Performing resolution...");
-		// Parse the client's index
-		Index clientIndex = Index.read(msg.getFile());
-
-		// Get your own index
-		Index serverIndex = Index.getInstance(Config.getPort());
-
-		// Perform resolution afterwards
-		Resolution resolution = Resolution.compare(serverIndex, clientIndex);
-
-		log("These were the following changes " + "received:\n" + resolution);
 	}
 
 	private void log(String message) {
