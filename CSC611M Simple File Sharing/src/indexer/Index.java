@@ -63,11 +63,11 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 */
 	private void indexDirectory(File directory) throws IOException {
 		BasicFileAttributes attributes;
-		
+
 		if (Files.notExists(directory.toPath(), LinkOption.NOFOLLOW_LINKS)){
 			Files.createDirectories(directory.toPath());
 		}
-		
+
 		directoryFilePaths = directory.listFiles();
 
 		for (File filePath : directoryFilePaths) {
@@ -77,13 +77,13 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 				indexDirectory(filePath);
 			} else {
 				String name = filePath.getName().toString();
-				
+
 				// Ignore OSX related files that start with .
 				if (name.startsWith(".")) continue;
-				
+
 				// Ignore indexlist.txt file
 				if (name.equalsIgnoreCase("indexlist.txt")) continue;
-				
+
 				// Get the attributes and add an index entry
 				attributes = Files.readAttributes(filePath.toPath(), BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 				String filename = filePath.getName();
@@ -221,10 +221,12 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 		Index index = new Index();
 		String indexLine = null;
 
-			// create indexlist.txt if it does not exist
-			if (!indexFile.exists())
-				Files.createFile(indexFile.toPath());
-		
+		// create indexlist.txt if it does not exist
+		Path path = indexFile.toPath();
+		System.out.println("INDEX PATH: "+path);
+		if (Files.notExists(path))
+			Files.createFile(path);
+
 
 		BufferedReader br = new BufferedReader(new FileReader(indexFile));
 
