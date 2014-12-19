@@ -6,18 +6,15 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import dropos.Config;
 import dropos.Host;
@@ -46,11 +43,17 @@ public class DropOSProtocol {
 		try {
 			socket = new Socket(Config.getIpAddress(), Config.getPort());
 			initialize(socket);
-		}catch(UnknownHostException e)
+		}catch(ConnectException e)
 		{
 			Host host = new Host(Config.getIpAddress(), Config.getPort());
-			System.out.println("Could not connect to host at " + host + ". Please check config.ini if the coordinator's IP address is configured properly.");
+			loge("Fatal error. Could not connect to host at " + host + ".");
+			loge("Please check config.ini if the coordinator's IP address is configured properly.");
+			System.out.println();
+			System.exit(1);
 		}
+	}
+	private void loge(String message) {
+		System.err.println("[PROTOCOL] " + message);
 	}
 	public DropOSProtocol(Socket s) {
 		initialize(s);
@@ -79,7 +82,7 @@ public class DropOSProtocol {
 			byte[] mes = message.getBytes("UTF-8");
 			byte[] packetHeaderLength = intToByteArray(mes.length);
 
-			System.out.println("Sending message: " + message);
+			log("Sending message: " + message);
 
 			// First 4 bytes contain an integer value, which is the length of the packet header
 			System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
@@ -90,7 +93,7 @@ public class DropOSProtocol {
 			bufferedOutputStream.write(buf, 0, buf.length);
 			bufferedOutputStream.flush();
 		} catch (UnsupportedEncodingException e) {
-			System.out.println("Message could not be converted into bytes.");
+			log("Message could not be converted into bytes.");
 		}catch (IOException e){
 			e.printStackTrace();
 		}
@@ -153,10 +156,13 @@ public class DropOSProtocol {
 			fileInputStream.close();
 
 		} catch (Exception e) {
-			System.out.println("File " + f + " was sent. (Recepient closed the socket.)");
+			log("File " + f + " was sent. (Recepient closed the socket.)");
 		}
 	}
 
+	private void log(String message) {
+		System.out.println("[PROTOCOL] " + message);
+	}
 	/**
 	 * This method is called when changes are detected on your directory while the program is running.
 	 * 
