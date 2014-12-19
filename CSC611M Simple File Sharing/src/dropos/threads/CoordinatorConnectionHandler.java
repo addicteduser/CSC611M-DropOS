@@ -230,7 +230,7 @@ public class CoordinatorConnectionHandler extends Thread {
 		
 		log("Sending the server's index list.");
 		// Respond by sending your own index
-		protocol.sendIndex();
+		protocol.sendIndex(Config.getPort());
 
 		log("Performing resolution...");
 		// Parse the client's index
