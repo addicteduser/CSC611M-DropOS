@@ -99,12 +99,12 @@ public class PacketHeader {
 			//For request,update and delete, constructor needs port and filename
 			//For index, constructor already parses the message
 			//For sregister and cregister, type is specified by the command
-			case "REQUEST": return new RequestPacketHeader(port,message.split(":")[2]);
-			case "UPDATE": return new UpdatePacketHeader(port,message.split(":")[2]);
+			case "REQUEST": return new RequestPacketHeader(port,message.split(":")[1]);
+			case "UPDATE": return new UpdatePacketHeader(port,message.split(":")[1]);
 			case "SREGISTER":
 			case "CREGISTER": return new RegisterPacketHeader(port,command);
 			case "INDEX": return new IndexListPacketHeader(port,message);
-			case "DELETE": return new DeletePacketHeader(port,message.split(":")[2]);
+			case "DELETE": return new DeletePacketHeader(port,message.split(":")[1]);
 		}
 		return null;
 	}
