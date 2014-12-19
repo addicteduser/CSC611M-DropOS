@@ -51,11 +51,9 @@ public class ConnectionHandler extends Thread {
 				
 				protocol = new DropOSProtocol(connectionSocket);
 				
-				log("Accepted connection from [" + protocol.getIPAddress() + "]");
 				PacketHeader headers = protocol.receiveHeader();
 				Message msg = headers.interpret(protocol);
 				
-				log("Received message: " + msg.toString());
 				interpretMessage(msg);
 				System.out.println();
 

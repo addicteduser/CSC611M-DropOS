@@ -87,11 +87,10 @@ public class DropOSProtocol {
 
 	public void sendMessage(PacketHeader packetHeader) {
 		try {
+			log("---" + packetHeader.toString()+"---------------------------->");
 			byte[] buf = new byte[BUFFER_LENGTH];
 			byte[] mes = packetHeader.toString().getBytes("UTF-8");
 			byte[] packetHeaderLength = intToByteArray(mes.length);
-
-			log("Sending message: " + packetHeader);
 
 			// First 4 bytes contain an integer value, which is the length of the packet header
 			System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
@@ -117,7 +116,7 @@ public class DropOSProtocol {
 	}
 
 	public void sendFile(PacketHeader header, File f) throws IOException {
-
+		log("---" + header.toString()+"---------------------------->");
 		// header
 		byte[] buf = new byte[BUFFER_LENGTH];
 		byte[] mes = header.getBytes();
@@ -267,6 +266,7 @@ public class DropOSProtocol {
 		if (bufferedInputStream.available() == 0)
 			socket.close();
 		
+		log("<--------------------------"+ message +"-----");
 		return PacketHeader.parsePacket(message, port);
 	}
 

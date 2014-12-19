@@ -91,7 +91,7 @@ public class DuplicatePacketHeader extends FilePacketHeader {
 			UpdatePacketHeader updatepacket = PacketHeader.createUpdate(filename, filesize, port);
 			
 			try {
-				System.out.println("[DuplicatePacketHeader] Sending an UPDATE to " + h);
+				System.out.println("[Duplicate] file " + file.getName() + " to server " + h);
 				System.out.println(updatepacket);
 				System.out.println();
 				DropOSProtocol createProtocol = h.createProtocol();

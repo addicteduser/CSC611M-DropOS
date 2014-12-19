@@ -49,9 +49,6 @@ public class DropCoordinator implements Runnable{
 	
 	private void checkIfServerFolderExists(Path path) {
 		if (Files.notExists(path)) {
-			log("Detected that coordinator folder is not yet created. Creating one now at path:");
-			log(path.toString());
-
 			try {
 				Files.createDirectory(path);
 			} catch (IOException e) {

@@ -54,12 +54,9 @@ public class CoordinatorConnectionHandler extends Thread {
 				host = new Host(connectionSocket);
 				
 				protocol = host.createProtocol(connectionSocket);
-				log("Accepting headers on a new DropOSProtocol with host [" + host + "]");
-
+				
 				PacketHeader headers = protocol.receiveHeader();
 				Message msg = headers.interpret(protocol);
-				log("Message from host " + host + "");
-				log(headers.toString());
 				System.out.println();
 				
 				interpretMessage(msg);

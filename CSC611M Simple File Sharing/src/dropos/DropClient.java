@@ -99,9 +99,6 @@ public class DropClient implements Runnable {
 
 	private void checkIfClientFolderExists(Path path) {
 		if (Files.notExists(path)) {
-			log("Detected that client folder is not yet created. Creating one now at path:");
-			log(path.toString());
-
 			try {
 				Files.createDirectory(path);
 			} catch (IOException e) {
@@ -305,19 +302,13 @@ public class DropClient implements Runnable {
 			switch (e.getType()) {
 			case UPDATE:
 				addFile(e);
-				log("Update message sent.");
-				log(e.toString());
 				break;
 			case DELETE:
 				deleteFile(e);
-				log("Delete message sent.");
-				log(e.toString());
 				break;
 
 			case REQUEST:
 				requestFile(e);
-				log("Request message sent.");
-				log(e.toString());
 				break;
 			}
 			// Write on index again
