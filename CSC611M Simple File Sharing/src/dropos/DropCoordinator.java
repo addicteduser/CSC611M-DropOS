@@ -1,5 +1,7 @@
 package dropos;
 
+import indexer.Index;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -31,6 +33,9 @@ public class DropCoordinator implements Runnable{
 		Path path = Config.getInstancePath(Config.getPort());
 		checkIfServerFolderExists(path);
 		
+		// Check if index exists
+		Index.readMyIndex(Config.getPort());
+		
 		while (true) {
 			try {
 				log("Waiting for connections on port " + serverSocket.getLocalPort() + "...");
@@ -44,7 +49,7 @@ public class DropCoordinator implements Runnable{
 	
 	private void checkIfServerFolderExists(Path path) {
 		if (Files.notExists(path)) {
-			log("Detected that server folder is not yet created. Creating one now at path:");
+			log("Detected that coordinator folder is not yet created. Creating one now at path:");
 			log(path.toString());
 
 			try {

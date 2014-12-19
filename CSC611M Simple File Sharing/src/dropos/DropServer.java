@@ -1,5 +1,7 @@
 package dropos;
 
+import indexer.Index;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -35,8 +37,13 @@ public class DropServer implements Runnable {
 		protocol = DropOSProtocol.connectToCoordinator();
 		protocol.sendMessage("SREGISTER:" + port);
 
+
+		// Check if folder exists
 		Path path = Config.getInstancePath(port);
 		checkIfServerFolderExists(path);
+		
+		// Check if index exists
+		Index.readMyIndex(port);
 
 		while (true) {
 			try {

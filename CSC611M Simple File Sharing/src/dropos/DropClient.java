@@ -56,6 +56,7 @@ public class DropClient implements Runnable {
 		Path path = Config.getInstancePath(port);
 		checkIfClientFolderExists(path);
 		
+		// Check if index exists
 		Index.readMyIndex(port);
 
 
