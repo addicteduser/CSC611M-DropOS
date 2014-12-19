@@ -82,25 +82,38 @@ public class ConnectionHandler extends Thread {
 		command = command.toUpperCase();
 		System.out.println("COMMAND: " + command);
 
+		FileAndMessage fileAndMsg = null;
+		if (msg instanceof FileAndMessage){
+			fileAndMsg = (FileAndMessage) msg;
+		}
+		
 		switch (command) {
 		case "INDEX":
 			/**
 			 * If the server receives an index command, it means that the client sent its index. What the server is supposed to do is to respond with its own
 			 * index and perform resolution.
 			 */
-			respondWithIndex((FileAndMessage) msg);
+			respondWithIndex(fileAndMsg);
 			break;
 		case "REQUEST":
-			respondToRequest((FileAndMessage) msg);
+			respondToRequest(fileAndMsg);
 			break;
 		case "UPDATE":
-			// do nothing
+			acceptUpdate(fileAndMsg);
 			break;
 		case "DELETE":
-			System.out.println(command + " command issued.");
+			acceptDelete(fileAndMsg);
 			break;
 		}
 
+	}
+
+	private void acceptDelete(FileAndMessage fileAndMsg) {
+		
+	}
+
+	private void acceptUpdate(FileAndMessage fileAndMsg) {
+		
 	}
 
 	private void respondToRequest(FileAndMessage msg) throws UnknownHostException, IOException {

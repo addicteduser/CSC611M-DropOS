@@ -1,10 +1,10 @@
 package message.packet;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import message.DropOSProtocol;
+import message.Message;
 import dropos.Config;
 import dropos.Host;
 
@@ -12,7 +12,7 @@ public class DuplicatePacketHeader extends FilePacketHeader {
 
 	String redundancyHeader;
 	String updateHeader;
-	ArrayList<String> ipAddresses = new ArrayList<String>();
+	ArrayList<Host> hosts;
 
 	/**
 	 * This method is used to create the DuplicatePacketHeader class.
@@ -23,7 +23,7 @@ public class DuplicatePacketHeader extends FilePacketHeader {
 	 */
 	public DuplicatePacketHeader(int port, String filename, long size, ArrayList<Host> redundantServers) {
 		super(port, "DUPLICATE");
-		
+		hosts = redundantServers;
 		filesize = size;
 		this.filename = filename;
 		
@@ -47,7 +47,8 @@ public class DuplicatePacketHeader extends FilePacketHeader {
 	 */
 	public DuplicatePacketHeader(int port, String header) {
 		super(port, header);
-
+		hosts = new ArrayList<Host>();
+		
 		String[] split = header.split("\n");
 		this.header = split[1];
 
@@ -56,8 +57,11 @@ public class DuplicatePacketHeader extends FilePacketHeader {
 		for (int i = 0; i < split.length; i++) {
 			if (i == 0)
 				updateHeader = split[i];
-			else
-				ipAddresses.add(split[i]);
+			else{
+				String[] pair = split[i].split("-");
+				Host h = new Host(pair[0], Integer.parseInt(pair[1]));
+				hosts.add(h);
+			}
 		}
 
 		filesize = Long.parseLong(this.header.split(":")[1]);
@@ -68,16 +72,24 @@ public class DuplicatePacketHeader extends FilePacketHeader {
 	protected String filePath() {
 		return Config.getInstancePath(port) + "\\" + filename;
 	}
+	
+	@Override
+	public Message interpret(DropOSProtocol protocol) throws IOException {
+		Message message = super.interpret(protocol);
+		duplicateRedundancy(protocol);
+		return message;
+	}
 
 	public void duplicateRedundancy(DropOSProtocol protocol) {
 		long filesize = file.length();
-		for (String ip : ipAddresses) {
+		for (Host h : hosts) {
 			UpdatePacketHeader updatepacket = PacketHeader.createUpdate(filename, filesize, port);
 			
 			try {
-				protocol.sendFile(updatepacket, file);
+				DropOSProtocol createProtocol = h.createProtocol();
+				createProtocol.sendFile(updatepacket, file);
 			} catch (IOException e) {
-				System.err.println("Could not send " + file.toPath() + " to IP Address " + ip);
+				System.err.println("Could not send " + file.toPath() + " to host " + h);
 			}
 		}
 	}
