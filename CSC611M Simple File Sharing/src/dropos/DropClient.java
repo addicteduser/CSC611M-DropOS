@@ -282,19 +282,24 @@ public class DropClient implements Runnable {
 		try {
 
 			log("New DirectoryEvent of type [" + e.getType() + "] detected. Connecting to the coordinator...");
-			System.out.println("Event Type: " + e.getType().toString());
 			protocol = DropOSProtocol.connectToCoordinator();
 
 			switch (e.getType()) {
 			case UPDATE:
 				addFile(e);
+				log("Update message sent.");
+				log(e.toString());
 				break;
 			case DELETE:
 				deleteFile(e);
+				log("Delete message sent.");
+				log(e.toString());
 				break;
 
 			case REQUEST:
 				requestFile(e);
+				log("Request message sent.");
+				log(e.toString());
 				break;
 			}
 		} catch (IOException err) {
