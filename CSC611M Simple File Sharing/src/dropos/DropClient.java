@@ -345,8 +345,14 @@ public class DropClient implements Runnable {
 	private void deleteFile(SynchronizationEvent e){
 		File f = new File(Config.getInstancePath(port) + "\\" + e.getFile().toString());
 		try {
-			Files.delete(f.toPath());
-			log("File " + f + " was deleted.");
+			Path path = f.toPath();
+			if (Files.exists(path)){
+				Files.delete(path);
+				log("File " + f + " was deleted.");
+			}else{
+				log("File " + f + " could not be deleted because it is missing / already deleted.");
+			}
+				
 		}catch(IOException err){
 			log("Could not delete file: ");
 			log(f.toString());
