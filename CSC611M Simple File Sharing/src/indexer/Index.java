@@ -211,9 +211,12 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	public static Index startUp(int port) {
 		if (preStartup.containsKey(port))
 			return preStartup.get(port);
-		System.out.println("Why is the start up index not found? Fatal error. Crashing now.");
-		System.exit(1);
-		return null;
+		
+		// Perform startUp indexing
+		directory(port);
+		
+		// Do some weird indexing shit
+		return startUp(port);
 	}
 
 	/**
