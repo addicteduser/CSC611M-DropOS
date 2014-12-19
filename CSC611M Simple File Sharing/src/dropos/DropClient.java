@@ -63,11 +63,8 @@ public class DropClient implements Runnable {
 
 		// If changes exist, handle them
 		if (compare.countChanges() > 0) {
-			log("Here are the offline changes detected: " + compare);
-			log("About to update coordinator regarding offline changes...");
+			log("Offline changes detected: " + compare);
 			handleResolution(compare);
-		} else {
-			log("There were no offline changes detected.");
 		}
 
 		// Create GUI
@@ -222,23 +219,25 @@ public class DropClient implements Runnable {
 		Index.getInstance(port).write(port);
 
 		try {
-			log("Sending the coordinator my own index list.");
+			log("Sending the coordinator my index list.");
 			protocol.sendIndex(port);
 		} catch (Exception e) {
 			log("Finished sending the index list.\n");
 		}
 
 		try {
-			log("Now waiting for coordinator to connect and send coordinator index list.");
 			Socket connectionSocket = serverSocket.accept();
+			
 			protocol = new DropOSProtocol(connectionSocket);
 
 			// Wait for a response (header... and later a file);
 			// Note that we expect the coordinator to respond with an index list as well.
 			IndexListPacketHeader phServerIndex = (IndexListPacketHeader) protocol.receiveHeader();
+			
 
 			// Receive the file once you have the packet header
 			FileAndMessage message = (FileAndMessage) phServerIndex.interpret(protocol);
+			log("Server connected and received their index list.");
 
 			File f = message.getFile();
 
@@ -281,7 +280,7 @@ public class DropClient implements Runnable {
 				}
 			}
 
-			log("Server index list received.");
+			log("Files updated.");
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -296,7 +295,7 @@ public class DropClient implements Runnable {
 	 */
 	private void eventPerformed(SynchronizationEvent e) {
 		try {
-			log("New DirectoryEvent of type [" + e.getType() + "] detected. Connecting to the coordinator...");
+			log("New directory event [" + e.getType() + "] detected.");
 			protocol = DropOSProtocol.connectToCoordinator();
 
 			switch (e.getType()) {
@@ -311,6 +310,8 @@ public class DropClient implements Runnable {
 				requestFile(e);
 				break;
 			}
+			
+			log("Connected to the server and performed " + e.getType().toString().toLowerCase());
 			// Write on index again
 			Index.getInstance(port).write(port);
 		} catch (IOException err) {
@@ -427,8 +428,6 @@ public class DropClient implements Runnable {
 		Resolution resolution = Resolution.compare(startUp, now);
 		if (resolution.countChanges() > 0)
 			System.out.println(resolution);
-		else
-			log("There were no changes on the directory.");
 		now.write(port);
 	}
 }

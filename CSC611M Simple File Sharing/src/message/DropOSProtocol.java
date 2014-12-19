@@ -180,7 +180,8 @@ public class DropOSProtocol {
 		FileOutputStream fileOutputStream = null;
 		BufferedOutputStream bufferedOutputStream = null;
 		File file = null;
-		System.out.println("Receiving file in path: "+filePath);
+		System.out.println();
+		System.out.println("Receiving file...");
 		file = new File(filePath);
 		
 		// If the destination folders aren't created yet, create them.
@@ -223,7 +224,7 @@ public class DropOSProtocol {
 		
 		if (socket.isClosed() == false)
 			socket.close();
-		
+		System.out.println("Received.\n");
 		return file;
 	}
 
