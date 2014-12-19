@@ -246,9 +246,16 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 		Index index = new Index();
 		String indexLine = null;
 
-		// create indexlist.txt if it does not exist
+
 		Path path = indexFile.toPath();
-		System.out.println("INDEX PATH: " + path);
+		
+		// check if parent exists; create if it doesn't
+		Path parent = path.getParent();
+		if (Files.notExists(parent))
+			Files.createDirectory(parent);
+		
+		
+		// check if indexlist.txt exists; create if it doesn't
 		if (Files.notExists(path))
 			Files.createFile(path);
 
