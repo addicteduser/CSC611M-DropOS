@@ -171,7 +171,7 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 * @return
 	 */
 	public static synchronized Index directory(int port) {
-		if (preStartup.containsKey(port)) {
+		if (preStartup.containsKey(port) == false) {
 			Index pre = readMyIndex(port);
 			preStartup.put(port, pre);
 		}
