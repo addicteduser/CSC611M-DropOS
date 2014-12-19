@@ -23,12 +23,12 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import message.DropOSProtocol;
+import message.DropOSProtocol.HostType;
 import message.FileAndMessage;
 import message.FilePacketHeader;
 import message.IndexListPacketHeader;
 import message.PacketHeader;
 import message.RequestPacketHeader;
-import message.DropOSProtocol.HostType;
 import dropos.event.SynchronizationEvent;
 import dropos.ui.DropClientWindow;
 
@@ -67,6 +67,9 @@ public class DropClient implements Runnable {
 		// Watch directory
 		Path clientPath = Config.getInstancePath(port);
 		watchDirectory(clientPath);
+		
+		// When the GUI is closed, the shutdown hook fires. The index is updated and written down.
+		shutdownHook();
 	}
 
 	private Resolution checkOfflineChanges() {
@@ -78,7 +81,6 @@ public class DropClient implements Runnable {
 		log("Producing index list from directory:");
 		System.out.println("         " + Config.getInstancePath(port) + "\n");
 		
-		int x;
 		Index olderIndex = Index.startUp();
 		Index newerIndex = Index.directory(port);
 
@@ -121,6 +123,8 @@ public class DropClient implements Runnable {
 				for (WatchEvent<?> watchEvent : key.pollEvents()) {
 					// Get the type of the event
 					kind = watchEvent.kind();
+					
+					@SuppressWarnings("unchecked")
 					Path newPath = ((WatchEvent<Path>) watchEvent).context();
 
 					// Create a directory event from what happened
@@ -131,7 +135,7 @@ public class DropClient implements Runnable {
 					System.out.println("KIND: " + kind.toString());
 					// Fire the event
 					eventPerformed(directoryEvent);
-
+					
 				}
 
 				if (!key.reset()) {
@@ -182,7 +186,7 @@ public class DropClient implements Runnable {
 
 		try {
 			log("Sending the coordinator my own index list.");
-			protocol.sendIndex();
+			protocol.sendIndex(port);
 		} catch (Exception e) {
 			log("Finished sending the index list.\n");
 		}
@@ -228,8 +232,9 @@ public class DropClient implements Runnable {
 					p = new DropOSProtocol(s);
 
 					FilePacketHeader requestHeader = (FilePacketHeader) p.receiveHeader();
+					
 					// Interpret message and copy to actual folder destination
-					FileAndMessage requestMessage = (FileAndMessage) phServerIndex.interpret(protocol);
+					phServerIndex.interpret(protocol);
 					requestHeader.writeFile(port);
 					break;
 				}
@@ -313,10 +318,16 @@ public class DropClient implements Runnable {
 	 *            this contains details of the file to be deleted
 	 * @throws IOException
 	 */
-	private void deleteFile(SynchronizationEvent e) throws IOException {
+	private void deleteFile(SynchronizationEvent e){
 		File f = new File(Config.getInstancePath(port) + "\\" + e.getFile().toString());
-		Files.delete(f.toPath());
-		log("File " + f + " was deleted.");
+		try {
+			Files.delete(f.toPath());
+			log("File " + f + " was deleted.");
+		}catch(IOException err){
+			log("Could not delete file: ");
+			log(f.toString());
+			err.printStackTrace();
+		}
 	}
 
 	/**
@@ -344,16 +355,11 @@ public class DropClient implements Runnable {
 		directory.put(filename, lastModified);
 
 		File f = new File(path + "\\" + filename);
-		System.out.println("UPDATE FILE: " + f.toPath());
-		try {
-			protocol.performSynchronization(e, f);
-		} catch (IOException ex) {
-			log("The coordinator received the file.");
-		}
+		protocol.performSynchronization(e, f);
 	}
 
 	public static void log(String message) {
-		System.out.println("[CLIENT] " + message);
+		System.out.println("[Client] " + message);
 	}
 
 	/**
@@ -378,5 +384,18 @@ public class DropClient implements Runnable {
 		} while (success == false);
 		log("Successfully created a DropClient on port " + port);
 		return client;
+	}
+	
+	private void shutdownHook(){
+		Index startUp = Index.startUp();
+		// TODO: This is a problem, not all host folders are indexed
+		Index now = Index.directory(Config.getPort());
+
+		Resolution resolution = Resolution.compare(startUp, now);
+		if (resolution.countChanges() > 0)
+			System.out.println(resolution);
+		else
+			System.out.println("[Client] There were no changes on the directory.");
+		now.write(port);
 	}
 }

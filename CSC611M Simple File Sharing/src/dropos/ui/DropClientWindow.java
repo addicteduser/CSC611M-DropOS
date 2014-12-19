@@ -16,9 +16,9 @@ public class DropClientWindow extends JFrame {
 	 */
 	private static final long serialVersionUID = -3216122212731392882L;
 
-	
 	public DropClientWindow() {
 		super("DropClient");
+		
 		setLayout(new FlowLayout(FlowLayout.CENTER, 4, 4));
 		
 		JLabel lblExit = new JLabel("Exit this window to stop the system.");

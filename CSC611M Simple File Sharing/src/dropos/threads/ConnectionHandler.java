@@ -28,9 +28,11 @@ public class ConnectionHandler extends Thread {
 	private BlockingQueue<Socket> queue;
 	private Socket connectionSocket;
 	private DropOSProtocol protocol;
+	private int port;
 
-	public ConnectionHandler(BlockingQueue<Socket> queue) {
+	public ConnectionHandler(BlockingQueue<Socket> queue, int port) {
 		this.queue = queue;
+		this.port = port;
 		this.start();
 	}
 
@@ -126,7 +128,7 @@ public class ConnectionHandler extends Thread {
 
 		log("Sending the server's index list.");
 		// Respond by sending your own index
-		protocol.sendIndex();
+		protocol.sendIndex(port);
 
 		log("Performing resolution...");
 		// Parse the client's index

@@ -3,6 +3,8 @@ package dropos;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import dropos.threads.CoordinatorConnectionHandler;
 import dropos.threads.CoordinatorThreadPool;
@@ -26,9 +28,12 @@ public class DropCoordinator implements Runnable{
 	}
 
 	public void run() {
+		Path path = Config.getInstancePath(Config.getPort());
+		checkIfServerFolderExists(path);
+		
 		while (true) {
 			try {
-				System.out.println("[Coordinator] Waiting for connections on port " + serverSocket.getLocalPort() + "...");
+				log("Waiting for connections on port " + serverSocket.getLocalPort() + "...");
 				Socket connectionSocket = serverSocket.accept();
 				pool.addTask(connectionSocket);
 			} catch (IOException e) {
@@ -37,16 +42,33 @@ public class DropCoordinator implements Runnable{
 		}
 	}
 	
+	private void checkIfServerFolderExists(Path path) {
+		if (Files.notExists(path)) {
+			log("Detected that server folder is not yet created. Creating one now at path:");
+			log(path.toString());
+
+			try {
+				Files.createDirectory(path);
+			} catch (IOException e) {
+				log("Could not create a directory at the selected path.");
+			}
+		}
+	}
+
+	private static void log(String message) {
+		log("[Coordinator] " + message);
+	}
+
 	public static DropCoordinator create(){
 		if (instance == null){
 			try {
 				instance = new DropCoordinator(Config.getPort());
 			} catch (IOException e) {
-				System.out.println("[Coordinator] The coordinator could not run because it is not using port " + Config.getPort() +". Please start the coordinator first.");
+				log("The coordinator could not run because it is not using port " + Config.getPort() +". Please start the coordinator first.");
 				System.exit(1);
 			}
 		}else{
-			System.out.println("[Coordinator] The coordinator is already instantiated. Returning reference...");
+			log("The coordinator is already instantiated. Returning reference...");
 		}
 		return instance;
 	}

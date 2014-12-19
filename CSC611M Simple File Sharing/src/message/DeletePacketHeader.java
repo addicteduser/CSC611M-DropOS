@@ -1,7 +1,6 @@
 package message;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 
 import dropos.Config;
