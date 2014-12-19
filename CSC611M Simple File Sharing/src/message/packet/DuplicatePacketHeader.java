@@ -29,7 +29,7 @@ public class DuplicatePacketHeader extends FilePacketHeader {
 		
 		// Prepare redundancy header by concatenating the IP Addresses of the servers
 		for(Host h : redundantServers) {
-			header += ":" + h.getIpAddress();
+			header += ":" + h.getIpAddress() + "-"+ h.getPort();
 		}
 		redundancyHeader = header;
 		

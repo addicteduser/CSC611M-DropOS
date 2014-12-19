@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import message.DropOSProtocol;
@@ -94,7 +95,8 @@ public class PacketHeader {
 
 	public static DuplicatePacketHeader createDuplicate(String filePath, int port, ArrayList<Host> redundantServers) {
 		long size = new File(filePath).length();
-		return new DuplicatePacketHeader(port, filePath, size, redundantServers);
+		String filename = Paths.get(filePath).toFile().getName();
+		return new DuplicatePacketHeader(port, filename, size, redundantServers);
 	}
 
 	public static PacketHeader parsePacket(String message, int port) {
@@ -118,6 +120,7 @@ public class PacketHeader {
 		// S/CREGISTER:PORT
 			case "SREGISTER":
 			case "CREGISTER": 
+				port = Integer.parseInt(split[1]);
 				return new RegisterPacketHeader(port,command);
 				
 		// INDEX
@@ -128,6 +131,9 @@ public class PacketHeader {
 			case "DELETE":
 				filename = split[1];
 				return new DeletePacketHeader(port,filename);
+				
+			case "DUPLICATE":
+			return new DuplicatePacketHeader(port, message);
 		}
 		return null;
 	}

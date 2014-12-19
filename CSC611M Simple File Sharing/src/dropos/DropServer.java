@@ -50,9 +50,7 @@ public class DropServer implements Runnable {
 
 		while (true) {
 			try {
-				System.out.println("[Server] Waiting for client connections on port " + serverSocket.getLocalPort() + "...");
 				Socket connectionSocket = serverSocket.accept();
-
 				pool.addTask(connectionSocket);
 			} catch (IOException e) {
 				e.printStackTrace();

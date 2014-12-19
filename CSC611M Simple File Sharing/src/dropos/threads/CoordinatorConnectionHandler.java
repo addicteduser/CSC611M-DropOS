@@ -52,7 +52,6 @@ public class CoordinatorConnectionHandler extends Thread {
 			try {
 				this.connectionSocket = queue.take();
 				host = new Host(connectionSocket);
-				log("Acquired lock on host " + host + ".");
 				
 				protocol = host.createProtocol(connectionSocket);
 				log("Accepting headers on a new DropOSProtocol with host [" + host + "]");
@@ -148,8 +147,8 @@ public class CoordinatorConnectionHandler extends Thread {
 			ArrayList<Host> selectedServersForRedundancy;
 			
 			// If it already exists in the redundancy list, then use it
-			if (redundancyList.containsKey(filePath)){
-				selectedServersForRedundancy = redundancyList.get(filePath);
+			if (redundancyList.containsKey(filename)){
+				selectedServersForRedundancy = redundancyList.get(filename);
 				
 			// If it doesn't, then (1) determine how many servers needed and (2) add them mark them for redundancy
 			}else {
