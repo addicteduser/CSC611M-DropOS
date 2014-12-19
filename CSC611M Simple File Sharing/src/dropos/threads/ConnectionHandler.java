@@ -42,7 +42,6 @@ public class ConnectionHandler extends Thread {
 	public void run() {
 		while (true) {
 			try {
-
 				connectionSocket = queue.take();
 				if (isCoordinator(connectionSocket) == false)
 				{
@@ -74,7 +73,7 @@ public class ConnectionHandler extends Thread {
 	 * @return
 	 */
 	private boolean isCoordinator(Socket socket) {
-		return socket.getInetAddress().toString().equals(Config.getIpAddress());
+		return socket.getInetAddress().toString().substring(1).equals(Config.getIpAddress());
 	}
 
 	private void interpretMessage(Message msg) throws UnknownHostException, IOException {
