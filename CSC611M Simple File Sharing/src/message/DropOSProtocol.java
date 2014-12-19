@@ -61,7 +61,14 @@ public class DropOSProtocol {
 
 	private void initialize(Socket s) {
 		socket = s;
-		port = socket.getLocalPort();
+		
+		port = socket.getPort();
+		if(port<4040||port>4050){
+			port = socket.getLocalPort();
+			//log("What the hell");
+			//System.exit(1);
+		}
+		
 		try {
 			InputStream inputStream = s.getInputStream();
 			bufferedInputStream = new BufferedInputStream(inputStream);
