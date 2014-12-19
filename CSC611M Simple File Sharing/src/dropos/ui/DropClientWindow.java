@@ -15,12 +15,9 @@ public class DropClientWindow extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = -3216122212731392882L;
-	private int port;
 
-	
-	public DropClientWindow(int port) {
+	public DropClientWindow() {
 		super("DropClient");
-		this.port = port;
 		
 		setLayout(new FlowLayout(FlowLayout.CENTER, 4, 4));
 		

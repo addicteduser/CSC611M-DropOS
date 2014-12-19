@@ -62,7 +62,7 @@ public class DropClient implements Runnable {
 		}
 
 		// Create GUI
-		new DropClientWindow(port);
+		new DropClientWindow();
 
 		// Watch directory
 		Path clientPath = Config.getInstancePath(port);
@@ -124,6 +124,7 @@ public class DropClient implements Runnable {
 					// Get the type of the event
 					kind = watchEvent.kind();
 					
+					@SuppressWarnings("unchecked")
 					Path newPath = ((WatchEvent<Path>) watchEvent).context();
 
 					// Create a directory event from what happened
