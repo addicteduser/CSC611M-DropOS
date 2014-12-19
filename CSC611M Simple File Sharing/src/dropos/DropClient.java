@@ -76,6 +76,10 @@ public class DropClient implements Runnable {
 		protocol = DropOSProtocol.connectToCoordinator();
 		protocol.sendMessage("CREGISTER:" + port);
 
+
+		Path path = Config.getInstancePath(port);
+		checkIfClientFolderExists(path);
+		
 		protocol = DropOSProtocol.connectToCoordinator();
 
 		log("Producing index list from directory:");
@@ -86,6 +90,21 @@ public class DropClient implements Runnable {
 
 		return Resolution.compare(olderIndex, newerIndex);
 	}
+	
+
+	private void checkIfClientFolderExists(Path path) {
+		if (Files.notExists(path)) {
+			log("Detected that client folder is not yet created. Creating one now at path:");
+			log(path.toString());
+
+			try {
+				Files.createDirectory(path);
+			} catch (IOException e) {
+				log("Could not create a directory at the selected path.");
+			}
+		}
+	}
+
 
 	private void watchDirectory(Path clientPath) {
 		// Sanity check - Check if path is a folder
