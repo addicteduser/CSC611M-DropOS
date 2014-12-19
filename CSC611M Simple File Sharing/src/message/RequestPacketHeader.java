@@ -7,11 +7,9 @@ import dropos.Config;
 
 public class RequestPacketHeader extends FilePacketHeader {
 	protected String filename;
-	private int port;
 	
-	public RequestPacketHeader(String header, int port) {
-		super(header);
-		this.port = port;
+	public RequestPacketHeader(int port, String header) {
+		super(port, header);
 		filename = header.split(":")[1];
 	}
 

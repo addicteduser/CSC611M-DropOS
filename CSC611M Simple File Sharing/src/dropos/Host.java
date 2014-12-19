@@ -14,24 +14,21 @@ public class Host {
 	private String ipAddress;
 	private int port = -1;
 	private HostType type = null;
-	private Semaphore mutexLock;
 	
 	
 	public Host(String ipAddress, int port) {
 		this.ipAddress = ipAddress;
 		this.port = port;
-		mutexLock = new Semaphore(1);
 	}
 	
-	public Host(Socket connectionSocket) {
-		if (connectionSocket.equals(null))
+	public Host(Socket socket) {
+		if (socket.equals(null))
 		{
 			System.err.println("Connection socket passed to Host is null. System is now exiting...");
 			System.exit(1);
 		}
 		
-		ipAddress = connectionSocket.getInetAddress().toString().substring(1);
-		mutexLock = new Semaphore(1);
+		ipAddress = socket.getInetAddress().toString().substring(1);
 	}
 	
 	public void setType(HostType type){
@@ -45,25 +42,14 @@ public class Host {
 		if (this.port == -1)
 			this.port = port;
 		else
-			System.err.println("PortError. Cannot re-set the port of a host.");
+			System.err.println("PortError. Cannot re-set the port of a host " + ipAddress + " to " + port + " because it is already " + this.port);
 	}
 	
-	public void acquire() throws InterruptedException{
-		mutexLock.acquire();
-	}
-	
-	public void release(){
-		mutexLock.release();
-	}
-
 	/**
 	 * Returns true of the Host is the same Host, or if the Socket provided deals with the same host.
 	 */
 	public boolean equals(Object obj) {
-		if (obj instanceof Socket){
-			Socket socket = (Socket) obj;
-			return socket.getInetAddress().equals(ipAddress) && port == socket.getPort();
-		}else if (obj instanceof Host){
+		if (obj instanceof Host){
 			Host host = (Host) obj;
 			return ipAddress.equalsIgnoreCase(host.ipAddress) && host.port == port;
 		}

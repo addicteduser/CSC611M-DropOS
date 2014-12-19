@@ -17,8 +17,8 @@ public class IndexListPacketHeader extends FilePacketHeader {
 	 * This method is used when you receive a packet header that is for an index list. 
 	 * @param header
 	 */
-	public IndexListPacketHeader(String header) {
-		super(header);
+	public IndexListPacketHeader(int port, String header) {
+		super(port, header);
 		try {
 			filesize = Long.parseLong(header.split(":")[1]);	
 		}catch (Exception e){
@@ -31,8 +31,8 @@ public class IndexListPacketHeader extends FilePacketHeader {
 	 * @param port 
 	 * @param header 
 	 */
-	public IndexListPacketHeader(String header, int port) {
-		super("INDEX:");
+	public IndexListPacketHeader(int port) {
+		super(port, "INDEX:");
 		this.port = port;
 		try {
 			File file = Index.getInstance(port).getFile();
@@ -52,7 +52,7 @@ public class IndexListPacketHeader extends FilePacketHeader {
 	 * The index of the server is labeled with the server's IP, and is not stored in the logically synchronized folder.
 	 */
 	protected String filePath() {
-		return "\\Indexes\\" + Config.getIpAddress() + ".txt";
+		return Config.getInstancePath(port).resolve("\\indexes\\" + Config.getIpAddress() + ".txt").toString();
 	}
 
 	

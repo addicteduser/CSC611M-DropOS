@@ -38,8 +38,8 @@ public class DropCoordinator implements Runnable{
 		
 		while (true) {
 			try {
-				log("Waiting for connections on port " + serverSocket.getLocalPort() + "...");
 				Socket connectionSocket = serverSocket.accept();
+				log("New connection received!");
 				pool.addTask(connectionSocket);
 			} catch (IOException e) {
 				e.printStackTrace();

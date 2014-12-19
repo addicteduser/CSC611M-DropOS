@@ -16,8 +16,8 @@ public class FilePacketHeader extends PacketHeader {
 	protected String filename;
 	protected File file;
 
-	public FilePacketHeader(String header) {
-		super(header);
+	public FilePacketHeader(int port, String header) {
+		super(port, header);
 		String[] split = header.split(":");
 		
 		try {
@@ -45,14 +45,13 @@ public class FilePacketHeader extends PacketHeader {
 	 * @return
 	 */
 	protected String filePath(){
-		return "\\temp\\" + filename;
+		return Config.getInstancePath(port).resolve("\\temp\\" + filename).toString();
 	}
 
 	@Override
 	public Message interpret(DropOSProtocol protocol) throws IOException {
 		file = receiveFile(protocol);
-		System.out.println("File was received.");
-		return new FileAndMessage("UPDATE " + filename, file);
+		return new FileAndMessage("UPDATE:" + file.length() + ":" + filename, file);
 	}
 	
 	public void writeFile(int port){

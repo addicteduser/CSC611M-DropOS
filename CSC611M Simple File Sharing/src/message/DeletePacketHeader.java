@@ -7,10 +7,8 @@ import dropos.Config;
 
 public class DeletePacketHeader extends PacketHeader {
 	protected String filename;
-	private int port;
-	public DeletePacketHeader(String header, int port) {
-		super(header);
-		this.port = port;
+	public DeletePacketHeader(int port, String header) {
+		super(port, header);
 		filename = header.split(":")[1];
 	}
 

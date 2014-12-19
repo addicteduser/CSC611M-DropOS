@@ -5,12 +5,8 @@ import java.io.IOException;
 public class ServerIndexListPacketHeader extends IndexListPacketHeader {
 	String ipAddress;
 	
-	public ServerIndexListPacketHeader(String header) {
-		super(header);
-	}
-	
-	protected String filePath() {
-		return ipAddress + ".txt";
+	public ServerIndexListPacketHeader(int port, String header) {
+		super(port, header);
 	}
 	
 	@Override

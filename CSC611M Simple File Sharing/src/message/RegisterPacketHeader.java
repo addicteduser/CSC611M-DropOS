@@ -4,8 +4,8 @@ import java.io.IOException;
 
 public class RegisterPacketHeader extends PacketHeader {
 
-	public RegisterPacketHeader(String header) {
-		super(header);
+	public RegisterPacketHeader(int port, String header) {
+		super(port, header);
 	}
 	
 	

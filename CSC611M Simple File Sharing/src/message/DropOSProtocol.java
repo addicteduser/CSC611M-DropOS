@@ -15,6 +15,8 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import dropos.Config;
 import dropos.Host;
@@ -43,8 +45,7 @@ public class DropOSProtocol {
 		try {
 			socket = new Socket(Config.getIpAddress(), Config.getPort());
 			initialize(socket);
-		}catch(ConnectException e)
-		{
+		} catch (ConnectException e) {
 			Host host = new Host(Config.getIpAddress(), Config.getPort());
 			loge("Fatal error. Could not connect to host at " + host + ".");
 			loge("Please check config.ini if the coordinator's IP address is configured properly.");
@@ -52,23 +53,23 @@ public class DropOSProtocol {
 			System.exit(1);
 		}
 	}
+
 	private void loge(String message) {
 		System.err.println("[Protocol] " + message);
 	}
+
 	public DropOSProtocol(Socket s) {
 		initialize(s);
 	}
 
 	private void initialize(Socket s) {
 		socket = s;
-		
+
 		port = socket.getPort();
-		if(port<4040||port>4050){
+		if (port < 4040 || port > 4050) {
 			port = socket.getLocalPort();
-			//log("What the hell");
-			//System.exit(1);
 		}
-		
+
 		try {
 			InputStream inputStream = s.getInputStream();
 			bufferedInputStream = new BufferedInputStream(inputStream);
@@ -101,7 +102,7 @@ public class DropOSProtocol {
 			bufferedOutputStream.flush();
 		} catch (UnsupportedEncodingException e) {
 			log("Message could not be converted into bytes.");
-		}catch (IOException e){
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -128,39 +129,37 @@ public class DropOSProtocol {
 		byte[] mes = header.getBytes();
 		byte[] packetHeaderLength = intToByteArray(mes.length);
 
-		try {
-			// First 4 bytes contain an integer value, which is the length of the packet header
-			// System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
-			bufferedOutputStream.write(packetHeaderLength, 0, packetHeaderLength.length);
+		// First 4 bytes contain an integer value, which is the length of the packet header
+		// System.arraycopy(packetHeaderLength, 0, buf, 0, 4);
+		bufferedOutputStream.write(packetHeaderLength, 0, packetHeaderLength.length);
 
-			// The next bytes would be the packet header
-			// System.arraycopy(mes, 0, buf, 4, mes.length);
-			bufferedOutputStream.write(mes, 0, mes.length);
+		// The next bytes would be the packet header
+		// System.arraycopy(mes, 0, buf, 4, mes.length);
+		bufferedOutputStream.write(mes, 0, mes.length);
 
-			// The last stream of bytes contains the payload; the file
-			FileInputStream fileInputStream = new FileInputStream(f);
-			BufferedInputStream bin = new BufferedInputStream(fileInputStream);
+		// The last stream of bytes contains the payload; the file
+		FileInputStream fileInputStream = new FileInputStream(f);
+		BufferedInputStream bin = new BufferedInputStream(fileInputStream);
 
-			int fileBytesWritten = 0;
-			do {
-				int bytesRead = bin.read(buf, fileBytesWritten, BUFFER_LENGTH);
-				// If you read something enough to fit the buffer, then write it out to the socket
-				if (bytesRead > 0) {
-					bufferedOutputStream.write(buf, fileBytesWritten, bytesRead);
-					fileBytesWritten += bytesRead;
-				}
-			} while (fileBytesWritten < f.length());
+		int fileBytesWritten = 0;
+		do {
+			int bytesRead = bin.read(buf, fileBytesWritten, BUFFER_LENGTH);
+			// If you read something enough to fit the buffer, then write it out to the socket
+			if (bytesRead > 0) {
+				bufferedOutputStream.write(buf, fileBytesWritten, bytesRead);
+				fileBytesWritten += bytesRead;
+			}
+		} while (fileBytesWritten < f.length());
 
-			fileInputStream.close();
-			bufferedOutputStream.flush();
-		} catch (Exception e) {
-			log("File " + f + " was sent. (Recepient closed the socket.)");
-		}
+		fileInputStream.close();
+		bufferedOutputStream.flush();
+		bufferedOutputStream.close();
 	}
 
 	private void log(String message) {
 		System.out.println("[Protocol] " + message);
 	}
+
 	/**
 	 * This method is called when changes are detected on your directory while the program is running.
 	 * 
@@ -190,6 +189,17 @@ public class DropOSProtocol {
 		File file = null;
 		System.out.println("Receiving file in path: "+filePath);
 		file = new File(filePath);
+		
+		// If the destination folders aren't created yet, create them.
+		Path parent = file.toPath().getParent();
+		if (Files.notExists(parent)){
+			Files.createDirectories(parent);
+		}
+		
+		if (Files.notExists(file.toPath()))
+		{
+			Files.createFile(file.toPath());
+		}
 
 		// Stream to handle file writing
 		fileOutputStream = new FileOutputStream(file);
@@ -217,8 +227,10 @@ public class DropOSProtocol {
 		// Close it
 		bufferedOutputStream.flush();
 		bufferedOutputStream.close();
-
-		socket.close();
+		
+		if (socket.isClosed() == false)
+			socket.close();
+		
 		return file;
 	}
 
@@ -255,8 +267,10 @@ public class DropOSProtocol {
 			if (bytesRead >= 0)
 				headerBytesRead += bytesRead;
 		} while (headerBytesRead < length);
-		socket.close();
+		
 		message = new String(buf);
+		if (bufferedInputStream.available() == 0)
+			socket.close();
 		return PacketHeader.create(message, port);
 	}
 

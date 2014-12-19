@@ -84,9 +84,6 @@ public class DropClient implements Runnable {
 		protocol = DropOSProtocol.connectToCoordinator();
 		protocol.sendMessage("CREGISTER:" + port);
 
-		
-		protocol = DropOSProtocol.connectToCoordinator();
-
 		log("Producing index list from directory:");
 		System.out.println("         " + Config.getInstancePath(port) + "\n");
 		
@@ -191,8 +188,12 @@ public class DropClient implements Runnable {
 
 			case "UPDATE":
 				try {
-					long dateModified = new File(Config.getInstancePath(port) + "\\" + filename).length();
-					FileAndLastModifiedPair e = new FileAndLastModifiedPair(filename, dateModified);
+					File file = new File(Config.getInstancePath(port) + "\\" + filename);
+					Path path = file.toPath();
+					BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+					long lastModified = attributes.lastModifiedTime().toMillis();
+					
+					FileAndLastModifiedPair e = new FileAndLastModifiedPair(filename, lastModified);
 					Index.getInstance(port).add(e);
 				} catch (Exception err) {
 					log("Error, could not add " + filename + " to the index.");
@@ -417,7 +418,7 @@ public class DropClient implements Runnable {
 				client = new DropClient(port);
 				success = true;
 			} catch (IOException e) {
-				log("Could not create a DropClient on port " + port + ". Attempting to use port " + (port + 1));
+				// log("Could not create a DropClient on port " + port + ". Attempting to use port " + (port + 1));
 				++port;
 			}
 		} while (success == false);
