@@ -141,6 +141,6 @@ public class ConnectionHandler extends Thread {
 	}
 
 	private void log(String message) {
-		System.out.println("[Server] " + message);
+		System.out.println("[Server " + port + "] " + message);
 	}
 }

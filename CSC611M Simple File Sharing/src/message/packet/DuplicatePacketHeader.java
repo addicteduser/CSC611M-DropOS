@@ -50,22 +50,27 @@ public class DuplicatePacketHeader extends FilePacketHeader {
 		hosts = new ArrayList<Host>();
 		
 		String[] split = header.split("\n");
-		this.header = split[1];
-
+		
+		// The two headers
 		redundancyHeader = split[0];
+		updateHeader = split[1];
+		
+		// Update part
+		String[] updateSplit = updateHeader.split(":");
+		filesize = Long.parseLong(updateSplit[1]);
+		filename = updateSplit[2];
+
+		// Duplicate part
 		split = redundancyHeader.split(":");
-		for (int i = 0; i < split.length; i++) {
-			if (i == 0)
-				updateHeader = split[i];
-			else{
-				String[] pair = split[i].split("-");
-				Host h = new Host(pair[0], Integer.parseInt(pair[1]));
-				hosts.add(h);
-			}
+		
+		// Parsing the hosts
+		for (int i = 1; i < split.length; i++) {
+			String[] pair = split[i].split("-");
+			Host h = new Host(pair[0], Integer.parseInt(pair[1]));
+			hosts.add(h);
 		}
 
-		filesize = Long.parseLong(this.header.split(":")[1]);
-		filename = this.header.split(":")[2];
+		
 	}
 
 	@Override
@@ -86,6 +91,9 @@ public class DuplicatePacketHeader extends FilePacketHeader {
 			UpdatePacketHeader updatepacket = PacketHeader.createUpdate(filename, filesize, port);
 			
 			try {
+				System.out.println("[DuplicatePacketHeader] Sending an UPDATE to " + h);
+				System.out.println(updatepacket);
+				System.out.println();
 				DropOSProtocol createProtocol = h.createProtocol();
 				createProtocol.sendFile(updatepacket, file);
 			} catch (IOException e) {

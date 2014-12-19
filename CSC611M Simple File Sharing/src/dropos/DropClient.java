@@ -386,8 +386,8 @@ public class DropClient implements Runnable {
 		protocol.performSynchronization(e, f, port);
 	}
 
-	public static void log(String message) {
-		System.out.println("[Client] " + message);
+	public void log(String message) {
+		System.out.println("[Client "+port+"] " + message);
 	}
 
 	/**
@@ -413,7 +413,7 @@ public class DropClient implements Runnable {
 				++port;
 			}
 		} while (success == false);
-		log("Successfully created a DropClient on port " + port);
+		System.out.println("[Client] Successfully created a DropClient on port " + port);
 		return client;
 	}
 	
@@ -425,7 +425,7 @@ public class DropClient implements Runnable {
 		if (resolution.countChanges() > 0)
 			System.out.println(resolution);
 		else
-			System.out.println("[Client] There were no changes on the directory.");
+			log("There were no changes on the directory.");
 		now.write(port);
 	}
 }
