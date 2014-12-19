@@ -1,9 +1,5 @@
 package dropos.threads;
 
-import indexer.Index;
-import indexer.Resolution;
-
-import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -11,11 +7,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Semaphore;
 
 import message.DropOSProtocol;
 import message.FileAndMessage;
 import message.Message;
+import message.packet.DuplicatePacketHeader;
 import message.packet.PacketHeader;
 import dropos.Config;
 import dropos.DropCoordinator;
@@ -39,18 +35,15 @@ public class CoordinatorConnectionHandler extends Thread {
 	
 	
 	private static ArrayList<Host> connectedServers, connectedClients;
-	private static ArrayList<FileAndServerPairs> redundanciesList;
-	
-	private static HashMap<Host, Resolution> resolutions;
+	private static Redundancy redundancyList;
 
 	public CoordinatorConnectionHandler(BlockingQueue<Socket> queue) {
 		this.queue = queue;
-		resolutions = new HashMap<Host, Resolution>();
 		this.start();
 
 		connectedClients = new ArrayList<Host>();
 		connectedServers = new ArrayList<Host>();
-		redundanciesList = new ArrayList<FileAndServerPairs>();
+		redundancyList = new Redundancy();
 	}
 
 	@Override
@@ -144,37 +137,49 @@ public class CoordinatorConnectionHandler extends Thread {
 
 	private void handleUpdate(FileAndMessage msg) {
 		try {
-			String filename = msg.getFile().toString();
-			
-			//isValid(msg, host);
+			String filePath = msg.getFile().toPath().toString();
+			String filename = msg.getFile().getName();
 			
 			int numberOfServers = connectedServers.size();
+			
 			// this is the number of servers required for duplication
 			int onethirdReliability = Math.round((numberOfServers * 1 / 3) + 1);
 			
-			ArrayList<Host> selectedServersForRedundancy = new ArrayList<Host>();
-			Random rand = new Random();
-			int sRand;
+			ArrayList<Host> selectedServersForRedundancy;
 			
-			// select the servers
-			for (int r = 0; r < onethirdReliability; r++) {
-				do {
-					sRand = rand.nextInt(numberOfServers);
-				} while (selectedServersForRedundancy.contains(connectedServers.get(sRand)));
+			// If it already exists in the redundancy list, then use it
+			if (redundancyList.containsKey(filePath)){
+				selectedServersForRedundancy = redundancyList.get(filePath);
 				
-				selectedServersForRedundancy.add(connectedServers.get(sRand));
+			// If it doesn't, then (1) determine how many servers needed and (2) add them mark them for redundancy
+			}else {
+				Random rand = new Random();
+				int sRand;
+				
+				// create a new bucket of hosts
+				selectedServersForRedundancy = new ArrayList<Host>();
+				redundancyList.put(filename, selectedServersForRedundancy);
+				
+				// determine which hosts go into this bucket
+				for (int r = 0; r < onethirdReliability; r++) {
+					do {
+						sRand = rand.nextInt(numberOfServers);
+					} while (selectedServersForRedundancy.contains(connectedServers.get(sRand)));
+					
+					selectedServersForRedundancy.add(connectedServers.get(sRand));
+				}
+	
 			}
-			
+						
 			// create the duplicate packet header
-			PacketHeader update = PacketHeader.createDuplicate(filename, Config.getPort(), selectedServersForRedundancy);
+			DuplicatePacketHeader update = PacketHeader.createDuplicate(filePath, Config.getPort(), selectedServersForRedundancy);
 			
 			// NOTE: duplicate packet header has method that parses the ip's and creates an updatepacket header :/
-			
-			
 			
 			Host arbitraryFirstHost = selectedServersForRedundancy.get(0);
 			
 			protocol = arbitraryFirstHost.createProtocol();
+			
 			// send the file to the redundancies
 			protocol.sendFile(update, msg.getFile());
 			
@@ -184,11 +189,31 @@ public class CoordinatorConnectionHandler extends Thread {
 	}
 
 	private void respondWithFile(FileAndMessage msg) {
+		String filename = msg.getFile().getName();
+		
+		if (redundancyList.containsKey(filename) == false){
+			log("Coordinator could not find file " + filename + ". Most likely it doesn't have this file yet.");
+			log("Coordinator exits and will not respond to request.");
+			return;
+		}
+		
 		// Find out who has the file
+		ArrayList<Host> servers = redundancyList.get(filename);
+		
+		if (servers.size() <= 0){
+			log("There are no servers which have this file. This is a weird bug.");
+			return;
+		}
 		
 		// Choose a random server
+		Host host = servers.get(0);
 		
-		// Get the file 
+		// Get the file
+		DropOSProtocol createProtocol = host.createProtocol();
+		PacketHeader packetHeader = PacketHeader.createRequest(filename, Config.getPort());
+		createProtocol.sendMessage(packetHeader);
+		
+		// TODO: Unfinished code
 		
 		// Pass back to client 
 	}
@@ -201,53 +226,22 @@ public class CoordinatorConnectionHandler extends Thread {
 		log("Sending the server's index list.");
 		// Respond by sending your own index
 		protocol.sendIndex(Config.getPort());
-
-		log("Performing resolution...");
-		// Parse the client's index
-		Index clientIndex = Index.read(msg.getFile());
 		
-		// Get your own index
-		Index serverIndex = Index.getInstance(Config.getPort());
-		
-		// Perform resolution afterwards
-		Resolution resolution = Resolution.compare(serverIndex, clientIndex);
-		
-		// Assigning resolution
-		setResolution(host, resolution);
-		
-		log("These were the following changes received:\n" + resolution);	
-	}
-
-	private synchronized void setResolution(Host host, Resolution resolution) {
-		resolutions.put(host, resolution);
 	}
 
 	private static void log(String message){
 		System.out.println("[Coordinator] " + message);
 	}
 	
-	
-	// TODO This is supposed to check the server-side resolution if a file is indeed valid. If so, it should return true to accept the file.
-	private boolean isValid(FileAndMessage msg, Host host) throws Exception {
-			if (resolutions.containsKey(host) == false)
-				throw new Exception("Invalid UPDATE message received. Client did not send me his index file.");
-			
-			Resolution resolution = resolutions.get(host);
-			String action = resolution.get(msg.getFile().getName());
-			
-			if (action.equalsIgnoreCase("UPDATE") == false)
-				throw new Exception("Invalid UPDATE message received. File is not marked for update.");
-					
-		return false;
-	}
-	
-	private class FileAndServerPairs {
-		String fileName;
-		ArrayList<Host> servers;
-		
-		public FileAndServerPairs(String filename, ArrayList<Host> servers) {
-			this.fileName = filename;
-			this.servers = servers;
+	private class Redundancy extends HashMap<String, ArrayList<Host>>{
+		/**
+		 * This method is used to mark which servers have a redundancy of this file.
+		 * @param filename the file
+		 * @param servers the servers which have the file
+		 */
+		public ArrayList<Host> put(String filename, ArrayList<Host> servers) {
+			// TODO Auto-generated method stub
+			return super.put(filename, servers);
 		}
 	}
 

@@ -12,9 +12,7 @@ import java.util.concurrent.BlockingQueue;
 import message.DropOSProtocol;
 import message.FileAndMessage;
 import message.Message;
-import message.packet.FilePacketHeader;
 import message.packet.PacketHeader;
-import message.packet.RequestPacketHeader;
 import message.packet.UpdatePacketHeader;
 import dropos.Config;
 import dropos.DropCoordinator;
@@ -113,7 +111,7 @@ public class ConnectionHandler extends Thread {
 
 		log("Sending the requested file [" + f.getName() + "] as an update...");
 		
-		UpdatePacketHeader updatePacket = PacketHeader.createUpdate(f.getName(), Config.getPort());
+		UpdatePacketHeader updatePacket = PacketHeader.createUpdate(f.getName(), f.length(), Config.getPort());
 		
 		protocol.sendFile(updatePacket, f);
 		log("Sent.");
