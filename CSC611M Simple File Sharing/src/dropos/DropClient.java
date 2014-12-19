@@ -81,7 +81,7 @@ public class DropClient implements Runnable {
 		log("Producing index list from directory:");
 		System.out.println("         " + Config.getInstancePath(port) + "\n");
 		
-		Index olderIndex = Index.startUp();
+		Index olderIndex = Index.startUp(port);
 		Index newerIndex = Index.directory(port);
 
 		return Resolution.compare(olderIndex, newerIndex);
@@ -366,9 +366,12 @@ public class DropClient implements Runnable {
 	 * Factory pattern to create a {@link DropClient} instance on the next available port. The function begins with the port dictated on the {@link Config}
 	 * file.
 	 * 
+	 * This method is synchronized because the ports are resources that two {@link DropClient}s might get permissions for.
+	 * By placing a mutex here, we ensure that only one {@link Host} is assigned to one port.
+	 * 
 	 * @return
 	 */
-	public static DropClient create() {
+	public synchronized static DropClient create() {
 		boolean success = false;
 		DropClient client = null;
 		int port = Config.getPort();
@@ -387,9 +390,8 @@ public class DropClient implements Runnable {
 	}
 	
 	private void shutdownHook(){
-		Index startUp = Index.startUp();
-		// TODO: This is a problem, not all host folders are indexed
-		Index now = Index.directory(Config.getPort());
+		Index startUp = Index.startUp(port);
+		Index now = Index.directory(port);
 
 		Resolution resolution = Resolution.compare(startUp, now);
 		if (resolution.countChanges() > 0)
