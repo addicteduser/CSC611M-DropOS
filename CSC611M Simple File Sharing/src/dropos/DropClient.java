@@ -51,6 +51,13 @@ public class DropClient implements Runnable {
 	public void run() {
 		// Check offline changes
 		Resolution compare = checkOfflineChanges();
+		
+		// Check if folder exists
+		Path path = Config.getInstancePath(port);
+		checkIfClientFolderExists(path);
+		
+		Index.readMyIndex(port);
+
 
 		// If changes exist, handle them
 		if (compare.countChanges() > 0) {
@@ -76,9 +83,6 @@ public class DropClient implements Runnable {
 		protocol = DropOSProtocol.connectToCoordinator();
 		protocol.sendMessage("CREGISTER:" + port);
 
-
-		Path path = Config.getInstancePath(port);
-		checkIfClientFolderExists(path);
 		
 		protocol = DropOSProtocol.connectToCoordinator();
 
