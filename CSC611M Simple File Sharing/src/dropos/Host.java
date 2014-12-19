@@ -1,9 +1,7 @@
 package dropos;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.util.concurrent.Semaphore;
 
 import message.DropOSProtocol;
 

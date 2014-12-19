@@ -5,9 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
-import message.DropOSProtocol;
-import dropos.Host.HostType;
-
 public class Config {
 	private static Path path;
 	private static String ipAddress;
