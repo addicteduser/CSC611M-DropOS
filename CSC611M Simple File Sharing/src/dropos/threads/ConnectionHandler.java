@@ -99,23 +99,14 @@ public class ConnectionHandler extends Thread {
 			respondToRequest(fileAndMsg);
 			break;
 		case "UPDATE":
-			acceptUpdate(fileAndMsg);
+			// Handled in interpret
 			break;
 		case "DELETE":
-			acceptDelete(fileAndMsg);
+			// Handled in interpret
 			break;
 		}
 
 	}
-
-	private void acceptDelete(FileAndMessage fileAndMsg) {
-		
-	}
-
-	private void acceptUpdate(FileAndMessage fileAndMsg) {
-		
-	}
-
 	private void respondToRequest(FileAndMessage msg) throws UnknownHostException, IOException {
 		File f = msg.getFile();
 		protocol = DropOSProtocol.connectToCoordinator();
