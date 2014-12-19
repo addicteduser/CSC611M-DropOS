@@ -86,7 +86,7 @@ public class PacketHeader {
 		return new Message(header);
 	}
 
-	public static PacketHeader createDuplicate(String filePath, int port, ArrayList<Host> redundantServers) {
+	public static DuplicatePacketHeader createDuplicate(String filePath, int port, ArrayList<Host> redundantServers) {
 		long size = new File(filePath).length();
 		return new DuplicatePacketHeader(port, filePath, size, redundantServers);
 	}
