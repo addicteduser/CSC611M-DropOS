@@ -1,7 +1,9 @@
 package message.packet;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
+
+import dropos.Config;
+
 
 public class UpdatePacketHeader extends FilePacketHeader {
 
@@ -15,6 +17,12 @@ public class UpdatePacketHeader extends FilePacketHeader {
 		this.header += ":" + filename;
 	}
 	
+	
+	@Override
+	protected String filePath() {
+		Path path = Config.getInstancePath(port);
+		return path.resolve(filename).toString();
+	}
 	
 
 }
