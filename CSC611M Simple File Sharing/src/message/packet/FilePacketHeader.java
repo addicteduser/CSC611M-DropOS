@@ -49,7 +49,9 @@ public class FilePacketHeader extends PacketHeader {
 	 * @return
 	 */
 	protected String filePath(){
-		return Config.getInstancePath(port).resolve("\\temp\\" + filename).toString();
+		Path path = Config.getInstancePath(port);
+		Path root = path.getParent();
+		return root.resolve("temp\\" + filename).toString();
 	}
 
 	@Override
