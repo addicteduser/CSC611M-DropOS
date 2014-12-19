@@ -81,7 +81,7 @@ public class DropClient implements Runnable {
 		log("Producing index list from directory:");
 		System.out.println("         " + Config.getInstancePath(port) + "\n");
 		
-		Index olderIndex = Index.startUp();
+		Index olderIndex = Index.startUp(port);
 		Index newerIndex = Index.directory(port);
 
 		return Resolution.compare(olderIndex, newerIndex);
@@ -387,9 +387,8 @@ public class DropClient implements Runnable {
 	}
 	
 	private void shutdownHook(){
-		Index startUp = Index.startUp();
-		// TODO: This is a problem, not all host folders are indexed
-		Index now = Index.directory(Config.getPort());
+		Index startUp = Index.startUp(port);
+		Index now = Index.directory(port);
 
 		Resolution resolution = Resolution.compare(startUp, now);
 		if (resolution.countChanges() > 0)

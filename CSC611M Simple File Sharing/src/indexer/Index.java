@@ -161,7 +161,7 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 */
 	public static Index directory(int port) {
 		if (preStartup == null)
-			preStartup = readMyIndex();
+			preStartup = readMyIndex(port);
 		instance = directory(Config.getInstancePath(port).toFile());
 		return instance;
 	}
@@ -185,21 +185,22 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 * <p>
 	 * This Index will usually be used to compare the pre-Index (this one) and the post-Index (after changes to the directory have been made).
 	 * </p>
+	 * @param port 
 	 * 
 	 * @return
 	 */
-	public static Index startUp() {
+	public static Index startUp(int port) {
 		if (preStartup == null)
-			preStartup = readMyIndex();
+			preStartup = readMyIndex(port);
 		return preStartup;
 	}
 
 	/**
 	 * This method can be called when you wish to import the current index list from the file.
 	 */
-	public static Index readMyIndex() {
+	public static Index readMyIndex(int port) {
 		try {
-			File file = new File("indexlist.txt");
+			File file = new File(Config.getInstancePath(port) + "\\indexlist.txt");
 			return read(file);
 		} catch (Exception e) {
 			e.printStackTrace();
