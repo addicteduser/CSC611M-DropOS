@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -74,8 +75,15 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 			if (filePath.isDirectory()) {
 				// Recursively index the detected folder
 				indexDirectory(filePath);
-			} else if (filePath.getName().startsWith(".") == false){
-
+			} else {
+				String name = filePath.getName().toString();
+				
+				// Ignore OSX related files that start with .
+				if (name.startsWith(".")) continue;
+				
+				// Ignore indexlist.txt file
+				if (name.equalsIgnoreCase("indexlist.txt")) continue;
+				
 				// Get the attributes and add an index entry
 				attributes = Files.readAttributes(filePath.toPath(), BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 				String filename = filePath.getName();
@@ -93,8 +101,9 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 * 
 	 * @return The file reference to the index list
 	 */
-	public File write() {
-		File indexList = new File("indexlist.txt");
+	public File write(int port) {
+		Path instancePath = Config.getInstancePath(port);
+		File indexList = new File(instancePath + "\\indexlist.txt");
 
 		try {
 			FileOutputStream out = new FileOutputStream(indexList);

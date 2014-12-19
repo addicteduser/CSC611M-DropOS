@@ -15,10 +15,13 @@ public class DropClientWindow extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = -3216122212731392882L;
+	private int port;
 
 	
-	public DropClientWindow() {
+	public DropClientWindow(int port) {
 		super("DropClient");
+		this.port = port;
+		
 		setLayout(new FlowLayout(FlowLayout.CENTER, 4, 4));
 		
 		JLabel lblExit = new JLabel("Exit this window to stop the system.");

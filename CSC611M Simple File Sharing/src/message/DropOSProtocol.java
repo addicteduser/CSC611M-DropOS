@@ -99,9 +99,9 @@ public class DropOSProtocol {
 		}
 	}
 
-	public void sendIndex() throws IOException {
+	public void sendIndex(int port) throws IOException {
 		Index index = Index.getInstance(port);
-		index.write();
+		index.write(port);
 		IndexListPacketHeader packetHeader = index.getPacketHeader(port);
 		File file = index.getFile();
 		sendFile(packetHeader, file);
@@ -202,7 +202,6 @@ public class DropOSProtocol {
 		byte[] buf = new byte[BUFFER_LENGTH];
 		int bytesRead = 0;
 		int totalBytesRead = 0;
-		int bytesWritten = 0;
 
 		do {
 			// Read from input stream into buffer

@@ -19,13 +19,13 @@ public class ThreadPool {
 	private ArrayList<ConnectionHandler> threadList = new ArrayList<ConnectionHandler>();
 	public static int count = 4;
 
-	public ThreadPool() {
+	public ThreadPool(int port) {
 		// Queue for storing "work" (In this case sockets)
 		this.socketQueue = new LinkedBlockingQueue();
 
 		// Create threads for pool
 		for (int i = 0; i < count; i++) {
-			threadList.add(new ConnectionHandler(socketQueue));
+			threadList.add(new ConnectionHandler(socketQueue, port));
 		}
 
 	}

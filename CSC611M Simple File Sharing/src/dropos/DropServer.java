@@ -28,7 +28,7 @@ public class DropServer implements Runnable {
 	private DropServer(int port) throws IOException {
 		this.port = port;
 		serverSocket = new ServerSocket(port);
-		pool = new ThreadPool();
+		pool = new ThreadPool(port);
 	}
 
 	public void run() {
