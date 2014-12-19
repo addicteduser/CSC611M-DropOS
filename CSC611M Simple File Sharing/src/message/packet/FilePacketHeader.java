@@ -44,7 +44,8 @@ public class FilePacketHeader extends PacketHeader {
 	}
 	
 	/**
-	 * All files are stored in the logically synchronized folder.
+	 * FilePacketHeader keeps the packets it receives into a temporary folder. This method 
+	 * returns the path to the file in that directory.
 	 * @return
 	 */
 	protected String filePath(){

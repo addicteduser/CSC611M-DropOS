@@ -24,12 +24,12 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import message.DropOSProtocol;
 import message.DropOSProtocol.HostType;
+import message.FileAndMessage;
 import message.packet.FilePacketHeader;
 import message.packet.IndexListPacketHeader;
 import message.packet.PacketHeader;
 import message.packet.RequestPacketHeader;
-import message.FileAndMessage;
-import message.Message;
+import message.packet.UpdatePacketHeader;
 import dropos.event.SynchronizationEvent;
 import dropos.ui.DropClientWindow;
 
@@ -244,7 +244,6 @@ public class DropClient implements Runnable {
 				String action = resolution.get(filename);
 				switch (action) {
 				case "UPDATE":
-					Long size = new File(filename).length();
 					PacketHeader header = PacketHeader.createUpdate(filename, port);
 					p.sendFile(header, f);
 					break;
@@ -261,11 +260,11 @@ public class DropClient implements Runnable {
 					Socket s = serverSocket.accept();
 					p = new DropOSProtocol(s);
 
-					FilePacketHeader requestHeader = (FilePacketHeader) p.receiveHeader();
+					UpdatePacketHeader updateHeader = (UpdatePacketHeader) p.receiveHeader();
 					
 					// Interpret message and copy to actual folder destination
 					phServerIndex.interpret(protocol);
-					requestHeader.writeFile(port);
+					updateHeader.writeFile(port);
 					break;
 				}
 			}
