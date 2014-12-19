@@ -63,14 +63,18 @@ public class DropServer implements Runnable {
 		}
 	}
 
+	
 	/**
 	 * Factory pattern to create a {@link DropServer} instance on the next
 	 * available port. The function begins with the port dictated on the
 	 * {@link Config} file.
 	 * 
+	 * This method is synchronized because the ports are resources that two {@link DropServer}s might get permissions for.
+	 * By placing a mutex here, we ensure that only one {@link Host} is assigned to one port.
+	 * 
 	 * @return
 	 */
-	public static DropServer create() {
+	public synchronized static DropServer create() {
 		boolean success = false;
 		DropServer server = null;
 		int port = Config.getPort();

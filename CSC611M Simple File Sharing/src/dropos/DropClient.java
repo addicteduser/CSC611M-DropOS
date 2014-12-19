@@ -366,9 +366,12 @@ public class DropClient implements Runnable {
 	 * Factory pattern to create a {@link DropClient} instance on the next available port. The function begins with the port dictated on the {@link Config}
 	 * file.
 	 * 
+	 * This method is synchronized because the ports are resources that two {@link DropClient}s might get permissions for.
+	 * By placing a mutex here, we ensure that only one {@link Host} is assigned to one port.
+	 * 
 	 * @return
 	 */
-	public static DropClient create() {
+	public synchronized static DropClient create() {
 		boolean success = false;
 		DropClient client = null;
 		int port = Config.getPort();
