@@ -23,12 +23,12 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import message.DropOSProtocol;
+import message.DropOSProtocol.HostType;
 import message.FileAndMessage;
 import message.FilePacketHeader;
 import message.IndexListPacketHeader;
 import message.PacketHeader;
 import message.RequestPacketHeader;
-import message.DropOSProtocol.HostType;
 import dropos.event.SynchronizationEvent;
 import dropos.ui.DropClientWindow;
 
@@ -313,10 +313,16 @@ public class DropClient implements Runnable {
 	 *            this contains details of the file to be deleted
 	 * @throws IOException
 	 */
-	private void deleteFile(SynchronizationEvent e) throws IOException {
+	private void deleteFile(SynchronizationEvent e){
 		File f = new File(Config.getInstancePath(port) + "\\" + e.getFile().toString());
-		Files.delete(f.toPath());
-		log("File " + f + " was deleted.");
+		try {
+			Files.delete(f.toPath());
+			log("File " + f + " was deleted.");
+		}catch(IOException err){
+			log("Could not delete file: ");
+			log(f.toString());
+			err.printStackTrace();
+		}
 	}
 
 	/**
@@ -344,12 +350,7 @@ public class DropClient implements Runnable {
 		directory.put(filename, lastModified);
 
 		File f = new File(path + "\\" + filename);
-		System.out.println("UPDATE FILE: " + f.toPath());
-		try {
-			protocol.performSynchronization(e, f);
-		} catch (IOException ex) {
-			log("The coordinator received the file.");
-		}
+		protocol.performSynchronization(e, f);
 	}
 
 	public static void log(String message) {
