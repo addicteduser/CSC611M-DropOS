@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import dropos.Config;
+import dropos.Host;
 import dropos.event.SynchronizationEvent;
 
 public class DropOSProtocol {
@@ -41,11 +42,16 @@ public class DropOSProtocol {
 	 */
 	private static final int BUFFER_LENGTH = 5 * 1024;
 
-	private DropOSProtocol() throws UnknownHostException, IOException {
-		socket = new Socket(Config.getIpAddress(), Config.getPort());
-		initialize(socket);
+	private DropOSProtocol() throws IOException {
+		try {
+			socket = new Socket(Config.getIpAddress(), Config.getPort());
+			initialize(socket);
+		}catch(UnknownHostException e)
+		{
+			Host host = new Host(Config.getIpAddress(), Config.getPort());
+			System.out.println("Could not connect to host at " + host + ". Please check config.ini if the coordinator's IP address is configured properly.");
+		}
 	}
-
 	public DropOSProtocol(Socket s) {
 		initialize(s);
 	}
