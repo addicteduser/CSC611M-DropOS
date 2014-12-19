@@ -100,7 +100,7 @@ public class PacketHeader {
 			//For index, constructor already parses the message
 			//For sregister and cregister, type is specified by the command
 			case "REQUEST": return new RequestPacketHeader(port,message.split(":")[1]);
-			case "UPDATE": return new UpdatePacketHeader(port,message.split(":")[1]);
+			case "UPDATE": return new UpdatePacketHeader(port,message);
 			case "SREGISTER":
 			case "CREGISTER": return new RegisterPacketHeader(port,command);
 			case "INDEX": return new IndexListPacketHeader(port,message);
