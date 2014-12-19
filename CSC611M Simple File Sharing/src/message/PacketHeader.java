@@ -8,7 +8,9 @@ import dropos.event.SynchronizationEvent;
 
 public class PacketHeader {
 	String header;
-	public PacketHeader(String header) {
+	protected int port;
+	public PacketHeader(int port, String header) {
+		this.port = port;
 		this.header = header;
 	}
 	
@@ -34,22 +36,22 @@ public class PacketHeader {
 		switch(command){
 		case "INDEX":
 			if (DropOSProtocol.type == HostType.Server)
-				result = new ServerIndexListPacketHeader(header);
+				result = new ServerIndexListPacketHeader(port, header);
 			else
-				result = new IndexListPacketHeader(header, port);
+				result = new IndexListPacketHeader(port, header);
 			break;
 		case "REQUEST":
-			result = new RequestPacketHeader(header, port);
+			result = new RequestPacketHeader(port, header);
 			break;
 		case "UPDATE":
-				result = new FilePacketHeader(header);
+				result = new FilePacketHeader(port, header);
 			break;
 		case "DELETE":
-			result = new DeletePacketHeader(header, port);
+			result = new DeletePacketHeader(port, header);
 			break;
 		case "SREGISTER":
 		case "CREGISTER":
-			result = new RegisterPacketHeader(header);
+			result = new RegisterPacketHeader(port, header);
 			break;
 		}
 		return result;

@@ -91,7 +91,7 @@ public class DropServer implements Runnable {
 				server = new DropServer(port);
 				success = true;
 			} catch (IOException e) {
-				log("Could not create client on port " + port + ". Attempting to use port " + (port + 1));
+				// log("Could not create client on port " + port + ". Attempting to use port " + (port + 1));
 				++port;
 			}
 		} while (success == false);

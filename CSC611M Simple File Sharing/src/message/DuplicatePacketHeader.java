@@ -12,8 +12,8 @@ public class DuplicatePacketHeader extends FilePacketHeader {
 	ArrayList<String> ipAddresses = new ArrayList<String>();
 	private int port;
 
-	public DuplicatePacketHeader(String header, int port) {
-		super(header);
+	public DuplicatePacketHeader(int port, String header) {
+		super(port, header);
 		this.port = port;
 
 		String[] split = header.split("\n");

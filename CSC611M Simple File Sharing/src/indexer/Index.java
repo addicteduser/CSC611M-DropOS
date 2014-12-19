@@ -88,6 +88,10 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 				// Ignore indexlist.txt file
 				if (name.equalsIgnoreCase("indexlist.txt"))
 					continue;
+				
+				// Ignore the indexes folder
+				if (filePath.isDirectory() && name.equalsIgnoreCase("indexes"))
+					continue;
 
 				// Get the attributes and add an index entry
 				attributes = Files.readAttributes(filePath.toPath(), BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
@@ -386,7 +390,7 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 	 * @return byte array which contains the packet header
 	 */
 	public IndexListPacketHeader getPacketHeader(int port) {
-		return new IndexListPacketHeader("INDEX", port);
+		return new IndexListPacketHeader(port);
 	}
 
 }

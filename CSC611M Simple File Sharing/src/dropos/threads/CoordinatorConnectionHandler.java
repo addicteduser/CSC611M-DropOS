@@ -111,7 +111,6 @@ public class CoordinatorConnectionHandler extends Thread {
 		if (msg instanceof FileAndMessage)
 			fileAndMsg = (FileAndMessage)msg;
 		
-		String port;
 		switch(command){
 		case "SREGISTER":
 			addServer(host, msg);

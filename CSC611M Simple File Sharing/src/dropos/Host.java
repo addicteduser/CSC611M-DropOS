@@ -23,14 +23,14 @@ public class Host {
 		mutexLock = new Semaphore(1);
 	}
 	
-	public Host(Socket connectionSocket) {
-		if (connectionSocket.equals(null))
+	public Host(Socket socket) {
+		if (socket.equals(null))
 		{
 			System.err.println("Connection socket passed to Host is null. System is now exiting...");
 			System.exit(1);
 		}
 		
-		ipAddress = connectionSocket.getInetAddress().toString().substring(1);
+		ipAddress = socket.getInetAddress().toString().substring(1);
 		mutexLock = new Semaphore(1);
 	}
 	
@@ -45,7 +45,7 @@ public class Host {
 		if (this.port == -1)
 			this.port = port;
 		else
-			System.err.println("PortError. Cannot re-set the port of a host.");
+			System.err.println("PortError. Cannot re-set the port of a host " + ipAddress + " to " + port + " because it is already " + this.port);
 	}
 	
 	public void acquire() throws InterruptedException{
@@ -62,7 +62,10 @@ public class Host {
 	public boolean equals(Object obj) {
 		if (obj instanceof Socket){
 			Socket socket = (Socket) obj;
-			return socket.getInetAddress().equals(ipAddress) && port == socket.getPort();
+			String ipAddress = socket.getInetAddress().toString().substring(1);
+			int socketPort = socket.getPort();
+			int socketLocalPort = socket.getLocalPort();
+			return ipAddress.equalsIgnoreCase(this.ipAddress) && (port == socketPort || port == socketLocalPort);
 		}else if (obj instanceof Host){
 			Host host = (Host) obj;
 			return ipAddress.equalsIgnoreCase(host.ipAddress) && host.port == port;
