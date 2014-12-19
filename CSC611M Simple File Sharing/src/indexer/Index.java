@@ -365,6 +365,20 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 		FileAndLastModifiedPair pair = new FileAndLastModifiedPair(filename, lastModified);
 		add(pair);
 	}
+	
+	public boolean add(FileAndLastModifiedPair e) {
+		for (FileAndLastModifiedPair pair : this) {
+			if (pair.file.equalsIgnoreCase(e.file))
+			{
+				// update instead of add
+				pair.lastModified = e.lastModified;
+				return true;
+			}
+		}
+		
+		// if missing, then add
+		return super.add(e);
+	}
 
 	public File getFile() throws IOException {
 		File f = new File("indexlist.txt");

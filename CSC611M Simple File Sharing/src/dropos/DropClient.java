@@ -161,6 +161,12 @@ public class DropClient implements Runnable {
 					// Ignore changes to the index list
 					if (file.toFile().getName().equalsIgnoreCase("indexlist.txt"))
 						continue;
+					
+					BasicFileAttributes attributes = Files.readAttributes(file, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+					String filename = file.toFile().getName();
+					long lastModified = attributes.lastModifiedTime().toMillis();
+					
+					
 
 					// Fire the event
 					eventPerformed(directoryEvent);
