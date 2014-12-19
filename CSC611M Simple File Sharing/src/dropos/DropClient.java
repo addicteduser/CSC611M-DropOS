@@ -242,9 +242,13 @@ public class DropClient implements Runnable {
 			for (String filename : resolution.keySet()) {
 				DropOSProtocol p = DropOSProtocol.connectToCoordinator();
 				String action = resolution.get(filename);
+				
+				
 				switch (action) {
 				case "UPDATE":
-					PacketHeader header = PacketHeader.createUpdate(filename, port);
+					Path path = Config.getAbsolutePath().resolve(filename);
+					long filesize = path.toFile().length();
+					PacketHeader header = PacketHeader.createUpdate(filename, filesize, port);
 					p.sendFile(header, f);
 					break;
 				case "DELETE":

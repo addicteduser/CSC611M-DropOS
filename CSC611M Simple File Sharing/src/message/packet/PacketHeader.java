@@ -35,7 +35,8 @@ public class PacketHeader {
 			return createRequest(filename, port);
 			
 		case UPDATE:
-			return createUpdate(filename, port);
+			long filesize = file.length();
+			return createUpdate(filename, filesize, port);
 		}
 		return null;
 	}
@@ -68,8 +69,8 @@ public class PacketHeader {
 		return new DeletePacketHeader(port, filename);
 	}
 	
-	public static UpdatePacketHeader createUpdate(String filename, int port){
-		return new UpdatePacketHeader(port, filename);
+	public static UpdatePacketHeader createUpdate(String filename, long filesize, int port){
+		return new UpdatePacketHeader(port, filesize, filename);
 	}
 	
 	public byte[] getBytes()  {
@@ -91,19 +92,36 @@ public class PacketHeader {
 	}
 
 	public static PacketHeader parsePacket(String message, int port) {
-		String command = message.split(":")[0];
+		String[] split = message.split(":");
+		String command = split[0];
+		String filename = null;
+		long filesize = 0;
 		
-		//returns a PacketHeader of the specified type
 		switch(command){
-			//For request,update and delete, constructor needs port and filename
-			//For index, constructor already parses the message
-			//For sregister and cregister, type is specified by the command
-			case "REQUEST": return new RequestPacketHeader(port,message.split(":")[1]);
-			case "UPDATE": return new UpdatePacketHeader(port,message.split(":")[1]);
+		// REQUEST:FILENAME
+			case "REQUEST": 
+				filename = split[1];
+				return new RequestPacketHeader(port,filename);
+				
+		// UPDATE:FILESIZE:FILENAME
+			case "UPDATE":
+				filesize = Long.parseLong(split[1]);
+				filename = split[2];
+				return new UpdatePacketHeader(port,filesize,filename);
+				
+		// S/CREGISTER:PORT
 			case "SREGISTER":
-			case "CREGISTER": return new RegisterPacketHeader(port,command);
-			case "INDEX": return new IndexListPacketHeader(port,message);
-			case "DELETE": return new DeletePacketHeader(port,message.split(":")[1]);
+			case "CREGISTER": 
+				return new RegisterPacketHeader(port,command);
+				
+		// INDEX
+			case "INDEX":
+				return new IndexListPacketHeader(port,message);
+				
+		// DELETE:FILENAME		
+			case "DELETE":
+				filename = split[1];
+				return new DeletePacketHeader(port,filename);
 		}
 		return null;
 	}
