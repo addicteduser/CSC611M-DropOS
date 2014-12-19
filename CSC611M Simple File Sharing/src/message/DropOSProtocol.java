@@ -152,7 +152,7 @@ public class DropOSProtocol {
 			} while (fileBytesWritten < f.length());
 
 			fileInputStream.close();
-
+			bufferedOutputStream.flush();
 		} catch (Exception e) {
 			log("File " + f + " was sent. (Recepient closed the socket.)");
 		}
@@ -188,7 +188,7 @@ public class DropOSProtocol {
 		FileOutputStream fileOutputStream = null;
 		BufferedOutputStream bufferedOutputStream = null;
 		File file = null;
-
+		System.out.println("Receiving file in path: "+filePath);
 		file = new File(filePath);
 
 		// Stream to handle file writing
@@ -240,7 +240,6 @@ public class DropOSProtocol {
 		int bytesRead = 0;
 
 		byte[] size = new byte[4];
-
 		bytesRead = bufferedInputStream.read(size, 0, 4);
 
 		// Determine N; how many bytes is the packet header?

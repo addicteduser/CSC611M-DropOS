@@ -60,7 +60,7 @@ public class CoordinatorConnectionHandler extends Thread {
 				this.connectionSocket = queue.take();
 				
 				host = selectHost(connectionSocket);
-				log("Attempting to get lock on host " + host + ".");
+				log("Attempting to get lock on host " + host + "("+host.getPort()+").");
 				host.acquire();
 				log("Acquired lock on host " + host + ".");
 				
