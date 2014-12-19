@@ -56,7 +56,7 @@ public class DropCoordinator implements Runnable{
 	}
 
 	private static void log(String message) {
-		log("[Coordinator] " + message);
+		System.out.println("[Coordinator] " + message);
 	}
 
 	public static DropCoordinator create(){
