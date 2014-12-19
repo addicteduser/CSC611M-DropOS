@@ -103,7 +103,7 @@ public class CoordinatorConnectionHandler extends Thread {
 			break;
 		
 		case "UPDATE":
-			verifyUpdate(fileAndMsg);
+			handleUpdate(fileAndMsg);
 			break;
 		
 		case "REQUEST":
@@ -142,11 +142,11 @@ public class CoordinatorConnectionHandler extends Thread {
 		log("Registered host [" + host + "] as a client connection.");
 	}
 
-	private void verifyUpdate(FileAndMessage msg) {
+	private void handleUpdate(FileAndMessage msg) {
 		try {
 			String filename = msg.getFile().toString();
 			
-			isValid(msg, host);
+			//isValid(msg, host);
 			
 			int numberOfServers = connectedServers.size();
 			// this is the number of servers required for duplication
@@ -156,6 +156,7 @@ public class CoordinatorConnectionHandler extends Thread {
 			Random rand = new Random();
 			int sRand;
 			
+			// select the servers
 			for (int r = 0; r < onethirdReliability; r++) {
 				do {
 					sRand = rand.nextInt(numberOfServers);
@@ -164,11 +165,17 @@ public class CoordinatorConnectionHandler extends Thread {
 				selectedServersForRedundancy.add(connectedServers.get(sRand));
 			}
 			
+			// create the duplicate packet header
 			PacketHeader update = PacketHeader.createDuplicate(filename, Config.getPort(), selectedServersForRedundancy);
+			
+			// NOTE: duplicate packet header has method that parses the ip's and creates an updatepacket header :/
+			
+			
 			
 			Host arbitraryFirstHost = selectedServersForRedundancy.get(0);
 			
 			protocol = arbitraryFirstHost.createProtocol();
+			// send the file to the redundancies
 			protocol.sendFile(update, msg.getFile());
 			
 		}catch(Exception e){
