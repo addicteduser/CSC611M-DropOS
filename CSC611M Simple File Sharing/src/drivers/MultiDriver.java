@@ -18,6 +18,8 @@ public class MultiDriver {
 		thread.start();
 		System.out.println("Coordinator generated.\n");
 		
+		try {
+		
 		// Create the servers
 		int servers = 3;
 		System.out.println("Generating " + servers + " server/s...");
@@ -26,6 +28,7 @@ public class MultiDriver {
 			thread = new Thread(s);
 			thread.start();	
 			System.out.println("Server " + (i + 1) + " generated.\n");
+			Thread.sleep(1000);
 		}
 		
 		// Create the clients
@@ -36,6 +39,11 @@ public class MultiDriver {
 			thread = new Thread(c);
 			thread.start();
 			System.out.println("Client " + (i + 1) + " generated.\n");
+			Thread.sleep(1000);
+		}
+		
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 	}
 
