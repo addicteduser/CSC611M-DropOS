@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import message.DropOSProtocol;
 import message.Message;
-import message.DropOSProtocol.HostType;
 import dropos.Host;
 import dropos.event.SynchronizationEvent;
 

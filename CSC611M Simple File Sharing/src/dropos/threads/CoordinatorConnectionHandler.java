@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 
@@ -34,7 +35,7 @@ public class CoordinatorConnectionHandler extends Thread {
 	
 	
 	private static ArrayList<Host> connectedServers, connectedClients;
-	private static ArrayList<FileAndServerPairs> redundanciesList;
+	private static Redundancy redundancyList;
 
 	public CoordinatorConnectionHandler(BlockingQueue<Socket> queue) {
 		this.queue = queue;
@@ -42,7 +43,7 @@ public class CoordinatorConnectionHandler extends Thread {
 
 		connectedClients = new ArrayList<Host>();
 		connectedServers = new ArrayList<Host>();
-		redundanciesList = new ArrayList<FileAndServerPairs>();
+		redundancyList = new Redundancy();
 	}
 
 	@Override
@@ -137,30 +138,43 @@ public class CoordinatorConnectionHandler extends Thread {
 	private void handleUpdate(FileAndMessage msg) {
 		try {
 			String filePath = msg.getFile().toPath().toString();
+			String filename = msg.getFile().getName();
 			
 			int numberOfServers = connectedServers.size();
 			
 			// this is the number of servers required for duplication
 			int onethirdReliability = Math.round((numberOfServers * 1 / 3) + 1);
 			
-			ArrayList<Host> selectedServersForRedundancy = new ArrayList<Host>();
-			Random rand = new Random();
-			int sRand;
+			ArrayList<Host> selectedServersForRedundancy;
 			
-			// select the servers
-			for (int r = 0; r < onethirdReliability; r++) {
-				do {
-					sRand = rand.nextInt(numberOfServers);
-				} while (selectedServersForRedundancy.contains(connectedServers.get(sRand)));
+			// If it already exists in the redundancy list, then use it
+			if (redundancyList.containsKey(filePath)){
+				selectedServersForRedundancy = redundancyList.get(filePath);
 				
-				selectedServersForRedundancy.add(connectedServers.get(sRand));
+			// If it doesn't, then (1) determine how many servers needed and (2) add them mark them for redundancy
+			}else {
+				Random rand = new Random();
+				int sRand;
+				
+				// create a new bucket of hosts
+				selectedServersForRedundancy = new ArrayList<Host>();
+				redundancyList.put(filename, selectedServersForRedundancy);
+				
+				// determine which hosts go into this bucket
+				for (int r = 0; r < onethirdReliability; r++) {
+					do {
+						sRand = rand.nextInt(numberOfServers);
+					} while (selectedServersForRedundancy.contains(connectedServers.get(sRand)));
+					
+					selectedServersForRedundancy.add(connectedServers.get(sRand));
+				}
+	
 			}
-			
+						
 			// create the duplicate packet header
 			DuplicatePacketHeader update = PacketHeader.createDuplicate(filePath, Config.getPort(), selectedServersForRedundancy);
 			
 			// NOTE: duplicate packet header has method that parses the ip's and creates an updatepacket header :/
-			
 			
 			Host arbitraryFirstHost = selectedServersForRedundancy.get(0);
 			
@@ -175,11 +189,31 @@ public class CoordinatorConnectionHandler extends Thread {
 	}
 
 	private void respondWithFile(FileAndMessage msg) {
+		String filename = msg.getFile().getName();
+		
+		if (redundancyList.containsKey(filename) == false){
+			log("Coordinator could not find file " + filename + ". Most likely it doesn't have this file yet.");
+			log("Coordinator exits and will not respond to request.");
+			return;
+		}
+		
 		// Find out who has the file
+		ArrayList<Host> servers = redundancyList.get(filename);
+		
+		if (servers.size() <= 0){
+			log("There are no servers which have this file. This is a weird bug.");
+			return;
+		}
 		
 		// Choose a random server
+		Host host = servers.get(0);
 		
-		// Get the file 
+		// Get the file
+		DropOSProtocol createProtocol = host.createProtocol();
+		PacketHeader packetHeader = PacketHeader.createRequest(filename, Config.getPort());
+		createProtocol.sendMessage(packetHeader);
+		
+		// TODO: Unfinished code
 		
 		// Pass back to client 
 	}
@@ -199,13 +233,15 @@ public class CoordinatorConnectionHandler extends Thread {
 		System.out.println("[Coordinator] " + message);
 	}
 	
-	private class FileAndServerPairs {
-		String fileName;
-		ArrayList<Host> servers;
-		
-		public FileAndServerPairs(String filename, ArrayList<Host> servers) {
-			this.fileName = filename;
-			this.servers = servers;
+	private class Redundancy extends HashMap<String, ArrayList<Host>>{
+		/**
+		 * This method is used to mark which servers have a redundancy of this file.
+		 * @param filename the file
+		 * @param servers the servers which have the file
+		 */
+		public ArrayList<Host> put(String filename, ArrayList<Host> servers) {
+			// TODO Auto-generated method stub
+			return super.put(filename, servers);
 		}
 	}
 
