@@ -17,6 +17,8 @@ public class UpdatePacketHeader extends FilePacketHeader {
 		this.header += ":" + filesize;
 		
 		this.header += ":" + filename;
+		
+		this.header += ":" + lastModified;
 	}
 	
 	
