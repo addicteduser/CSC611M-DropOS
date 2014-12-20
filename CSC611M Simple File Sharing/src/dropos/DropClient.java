@@ -265,7 +265,7 @@ public class DropClient implements Runnable {
 				case "UPDATE":
 					Path path = Config.getAbsolutePath().resolve(filename);
 					long filesize = path.toFile().length();
-					PacketHeader header = PacketHeader.createUpdate(filename, filesize, port);
+					PacketHeader header = PacketHeader.createUpdate(filename, filesize, port, Index.getRawLastModified(f));
 					p.sendFile(header, f);
 					break;
 				case "DELETE":

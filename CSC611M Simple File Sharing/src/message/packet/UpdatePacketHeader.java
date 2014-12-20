@@ -7,10 +7,12 @@ import dropos.Config;
 
 public class UpdatePacketHeader extends FilePacketHeader {
 
-	public UpdatePacketHeader(int port, long filesize, String filename) {
+
+	public UpdatePacketHeader(int port, long filesize, String filename, long lastModified) {
 		super(port, "UPDATE");
 		this.filename = filename;
 		this.filesize = filesize;
+		this.lastModified = lastModified;
 		
 		this.header += ":" + filesize;
 		

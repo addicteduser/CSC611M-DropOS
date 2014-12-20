@@ -88,7 +88,7 @@ public class DuplicatePacketHeader extends FilePacketHeader {
 	public void duplicateRedundancy(DropOSProtocol protocol) {
 		long filesize = file.length();
 		for (Host h : hosts) {
-			UpdatePacketHeader updatepacket = PacketHeader.createUpdate(filename, filesize, port);
+			UpdatePacketHeader updatepacket = PacketHeader.createUpdate(filename, filesize, port, lastModified);
 			
 			try {
 				System.out.println("[Duplicate] Duplicating a file...");

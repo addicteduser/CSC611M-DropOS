@@ -3,8 +3,11 @@ package message.packet;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
 import message.DropOSProtocol;
@@ -34,6 +37,7 @@ public class PacketHeader {
 		
 		
 		
+		
 		switch(event.getType()){
 		case DELETE:
 			return createDelete(filename, port);
@@ -43,7 +47,15 @@ public class PacketHeader {
 			
 		case UPDATE:
 			long filesize = file.length();
-			return createUpdate(filename, filesize, port);
+			// Get the attributes and add an index entry
+			long lastModified = -1;
+			try {
+				BasicFileAttributes attributes;
+				attributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+				lastModified = attributes.lastModifiedTime().toMillis();
+			} catch (IOException e) {
+			}
+			return createUpdate(filename, filesize, port, lastModified);
 		}
 		return null;
 	}
@@ -76,8 +88,8 @@ public class PacketHeader {
 		return new DeletePacketHeader(port, filename);
 	}
 	
-	public static UpdatePacketHeader createUpdate(String filename, long filesize, int port){
-		return new UpdatePacketHeader(port, filesize, filename);
+	public static UpdatePacketHeader createUpdate(String filename, long filesize, int port, long lastModified){
+		return new UpdatePacketHeader(port, filesize, filename, lastModified);
 	}
 	
 	public byte[] getBytes()  {
@@ -115,7 +127,8 @@ public class PacketHeader {
 			case "UPDATE":
 				filesize = Long.parseLong(split[1]);
 				filename = split[2];
-				return new UpdatePacketHeader(port,filesize,filename);
+				long lastModified = Long.parseLong(split[3]);
+				return new UpdatePacketHeader(port,filesize,filename,lastModified);
 				
 		// S/CREGISTER:PORT
 			case "SREGISTER":

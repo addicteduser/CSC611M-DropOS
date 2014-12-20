@@ -111,7 +111,8 @@ public class ConnectionHandler extends Thread {
 
 		log("Sending the requested file [" + f.getName() + "] as an update...");
 		
-		UpdatePacketHeader updatePacket = PacketHeader.createUpdate(f.getName(), f.length(), Config.getPort());
+		long lastModified = Index.getInstance(port).getLastModified(f);
+		UpdatePacketHeader updatePacket = PacketHeader.createUpdate(f.getName(), f.length(), Config.getPort(), lastModified);
 		
 		protocol.sendFile(updatePacket, f);
 		log("Sent.");

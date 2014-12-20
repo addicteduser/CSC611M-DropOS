@@ -1,5 +1,7 @@
 package dropos.threads;
 
+import indexer.Index;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -135,6 +137,7 @@ public class CoordinatorConnectionHandler extends Thread {
 		try {
 			String filePath = msg.getFile().toPath().toString();
 			String filename = msg.getFile().getName();
+			long lastModified = Long.parseLong(msg.message.split(":")[2]);
 			
 			int numberOfServers = connectedServers.size();
 			
@@ -177,6 +180,8 @@ public class CoordinatorConnectionHandler extends Thread {
 			
 			// send the file to the redundancies
 			protocol.sendFile(update, msg.getFile());
+			
+			Index.getInstance(Config.getPort()).put(msg.getFile().getName(), lastModified);
 			
 		}catch(Exception e){
 			log(e.getMessage());

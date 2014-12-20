@@ -18,6 +18,8 @@ public class FilePacketHeader extends PacketHeader {
 	protected long filesize;
 	protected String filename;
 	protected File file;
+	protected long lastModified;
+
 
 	public FilePacketHeader(int port, String header) {
 		super(port, header);
@@ -26,6 +28,7 @@ public class FilePacketHeader extends PacketHeader {
 		try {
 			filesize = Long.parseLong(split[1]);
 			filename = split[2];
+			lastModified = Long.parseLong(split[3]);
 		}catch(ArrayIndexOutOfBoundsException e){ 
 			// This is fine, the index has less parameters
 		}catch (Exception e){
@@ -57,7 +60,7 @@ public class FilePacketHeader extends PacketHeader {
 	@Override
 	public Message interpret(DropOSProtocol protocol) throws IOException {
 		file = receiveFile(protocol);
-		return new FileAndMessage("UPDATE:" + file.length() + ":" + filename, file);
+		return new FileAndMessage("UPDATE:" + file.length() + ":" + filename+":"+lastModified, file);
 	}
 	
 	public void writeFile(int port){

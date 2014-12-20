@@ -102,6 +102,29 @@ public class Index extends ArrayList<FileAndLastModifiedPair> {
 			}
 		}
 	}
+	
+	public long getLastModified (File f){
+		for (FileAndLastModifiedPair pair : this) {
+			if (pair.file.equalsIgnoreCase(f.getName()))
+				return pair.lastModified;
+		}
+		return 0;
+	}
+	
+	public static long getRawLastModified(File f){
+		// Get the attributes and add an index entry
+		BasicFileAttributes attributes;
+		try {
+			attributes = Files.readAttributes(f.toPath(), BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+		
+		String filename = f.getName();
+		return attributes.lastModifiedTime().toMillis();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
+	}
 
 	/**
 	 * <p>
