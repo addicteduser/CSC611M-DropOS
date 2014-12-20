@@ -78,7 +78,6 @@ public class ConnectionHandler extends Thread {
 		String[] split = msg.message.split(":");
 		String command = split[0];
 		command = command.toUpperCase();
-		System.out.println("COMMAND: " + command);
 
 		FileAndMessage fileAndMsg = null;
 		if (msg instanceof FileAndMessage){

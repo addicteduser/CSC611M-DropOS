@@ -4,7 +4,6 @@ import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
-import indexer.FileAndLastModifiedPair;
 import indexer.Index;
 import indexer.Resolution;
 
@@ -21,6 +20,7 @@ import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 
 import message.DropOSProtocol;
 import message.DropOSProtocol.HostType;
@@ -37,10 +37,12 @@ public class DropClient implements Runnable {
 	private DropOSProtocol protocol;
 	private ServerSocket serverSocket;
 	private int port;
+	private ArrayList<SynchronizationEvent> events;
 
 	private DropClient(int port) throws IOException {
 		this.port = port;
 		serverSocket = new ServerSocket(port);
+		events = new ArrayList<SynchronizationEvent>();
 		log("Client is now listening on port " + port + ".");
 	}
 
@@ -148,6 +150,14 @@ public class DropClient implements Runnable {
 					// Create a directory event from what happened
 					Path file = Config.getInstancePath(port).resolve(newPath);
 					SynchronizationEvent directoryEvent = new SynchronizationEvent(file, kind);
+					
+					if (events.contains(directoryEvent)){
+						// log("Duplicate event being ignored: " + directoryEvent);
+						continue; // This event has already been handled
+					}
+						
+					
+					events.add(directoryEvent);
 
 					if (kind.toString().equalsIgnoreCase("modify"))
 						continue;
@@ -328,7 +338,7 @@ public class DropClient implements Runnable {
 	 */
 	private void requestFile(SynchronizationEvent e) throws IOException {
 
-		log("Now requesting for file: " + e.getFile().toFile());
+		log("Now requesting for file: " + e.getFileName().toFile());
 		PacketHeader requestPacket = PacketHeader.create(e, port);
 		protocol.sendMessage(requestPacket);
 
@@ -375,7 +385,7 @@ public class DropClient implements Runnable {
 	 */
 	private void addFile(SynchronizationEvent e) throws IOException {
 		Path path = Config.getInstancePath(port);
-		String filename = e.getFile().toString();
+		String filename = e.getFileName().toString();
 
 		// Get attributes
 		BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);

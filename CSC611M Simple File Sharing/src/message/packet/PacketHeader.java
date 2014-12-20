@@ -27,7 +27,7 @@ public class PacketHeader {
 	}
 	
 	public static PacketHeader create(SynchronizationEvent event, int port) {
-		File file = event.getFile().toFile();
+		File file = event.getFileName().toFile();
 		String filename = file.getName();
 		Path path = Config.getInstancePath(port).resolve(filename);
 		file = path.toFile();
