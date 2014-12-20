@@ -87,7 +87,11 @@ public class DropOSProtocol {
 
 	public void sendMessage(PacketHeader packetHeader) {
 		try {
-			log("---" + packetHeader.toString()+"---------------------------->");
+			System.out.println();
+			log("------------------------------------------->");
+			log("From port ["+socket.getLocalPort()+"] to port [" + socket.getPort() +"]"  );
+			log(packetHeader.toString());
+			System.out.println();
 			byte[] buf = new byte[BUFFER_LENGTH];
 			byte[] mes = packetHeader.toString().getBytes("UTF-8");
 			byte[] packetHeaderLength = intToByteArray(mes.length);
@@ -116,7 +120,12 @@ public class DropOSProtocol {
 	}
 
 	public void sendFile(PacketHeader header, File f) throws IOException {
-		log("---" + header.toString()+"---------------------------->");
+		System.out.println();
+		log("------------------------------------------->");
+		log("From port ["+socket.getLocalPort()+"] to port [" + socket.getPort() +"]"  );
+		log(header.toString());
+		System.out.println();
+		
 		// header
 		byte[] buf = new byte[BUFFER_LENGTH];
 		byte[] mes = header.getBytes();
@@ -267,7 +276,11 @@ public class DropOSProtocol {
 		if (bufferedInputStream.available() == 0)
 			socket.close();
 		
-		log("<--------------------------"+ message +"-----");
+		System.out.println();
+		log("<-------------------------------------------");
+		log("Received from port ["+socket.getPort()+"] to my port [" + socket.getLocalPort() +"]"  );
+		log(message.toString());
+		System.out.println();
 		return PacketHeader.parsePacket(message, port);
 	}
 

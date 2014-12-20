@@ -310,8 +310,6 @@ public class DropClient implements Runnable {
 				requestFile(e);
 				break;
 			}
-			
-			log("Connected to the server and performed " + e.getType().toString().toLowerCase());
 			// Write on index again
 			Index.getInstance(port).write(port);
 		} catch (IOException err) {
